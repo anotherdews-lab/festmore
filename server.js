@@ -95,7 +95,7 @@ cron.schedule('0 2 * * *', async () => {
 // ─────────────────────────────────────
 // START SERVER
 // ─────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🎪 ════════════════════════════════════');
   console.log('   FESTMORE is running!');
