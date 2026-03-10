@@ -40,6 +40,7 @@ function renderArticlesList({ articles, total, totalPages, page, category, count
 <title>Festival Guides & Event News ${new Date().getFullYear()} | Festmore</title>
 <meta name="description" content="Read the latest festival guides, event news and travel tips. ${total} articles updated daily by AI. Covering events in Germany, Denmark, UK, France and more."/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="/css/main.css"/>
 </head><body>
 ${nav(user)}
@@ -76,6 +77,7 @@ function renderArticleDetail(a, related, user) {
 <link rel="canonical" href="https://festmore.com/articles/${a.slug}"/>
 <script type="application/ld+json">${JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":a.title,"description":a.excerpt||"","image":img,"datePublished":a.created_at,"author":{"@type":"Organization","name":"Festmore Editorial"},"publisher":{"@type":"Organization","name":"Festmore","logo":{"@type":"ImageObject","url":"https://festmore.com/logo.png"}}})}</script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="/css/main.css"/>
 </head><body>
 ${nav(user)}
