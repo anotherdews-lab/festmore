@@ -237,14 +237,7 @@ ${featured.length ? `
 <div class="ad-leaderboard"><div class="ad-label-small">Advertisement</div>
 <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins>
 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-```
 
-Then in VS Code terminal:
-```
-cd ~/Desktop/festmore-2
-git add .
-git commit -m "add adsense ads"
-git push
 </div>
 
 <!-- LATEST ARTICLES -->
