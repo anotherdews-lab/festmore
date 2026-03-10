@@ -176,7 +176,7 @@ ${renderNav(user)}
 </section>
 
 <!-- ADSENSE LEADERBOARD -->
-<div class="ad-leaderboard"><div class="ad-label-small">Advertisement</div>
+<div class="ad-leaderboard" style="clear:both;position:relative;z-index:1;margin-top:40px;"><div class="ad-label-small">Advertisement</div>
 <!-- PASTE YOUR ADSENSE CODE HERE -->
 <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins>
 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
