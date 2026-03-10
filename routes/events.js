@@ -175,6 +175,7 @@ function renderEventsPage({ events, total, totalPages, page, q, country, categor
 <meta name="description" content="Browse ${total}+ ${category!=='ALL'?CAT_NAMES[category]:''} events${country!=='ALL'?' in '+COUNTRY_NAMES[country]:'worldwide'}. Free and paid events, festivals, markets and more on Festmore."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="/css/main.css"/>
 </head><body>
 ${renderNavSimple(user)}
@@ -225,7 +226,7 @@ ${renderNavSimple(user)}
   </form>
 
   <!-- AD -->
-  <div class="ad-placeholder" style="margin-bottom:28px;min-height:90px;">📢 Google AdSense</div>
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 
   <!-- RESULTS -->
   ${events.length === 0 ? `
@@ -284,7 +285,7 @@ ${renderNavSimple(user)}
 </div>
 <div class="container" style="padding:40px 0;display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:start;">
   <div>
-    <div class="ad-placeholder" style="margin-bottom:28px;">📢 Google AdSense — In-Content</div>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     <div class="event-detail-card">
       <h2 style="font-family:'Playfair Display',serif;font-size:24px;margin-bottom:16px;">About This Event</h2>
       <p style="font-size:16px;line-height:1.8;color:#3d3530;">${(e.description||'No description available.').replace(/\n/g,'<br/>')}</p>
@@ -309,7 +310,7 @@ ${renderNavSimple(user)}
       ${e.ticket_url?`<a href="${e.ticket_url}" target="_blank" rel="nofollow noopener" class="btn btn-outline" style="display:block;text-align:center;margin-top:8px;">Buy Tickets →</a>`:''}
       <button onclick="shareEvent()" class="btn btn-ghost" style="width:100%;margin-top:8px;">Share This Event 🔗</button>
     </div>
-    <div class="ad-placeholder" style="margin-top:20px;min-height:250px;">📢 Sidebar Ad</div>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     <div style="margin-top:20px;background:#1a1612;border-radius:16px;padding:24px;color:#fff;">
       <h4 style="font-family:'Playfair Display',serif;margin-bottom:8px;">Are you a vendor?</h4>
       <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;">Create your vendor profile and apply for spots at events like this one.</p>
