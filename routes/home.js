@@ -116,6 +116,7 @@ function renderHome({ featured, recent, articles, countryCounts, catCounts, stat
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Festmore","url":"https://festmore.com","potentialAction":{"@type":"SearchAction","target":"https://festmore.com/events?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="/css/main.css"/>
 </head>
 <body>
@@ -177,7 +178,8 @@ ${renderNav(user)}
 <!-- ADSENSE LEADERBOARD -->
 <div class="ad-leaderboard"><div class="ad-label-small">Advertisement</div>
 <!-- PASTE YOUR ADSENSE CODE HERE -->
-<div class="ad-placeholder">📢 Google AdSense — Leaderboard 728×90</div>
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </div>
 
 <!-- CATEGORIES -->
@@ -233,7 +235,16 @@ ${featured.length ? `
 
 <!-- MID ADSENSE -->
 <div class="ad-leaderboard"><div class="ad-label-small">Advertisement</div>
-<div class="ad-placeholder">📢 Google AdSense — In-Content</div>
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+```
+
+Then in VS Code terminal:
+```
+cd ~/Desktop/festmore-2
+git add .
+git commit -m "add adsense ads"
+git push
 </div>
 
 <!-- LATEST ARTICLES -->
