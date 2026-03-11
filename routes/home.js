@@ -372,7 +372,7 @@ function eventCardHTML(e, IMGS, FLAGS, CATS) {
 function renderNav(user) {
   return `<nav class="main-nav">
   <div class="nav-inner">
-    <a href="/" class="logo"><span class="logo-fest">Fest</span><span class="logo-more">more</span><span class="logo-dot"></span></a>
+    <a href="/" class="logo"><img src="/logo.png" alt="Festmore" style="height:48px;width:auto;"/></a>
     <form class="nav-search" action="/events" method="GET">
       <span>🔍</span>
       <input type="text" name="q" placeholder="Search events, cities, countries…"/>
