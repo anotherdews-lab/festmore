@@ -135,4 +135,10 @@ Disallow: /api
 `);
 });
 
+// Ads.txt
+router.get('/ads.txt', (req, res) => {
+  res.header('Content-Type', 'text/plain');
+  res.send('google.com, pub-2486135003689222, DIRECT, f08c47fec0942fa0');
+});
+
 module.exports = router;
