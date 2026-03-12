@@ -255,4 +255,6 @@ console.log(`   Sample events: ${sampleEvents.length}`);
 console.log(`   Sample articles: ${sampleArticles.length}`);
 console.log('\n🚀 Ready to start! Run: npm run dev');
 
+try { db.exec('ALTER TABLE events ADD COLUMN meta_title TEXT'); } catch(e) {}
+try { db.exec('ALTER TABLE events ADD COLUMN meta_desc TEXT'); } catch(e) {}
 db.close();
