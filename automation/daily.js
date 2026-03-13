@@ -1,38 +1,37 @@
-// automation/daily.js
-// ════════════════════════════════════════════════════
-// THIS IS THE MAGIC ENGINE
-// Runs automatically every night at 2:00 AM
-// It writes 10 new articles about real world events
-// Uses Claude AI + real-time web search
-// Zero manual work needed from you!
-// ════════════════════════════════════════════════════
+// automation/daily.js — FIXED VERSION
+// Articles are NEVER deleted — only new ones added
+// No mention of AI in article content
 
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const db = require('../db');
 
-// Topics it writes about — rotates through these
 const ARTICLE_TOPICS = [
-  { type: 'guide',     template: 'Top 10 {category} in {country} for {year}' },
-  { type: 'guide',     template: 'Best Free Festivals in {country} {year} — Complete Guide' },
-  { type: 'news',      template: 'What\'s Happening This Month: {country} Events {month} {year}' },
-  { type: 'guide',     template: '{category} Guide: Everything You Need to Know for {year}' },
-  { type: 'tips',      template: 'How to Find the Best {category} Near You' },
-  { type: 'roundup',   template: 'The Ultimate {country} Festival Calendar {year}' },
-  { type: 'news',      template: 'New Events Added This Week in {country}' },
-  { type: 'guide',     template: 'Family-Friendly Events in {country}: Kids & Adults {year}' },
-  { type: 'tips',      template: 'Vendor Guide: How to Get a Spot at Europe\'s Best Markets' },
-  { type: 'roundup',   template: 'Christmas Markets Europe {year}: Dates, Cities & What to Expect' },
-  { type: 'guide',     template: 'Food Festivals in {country}: The Complete {year} Guide' },
-  { type: 'news',      template: 'Festival News: This Week in European Events' },
-  { type: 'guide',     template: 'Music Festivals in {country} {year} — Dates & Tickets' },
-  { type: 'tips',      template: 'How to Plan Your Festival Season in Europe' },
-  { type: 'roundup',   template: 'City Events in {city}: What\'s On in {month} {year}' },
+  { type: 'guide',   template: 'Top 10 {category} in {country} for {year}' },
+  { type: 'guide',   template: 'Best Free Festivals in {country} {year} — Complete Guide' },
+  { type: 'news',    template: 'What\'s Happening This Month: {country} Events {month} {year}' },
+  { type: 'guide',   template: '{category} Guide: Everything You Need to Know for {year}' },
+  { type: 'tips',    template: 'How to Find the Best {category} Near You' },
+  { type: 'roundup', template: 'The Ultimate {country} Festival Calendar {year}' },
+  { type: 'news',    template: 'New Events Added This Week in {country}' },
+  { type: 'guide',   template: 'Family-Friendly Events in {country}: Kids & Adults {year}' },
+  { type: 'tips',    template: 'Vendor Guide: How to Get a Spot at Europe\'s Best Markets' },
+  { type: 'roundup', template: 'Christmas Markets Europe {year}: Dates, Cities & What to Expect' },
+  { type: 'guide',   template: 'Food Festivals in {country}: The Complete {year} Guide' },
+  { type: 'news',    template: 'Festival News: This Week in European Events' },
+  { type: 'guide',   template: 'Music Festivals in {country} {year} — Dates & Tickets' },
+  { type: 'tips',    template: 'How to Plan Your Festival Season in Europe' },
+  { type: 'roundup', template: 'City Events in {city}: What\'s On in {month} {year}' },
+  { type: 'guide',   template: 'Street Markets in {country}: The Best {year} Guide' },
+  { type: 'tips',    template: 'What to Expect at a {category} in {country}' },
+  { type: 'roundup', template: 'Best Summer Events in {country} {year}' },
+  { type: 'guide',   template: 'Winter Festivals in {country}: Complete {year} Guide' },
+  { type: 'news',    template: 'Upcoming Events in {city} — {month} {year}' },
 ];
 
-const COUNTRIES = ['Germany', 'Denmark', 'United Kingdom', 'France', 'Belgium', 'Netherlands', 'Sweden', 'Poland', 'USA'];
-const CATEGORIES = ['Festivals', 'Christmas Markets', 'Food Markets', 'Music Festivals', 'City Events', 'Street Markets', 'Cultural Events'];
-const CITIES = ['Berlin', 'Hamburg', 'Copenhagen', 'London', 'Paris', 'Amsterdam', 'Stockholm', 'Brussels', 'New York'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const COUNTRIES   = ['Germany','Denmark','United Kingdom','France','Belgium','Netherlands','Sweden','Poland','USA'];
+const CATEGORIES  = ['Festivals','Christmas Markets','Food Markets','Music Festivals','City Events','Street Markets','Cultural Events'];
+const CITIES      = ['Berlin','Hamburg','Copenhagen','London','Paris','Amsterdam','Stockholm','Brussels','New York'];
+const MONTHS      = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function randomFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -45,7 +44,7 @@ async function callClaude(prompt, maxTokens = 2000) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001', // cheapest model for articles
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }]
     })
@@ -56,11 +55,11 @@ async function callClaude(prompt, maxTokens = 2000) {
 }
 
 async function generateArticle(topicTemplate) {
-  const year = new Date().getFullYear();
-  const month = MONTHS[new Date().getMonth()];
-  const country = randomFrom(COUNTRIES);
+  const year     = new Date().getFullYear();
+  const month    = MONTHS[new Date().getMonth()];
+  const country  = randomFrom(COUNTRIES);
   const category = randomFrom(CATEGORIES);
-  const city = randomFrom(CITIES);
+  const city     = randomFrom(CITIES);
 
   const title = topicTemplate
     .replace('{year}', year)
@@ -79,6 +78,8 @@ Requirements:
 - Write in friendly, engaging English
 - Include real, accurate information about festivals and events
 - Length: 600-900 words
+- Do NOT mention AI, artificial intelligence, or that this was generated automatically
+- Write as a professional human journalist would
 - Use this exact format:
 
 EXCERPT: [One compelling sentence, max 160 characters]
@@ -86,7 +87,6 @@ META_DESC: [SEO meta description, max 155 characters, include main keyword]
 TAGS: ["tag1", "tag2", "tag3", "tag4"] (4 relevant keyword tags as JSON array)
 CATEGORY: [one of: festival, market, christmas, concert, city, business, kids, exhibition]
 COUNTRY_CODE: [2-letter ISO code like DE, GB, FR, DK, NL, SE, BE, US, PL]
-IMAGE_CATEGORY: [one of: festival, market, christmas, concert, city, business, kids, exhibition]
 
 ---ARTICLE---
 [Full article in clean text with ## headings. No markdown asterisks. No HTML. Just clean text with ## for H2 headings and ### for H3.]
@@ -95,13 +95,12 @@ Make it genuinely useful and informative. Include practical tips, dates if known
 
   const raw = await callClaude(prompt, 1800);
 
-  // Parse the response
-  const excerptMatch  = raw.match(/EXCERPT:\s*(.+)/);
-  const metaMatch     = raw.match(/META_DESC:\s*(.+)/);
-  const tagsMatch     = raw.match(/TAGS:\s*(\[.+?\])/s);
-  const catMatch      = raw.match(/CATEGORY:\s*(\w+)/);
-  const countryMatch  = raw.match(/COUNTRY_CODE:\s*([A-Z]{2})/);
-  const articleMatch  = raw.match(/---ARTICLE---\n([\s\S]+)/);
+  const excerptMatch = raw.match(/EXCERPT:\s*(.+)/);
+  const metaMatch    = raw.match(/META_DESC:\s*(.+)/);
+  const tagsMatch    = raw.match(/TAGS:\s*(\[.+?\])/s);
+  const catMatch     = raw.match(/CATEGORY:\s*(\w+)/);
+  const countryMatch = raw.match(/COUNTRY_CODE:\s*([A-Z]{2})/);
+  const articleMatch = raw.match(/---ARTICLE---\n([\s\S]+)/);
 
   const excerpt  = excerptMatch?.[1]?.trim() || title;
   const metaDesc = metaMatch?.[1]?.trim() || excerpt;
@@ -110,7 +109,7 @@ Make it genuinely useful and informative. Include practical tips, dates if known
   const cCode    = countryMatch?.[1]?.trim() || 'DE';
   const content  = articleMatch?.[1]?.trim() || raw;
 
-  // Convert markdown-like headings to basic HTML
+  // Convert to HTML
   const htmlContent = content
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -130,47 +129,50 @@ function slugify(str) {
 }
 
 const ARTICLE_IMAGES = {
-  festival:   'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=70',
-  market:     'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=70',
-  christmas:  'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800&q=70',
-  concert:    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=70',
-  city:       'https://images.unsplash.com/photo-1467803738586-46b7eb7b16a1?w=800&q=70',
-  business:   'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=70',
-  kids:       'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=70',
-  exhibition: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=70',
+  festival:   'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=75',
+  market:     'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=75',
+  christmas:  'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800&q=75',
+  concert:    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=75',
+  city:       'https://images.unsplash.com/photo-1467803738586-46b7eb7b16a1?w=800&q=75',
+  business:   'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=75',
+  kids:       'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=75',
+  exhibition: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=75',
 };
 
 async function run() {
   console.log('');
-  console.log('🤖 ════════════════════════════════════');
-  console.log('   FESTMORE DAILY AUTOMATION STARTED');
+  console.log('📰 ════════════════════════════════════');
+  console.log('   FESTMORE DAILY ARTICLES STARTED');
   console.log(`   ${new Date().toLocaleString()}`);
   console.log('════════════════════════════════════');
 
   if (!process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY.includes('YOUR_')) {
-    console.log('⚠️  No Anthropic API key found. Add it to your .env file.');
-    console.log('   Get a free key at: https://console.anthropic.com');
+    console.log('⚠️  No Anthropic API key found.');
     return;
   }
 
-  // Pick 10 random topics (no duplicates in last 7 days)
+  // Get recent titles to avoid duplicates (last 30 days)
   const recentTitles = db.prepare(`
     SELECT title FROM articles
-    WHERE created_at > datetime('now', '-7 days')
+    WHERE created_at > datetime('now', '-30 days')
   `).all().map(a => a.title.toLowerCase());
+
+  // Count total articles before (we never delete!)
+  const totalBefore = db.prepare("SELECT COUNT(*) as n FROM articles").get().n;
+  console.log(`  📚 Current articles in database: ${totalBefore} (none will be deleted)`);
 
   const shuffled = [...ARTICLE_TOPICS].sort(() => Math.random() - 0.5);
   let written = 0;
-  let tried = 0;
+  let tried   = 0;
 
-  while (written < 10 && tried < ARTICLE_TOPICS.length) {
+  while (written < 10 && tried < ARTICLE_TOPICS.length * 2) {
     const topic = shuffled[tried % shuffled.length];
     tried++;
 
     try {
       const article = await generateArticle(topic.template);
 
-      // Check for duplicate title
+      // Check for duplicate
       if (recentTitles.some(t => t.includes(article.title.toLowerCase().substring(0, 30)))) {
         console.log(`  ⏭️  Skipping duplicate topic`);
         continue;
@@ -185,39 +187,35 @@ async function run() {
 
       const imageUrl = ARTICLE_IMAGES[article.cat] || ARTICLE_IMAGES.festival;
 
+      // INSERT — never update or delete existing articles
       db.prepare(`
         INSERT INTO articles (title, slug, excerpt, content, category, country, image_url, tags, meta_title, meta_desc, status, author)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', 'Festmore Editorial')
       `).run(
-        article.title,
-        slug,
-        article.excerpt,
-        article.htmlContent,
-        article.cat,
-        article.cCode,
-        imageUrl,
-        article.tags,
-        article.metaTitle,
-        article.metaDesc
+        article.title, slug, article.excerpt, article.htmlContent,
+        article.cat, article.cCode, imageUrl, article.tags,
+        article.metaTitle, article.metaDesc
       );
 
       written++;
-      console.log(`  ✅ Article ${written}/10 published: "${article.title}"`);
+      console.log(`  ✅ Article ${written}/10: "${article.title}"`);
 
-      // Small delay to be nice to the API
       await new Promise(r => setTimeout(r, 1500));
 
     } catch (err) {
-      console.error(`  ❌ Error writing article:`, err.message);
+      console.error(`  ❌ Error:`, err.message);
     }
   }
 
-  // Also auto-generate some events from AI
+  // Count after
+  const totalAfter = db.prepare("SELECT COUNT(*) as n FROM articles").get().n;
+  console.log(`  📚 Total articles now: ${totalAfter} (+${totalAfter - totalBefore} new)`);
+
+  // Generate new events too
   await generateAIEvents();
 
   console.log('');
-  console.log(`✅ Daily automation complete!`);
-  console.log(`   Articles written today: ${written}`);
+  console.log(`✅ Daily automation complete! Articles written: ${written}`);
   console.log('════════════════════════════════════');
 }
 
@@ -241,18 +239,17 @@ Return ONLY a JSON array, no markdown, no explanation:
   "price_display": "Free or €XX",
   "attendees": 5000,
   "vendor_spots": 20,
-  "website": "https://...",
+  "website": "https://example.com",
   "tags": ["tag1","tag2","tag3"]
 }]`;
 
   try {
-    const raw = await callClaude(prompt, 1500);
-    const clean = raw.replace(/```json|```/g, '').trim();
+    const raw    = await callClaude(prompt, 1500);
+    const clean  = raw.replace(/```json|```/g, '').trim();
     const events = JSON.parse(clean);
+    let added    = 0;
 
-    let added = 0;
     for (const e of events) {
-      // Create slug
       let slug = slugify(`${e.title}-${e.city}-${year}`);
       if (db.prepare('SELECT id FROM events WHERE slug=?').get(slug)) continue;
 
@@ -268,13 +265,12 @@ Return ONLY a JSON array, no markdown, no explanation:
       );
       added++;
     }
-    console.log(`  ✅ Added ${added} new AI-generated events`);
+    console.log(`  ✅ Added ${added} new events`);
   } catch (err) {
     console.error('  ⚠️  Could not generate events:', err.message);
   }
 }
 
-// Can be run directly: node automation/daily.js
 if (require.main === module) {
   run().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); });
 }
