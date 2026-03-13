@@ -420,6 +420,8 @@ function renderNav(user) {
     <a href="/events?category=messe" class="nav-cat">🏛️ Trade Fairs</a>
     <a href="/articles" class="nav-cat">📰 Articles</a>
     <a href="/vendors" class="nav-cat">🏪 Vendors</a>
+    <a href="/about" class="nav-cat">ℹ️ About</a>
+    <a href="/contact" class="nav-cat">✉️ Contact</a>
   </div>
   <div class="nav-mobile">
     <a href="/events">🌍 All Events</a>
