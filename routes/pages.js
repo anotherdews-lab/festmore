@@ -1,4 +1,4 @@
-/ routes/pages.js — Contact & About pages
+// routes/pages.js — Contact & About pages
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
