@@ -301,37 +301,65 @@ ${articles.length ? `
 </section>
 
 <!-- VENDOR PITCH STRIP -->
-<section style="background:#fff;padding:64px 0;border-top:1px solid var(--border);">
+<!-- VENDOR PITCH STRIP -->
+<section style="background:#fff;padding:80px 0;border-top:1px solid var(--border);">
   <div class="container">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;">
-      <div>
-        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(74,124,89,.08);border:1px solid rgba(74,124,89,.2);color:#4a7c59;font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px;margin-bottom:18px;letter-spacing:.8px;text-transform:uppercase;">
-          <span>🏪</span> For Vendors
-        </div>
-        <h2 style="font-family:'DM Serif Display',serif;font-size:clamp(26px,3vw,38px);font-weight:400;margin-bottom:14px;">Grow Your Business<br/>at Festivals &amp; Markets</h2>
-        <p style="color:var(--ink3);font-size:15.5px;line-height:1.75;margin-bottom:28px;">Create your verified vendor profile on Festmore and start getting discovered by event organisers across Europe and beyond. One profile, unlimited opportunities.</p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <a href="/vendors/register" class="btn btn-primary btn-lg">Create Vendor Profile — €49/yr →</a>
-          <a href="/vendors" class="btn btn-outline btn-lg">Browse Vendors</a>
+    <div style="text-align:center;margin-bottom:56px;">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(232,71,10,.07);border:1px solid rgba(232,71,10,.18);color:var(--flame);font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px;margin-bottom:16px;letter-spacing:.8px;text-transform:uppercase;">💰 Grow Your Business</div>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,48px);font-weight:400;margin-bottom:14px;">Two Ways to Make Money<br/>with <em style="color:var(--flame);">Festmore</em></h2>
+      <p style="color:var(--ink3);font-size:16px;max-width:560px;margin:0 auto;line-height:1.75;">Join thousands of event organisers and vendors already using Festmore to reach new customers across Europe and beyond.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1100px;margin:0 auto;">
+      <div style="background:var(--ink);border-radius:28px;padding:48px 44px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(232,71,10,.2) 0%,transparent 70%);"></div>
+        <div style="position:relative;">
+          <div style="font-size:44px;margin-bottom:18px;">🎪</div>
+          <div style="font-size:11px;font-weight:700;color:var(--flame);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">For Event Organisers</div>
+          <h3 style="font-family:'DM Serif Display',serif;font-size:30px;font-weight:400;color:#fff;margin-bottom:12px;line-height:1.1;">Get Your Event<br/>Seen by Thousands</h3>
+          <p style="color:rgba(255,255,255,.55);font-size:15px;line-height:1.75;margin-bottom:28px;">List your festival, market, concert or fair on Festmore and reach a targeted audience of event-lovers across 11 countries.</p>
+          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:20px 22px;margin-bottom:28px;">
+            <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px;"><span style="font-family:'DM Serif Display',serif;font-size:44px;color:#fff;line-height:1;">€79</span><span style="color:rgba(255,255,255,.4);font-size:15px;">/year</span></div>
+            <div style="font-size:12px;color:rgba(255,255,255,.4);">Less than €7 per month · One-time annual payment</div>
+          </div>
+          ${['✅ Your event live within 24 hours','🌍 Visible in 11 countries worldwide','🔍 SEO-optimised page with your own URL','📧 Featured in newsletter to ${stats.subscribers}+ subscribers','🏪 Connect with verified vendors','📊 Track views and visitor interest'].map(b=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px;color:rgba(255,255,255,.7);">${b}</div>`).join('')}
+          <a href="/events/submit" class="btn btn-primary btn-lg" style="display:block;text-align:center;margin-top:28px;">List Your Event — €79/year →</a>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        ${[
-          ['💰','€49/year','Full annual profile — less than €5/month'],
-          ['✅','Verified Badge','Stand out with a verified vendor status'],
-          ['🎪','Event Access','Apply to festivals and markets directly'],
-          ['🌍','11 Countries','Be discovered by organisers across Europe'],
-        ].map(([icon, title, desc]) => `
-          <div style="background:var(--ivory);border:1px solid var(--border);border-radius:16px;padding:22px 18px;">
-            <div style="font-size:26px;margin-bottom:10px;">${icon}</div>
-            <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px;">${title}</div>
-            <div style="font-size:12.5px;color:var(--ink3);line-height:1.5;">${desc}</div>
-          </div>`).join('')}
+      <div style="background:linear-gradient(145deg,#2d5a3d,#1a3d28);border-radius:28px;padding:48px 44px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(74,124,89,.4) 0%,transparent 70%);"></div>
+        <div style="position:relative;">
+          <div style="font-size:44px;margin-bottom:18px;">🏪</div>
+          <div style="font-size:11px;font-weight:700;color:#7ec99a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">For Vendors</div>
+          <h3 style="font-family:'DM Serif Display',serif;font-size:30px;font-weight:400;color:#fff;margin-bottom:12px;line-height:1.1;">Get Booked at<br/>Europe's Best Events</h3>
+          <p style="color:rgba(255,255,255,.55);font-size:15px;line-height:1.75;margin-bottom:28px;">Create your verified vendor profile and get discovered by event organisers actively searching for food vendors, artisans, entertainers and more.</p>
+          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:20px 22px;margin-bottom:28px;">
+            <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px;"><span style="font-family:'DM Serif Display',serif;font-size:44px;color:#fff;line-height:1;">€49</span><span style="color:rgba(255,255,255,.4);font-size:15px;">/year</span></div>
+            <div style="font-size:12px;color:rgba(255,255,255,.4);">Less than €5 per month · One booking pays for the whole year</div>
+          </div>
+          ${['✅ Verified vendor badge on your profile','🎪 Apply to festivals & markets directly','🌍 Discovered by organisers in 11 countries','📧 Featured in our weekly newsletter','📊 See who views your profile','🏆 Stand out from unverified competitors'].map(b=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px;color:rgba(255,255,255,.7);">${b}</div>`).join('')}
+          <a href="/vendors/register" style="display:block;text-align:center;margin-top:28px;background:#fff;color:#1a3d28;padding:14px 32px;border-radius:14px;font-size:15px;font-weight:700;">Create Vendor Profile — €49/year →</a>
+        </div>
       </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:48px;flex-wrap:wrap;margin-top:52px;padding-top:44px;border-top:1px solid var(--border);">
+      ${[['${stats.events}+','Events Listed'],['${stats.vendors}+','Verified Vendors'],['11','Countries'],['${stats.subscribers}+','Newsletter Subscribers'],['${stats.articles}+','Articles Published']].map(([n,l])=>`<div style="text-align:center;"><div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--ink);line-height:1;">${n}</div><div style="font-size:12px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">${l}</div></div>`).join('')}
     </div>
   </div>
 </section>
 
+<!-- URGENCY STRIP -->
+<div style="background:var(--flame);padding:22px 0;">
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+    <div style="color:#fff;">
+      <div style="font-family:'DM Serif Display',serif;font-size:20px;">🔥 Limited spots available for featured listings in ${new Date().getFullYear()}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:3px;">Get your event or vendor profile live today and start getting discovered</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="/events/submit" style="background:#fff;color:var(--flame);padding:12px 24px;border-radius:99px;font-size:13.5px;font-weight:700;white-space:nowrap;">List Event €79 →</a>
+      <a href="/vendors/register" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.4);padding:12px 24px;border-radius:99px;font-size:13.5px;font-weight:700;white-space:nowrap;">Join as Vendor €49 →</a>
+    </div>
+  </div>
+</div>
 ${renderFooter(stats)}
 
 <script src="/js/main.js"></script>
