@@ -102,8 +102,8 @@ router.post('/submit', async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${process.env.SITE_URL}/events/payment-success?session_id={CHECKOUT_SESSION_ID}&event_id=${eventId}`,
-      cancel_url: `${process.env.SITE_URL}/events/submit?error=Payment cancelled. Your event was saved — you can pay later.`,
+      success_url: `https://festmore.com/events/payment-success?session_id={CHECKOUT_SESSION_ID}&event_id=${eventId}`,
+      cancel_url: `https://festmore.com/events/submit?error=Payment+cancelled`,
       metadata: { event_id: String(eventId), type: 'event_listing', email: email || '' },
       customer_email: email || undefined,
     });
