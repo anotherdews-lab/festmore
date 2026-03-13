@@ -88,14 +88,15 @@ router.post('/submit', async (req, res) => {
 
   // Create Stripe checkout session
   try {
+    const safeTitle = title.replace(/[^\x00-\x7F]/g, '');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
           currency: 'eur',
           product_data: {
-            name: `Festmore Event Listing — ${title}`,
-            description: `Annual listing for "${title}" on Festmore.com. Your event will be live within 24 hours.`,
+            name: `Festmore Event Listing - ${safeTitle}`,
+            description: `Annual listing on Festmore.com. Your event will be live within 24 hours.`,
           },
           unit_amount: parseInt(process.env.PRICE_EVENT_YEARLY) || 7900,
         },
