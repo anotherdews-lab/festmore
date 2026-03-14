@@ -342,7 +342,7 @@ ${articles.length ? `
       </div>
     </div>
     <div style="display:flex;justify-content:center;gap:48px;flex-wrap:wrap;margin-top:52px;padding-top:44px;border-top:1px solid var(--border);">
-     ${[[stats.events+'+','Events Listed'],[stats.vendors+'+','Verified Vendors'],['11','Countries'],[stats.subscribers+'+','Newsletter Subscribers'],[stats.articles+'+','Articles Published']]
+      ${[['${stats.events}+','Events Listed'],['${stats.vendors}+','Verified Vendors'],['11','Countries'],['${stats.subscribers}+','Newsletter Subscribers'],['${stats.articles}+','Articles Published']].map(([n,l])=>`<div style="text-align:center;"><div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--ink);line-height:1;">${n}</div><div style="font-size:12px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">${l}</div></div>`).join('')}
     </div>
   </div>
 </section>
