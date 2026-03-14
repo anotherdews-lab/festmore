@@ -347,13 +347,6 @@ ${articles.length ? `
 
     </div>
 
-    <div style="display:flex;justify-content:center;gap:48px;flex-wrap:wrap;margin-top:52px;padding-top:44px;border-top:1px solid var(--border);">
-      <div style="text-align:center;"><div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--ink);line-height:1;">${ev}+</div><div style="font-size:12px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Events Listed</div></div>
-      <div style="text-align:center;"><div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--ink);line-height:1;">${vn}+</div><div style="font-size:12px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Verified Vendors</div></div>
-      <div style="text-align:center;"><div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--ink);line-height:1;">11</div><div style="font-size:12px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Countries</div></div>
-      <div style="text-align:center;"><div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--ink);line-height:1;">${sb}+</div><div style="font-size:12px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Subscribers</div></div>
-      <div style="text-align:center;"><div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--ink);line-height:1;">${ar}+</div><div style="font-size:12px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Articles Published</div></div>
-    </div>
 
   </div>
 </section>
