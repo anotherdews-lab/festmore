@@ -106,6 +106,14 @@ try {
 } catch(err) {
   console.log('Events script:', err.message);
 }
+try {
+  const fs = require('fs');
+  if (fs.existsSync('./add-sample-vendors.js')) {
+    require('./add-sample-vendors.js');
+  }
+} catch(err) {
+  console.log('Vendors script:', err.message);
+}
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
