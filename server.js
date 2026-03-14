@@ -97,6 +97,16 @@ cron.schedule('0 2 * * *', async () => {
 // ─────────────────────────────────────
 // START SERVER
 // ─────────────────────────────────────
+// Run US city events script once on startup
+try {
+  const fs = require('fs');
+  if (fs.existsSync('./add-us-city-events.js')) {
+    require('./add-us-city-events.js');
+  }
+} catch(err) {
+  console.log('Events script:', err.message);
+}
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🎪 ════════════════════════════════════');
