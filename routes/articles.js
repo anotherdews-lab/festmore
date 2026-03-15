@@ -5,7 +5,7 @@ const db      = require('../db');
 
 router.get('/', (req, res) => {
   const { category='ALL', country='ALL', page=1 } = req.query;
-  const perPage = 12, offset = (parseInt(page)-1)*perPage;
+  const perPage = 24, offset = (parseInt(page)-1)*perPage;
   let where = ["status='published'"], params = [];
   if (category !== 'ALL') { where.push("category=?"); params.push(category); }
   if (country  !== 'ALL') { where.push("country=?");  params.push(country); }
