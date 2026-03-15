@@ -139,12 +139,6 @@ try {
   }
 } catch(err) { console.log('Europe events:', err.message); }
 
-// Make admin — remove after first deploy
-try {
-  db.prepare("UPDATE users SET role='admin' WHERE email='anotherdews@gmail.com'").run();
-  console.log('✅ Admin user set!');
-} catch(e) {}
-
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
