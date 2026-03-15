@@ -132,6 +132,12 @@ try {
   }
 } catch(err) { console.log('Subscribers script:', err.message); }
 
+try {
+  if (require('fs').existsSync('./add-europe-events.js')) {
+    require('./add-europe-events.js');
+  }
+} catch(err) { console.log('Europe events:', err.message); }
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🎪 ════════════════════════════════════');
