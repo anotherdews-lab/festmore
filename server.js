@@ -114,6 +114,11 @@ try {
 } catch(err) {
   console.log('Vendors script:', err.message);
 }
+try {
+  if (require('fs').existsSync('./add-trending-articles.js')) {
+    require('./add-trending-articles.js');
+  }
+} catch(err) { console.log('Articles script:', err.message); }
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
