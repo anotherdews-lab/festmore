@@ -144,7 +144,7 @@ try {
   db.prepare("UPDATE users SET role='admin' WHERE email='anotherdews@gmail.com'").run();
   console.log('✅ Admin user set!');
 } catch(e) {}
-Also add `const db = require('./db');` at the top of server.js if it's not there.
+
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
