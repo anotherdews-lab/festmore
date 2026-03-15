@@ -126,6 +126,12 @@ try {
   }
 } catch(err) { console.log('Markets script:', err.message); }
 
+try {
+  if (require('fs').existsSync('./add-subscribers.js')) {
+    require('./add-subscribers.js');
+  }
+} catch(err) { console.log('Subscribers script:', err.message); }
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🎪 ════════════════════════════════════');
