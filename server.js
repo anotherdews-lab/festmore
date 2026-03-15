@@ -120,6 +120,12 @@ try {
   }
 } catch(err) { console.log('Articles script:', err.message); }
 
+try {
+  if (require('fs').existsSync('./add-holland-flea-markets.js')) {
+    require('./add-holland-flea-markets.js');
+  }
+} catch(err) { console.log('Markets script:', err.message); }
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🎪 ════════════════════════════════════');
