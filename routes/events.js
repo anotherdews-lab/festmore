@@ -644,7 +644,6 @@ function eventCardHTMLFull(e) {
         ${e.featured ? '<span class="badge badge-feat">★ Featured</span>' : ''}
         <span class="badge badge-cat">${icon} ${e.category}</span>
         ${isFree ? '<span class="badge badge-free">Free</span>' : ''}
-        ${isFreeListig ? '<span class="badge" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">🔓 Unverified</span>' : '<span class="badge" style="background:#4a7c59;color:#fff;">✅ Verified</span>'}
       </div>
     </div>
     <div class="event-body">
