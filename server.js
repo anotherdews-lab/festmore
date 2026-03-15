@@ -50,6 +50,7 @@ app.use('/payments',  require('./routes/payments'));
 app.use('/api',       require('./routes/api'));
 app.use('/', require('./routes/sitemap'));
 app.use('/admin',     require('./routes/admin'));
+app.use('/applications', require('./routes/applications'));
 app.use('/', require('./routes/pages'));
 
 // ─────────────────────────────────────
