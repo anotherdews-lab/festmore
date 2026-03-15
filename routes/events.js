@@ -640,10 +640,11 @@ function eventCardHTMLFull(e) {
     <div class="event-img">
       <img src="${img}" alt="${e.title} — ${e.city}" loading="lazy" itemprop="image"/>
       <div class="event-img-overlay"></div>
-      <div class="event-badges">
+       <div class="event-badges">
         ${e.featured ? '<span class="badge badge-feat">★ Featured</span>' : ''}
         <span class="badge badge-cat">${icon} ${e.category}</span>
         ${isFree ? '<span class="badge badge-free">Free</span>' : ''}
+        ${isFreeListig ? '<span class="badge" style="background:rgba(0,0,0,.4);color:#fff;">🔓 Unverified</span>' : '<span class="badge" style="background:#4a7c59;color:#fff;">✅ Verified</span>'}
       </div>
     </div>
     <div class="event-body">
