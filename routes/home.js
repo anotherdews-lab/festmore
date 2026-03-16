@@ -74,6 +74,16 @@ function renderHome({ featured, recent, articles, countryCounts, catCounts, stat
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Festmore — Europe's Festival &amp; Event Platform for Organisers and Vendors</title>
 <meta name="description" content="List your festival, market or event on Festmore and reach thousands of visitors. Verified vendor profiles connect you with event organisers across 11 countries."/>
+<link rel="alternate" hreflang="en" href="https://festmore.com/?lang=en"/>
+<link rel="alternate" hreflang="de" href="https://festmore.com/?lang=de"/>
+<link rel="alternate" hreflang="da" href="https://festmore.com/?lang=dk"/>
+<link rel="alternate" hreflang="nl" href="https://festmore.com/?lang=nl"/>
+<link rel="alternate" hreflang="fr" href="https://festmore.com/?lang=fr"/>
+<link rel="alternate" hreflang="sv" href="https://festmore.com/?lang=se"/>
+<link rel="alternate" hreflang="ar" href="https://festmore.com/?lang=ar"/>
+<link rel="alternate" hreflang="zh" href="https://festmore.com/?lang=zh"/>
+<link rel="alternate" hreflang="x-default" href="https://festmore.com/"/>
+<meta name="robots" content="index,follow"/>
 <meta name="robots" content="index,follow"/>
 <link rel="canonical" href="https://festmore.com/"/>
 <meta property="og:type" content="website"/>
