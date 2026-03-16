@@ -62,12 +62,36 @@ function renderHome({ featured, recent, articles, countryCounts, catCounts, stat
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Festmore — Europe's Festival & Event Platform for Organisers and Vendors</title>
+<title>Festmore — Europe's Festival &amp; Event Platform for Organisers and Vendors</title>
 <meta name="description" content="List your festival, market or event on Festmore and reach thousands of visitors. Verified vendor profiles connect you with event organisers across 11 countries."/>
+<meta name="robots" content="index,follow"/>
+<meta name="googlebot" content="index,follow"/>
 <link rel="canonical" href="https://festmore.com/"/>
-<meta property="og:title" content="Festmore — Europe's Festival & Event Platform"/>
-<meta property="og:description" content="List your event or create a vendor profile. Reach thousands of visitors across Europe."/>
+
+<!-- Open Graph — complete set -->
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Festmore"/>
+<meta property="og:title" content="Festmore — Europe's Festival &amp; Event Platform"/>
+<meta property="og:description" content="List your festival or create a verified vendor profile. Reach thousands of visitors across 11 countries."/>
 <meta property="og:image" content="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:url" content="https://festmore.com/"/>
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:site" content="@festmore"/>
+<meta name="twitter:title" content="Festmore — Europe's Festival &amp; Event Platform"/>
+<meta name="twitter:description" content="List your festival or create a verified vendor profile. Reach thousands across 11 countries."/>
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80"/>
+
+<!-- Geo -->
+<meta name="geo.region" content="EU"/>
+<meta name="language" content="English"/>
+<!-- WebSite Schema with SearchAction -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Festmore","url":"https://festmore.com","description":"Europe's festival and vendor marketplace","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://festmore.com/events?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
+<!-- Organisation Schema -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Festmore","url":"https://festmore.com","logo":"https://festmore.com/logo.png","description":"Europe's festival and vendor marketplace connecting event organisers with verified vendors across 11 countries.","contactPoint":{"@type":"ContactPoint","email":"hello@festmore.com","contactType":"customer service"},"areaServed":["DE","DK","NL","GB","FR","SE","BE","PL","AE","US","CN"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222" crossorigin="anonymous"></script>
