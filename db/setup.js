@@ -257,4 +257,7 @@ console.log('\n🚀 Ready to start! Run: npm run dev');
 
 try { db.exec('ALTER TABLE events ADD COLUMN meta_title TEXT'); } catch(e) {}
 try { db.exec('ALTER TABLE events ADD COLUMN meta_desc TEXT'); } catch(e) {}
+// Trigger all seed scripts
+try { require('../add-seo-articles.js'); } catch(e) {}
+try { require('../add-trending-articles.js'); } catch(e) {}
 db.close();
