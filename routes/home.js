@@ -1,946 +1,477 @@
-// utils/i18n.js
-// Festmore Translation System — 9 Languages
-// EN, DE, DK, NL, FR, SE, AR, ZH
-
-const translations = {
-
-  // ─── ENGLISH ───
-  en: {
-    // Nav
-    nav_all: 'All',
-    nav_festivals: 'Festivals',
-    nav_markets: 'Markets',
-    nav_xmas: 'Xmas Markets',
-    nav_concerts: 'Concerts',
-    nav_city: 'City',
-    nav_flea: 'Flea Markets',
-    nav_articles: 'Articles',
-    nav_vendors: 'Vendors',
-    nav_pricing: '💰 Pricing',
-    nav_login: 'Login',
-    nav_list_event: '+ List Event',
-    nav_dashboard: 'Dashboard',
-    nav_logout: 'Logout',
-    nav_register: 'Register',
-    nav_become_vendor: 'Become Vendor',
-    nav_search: 'Search events, cities, countries…',
-
-    // Hero
-    hero_badge: "Europe's #1 Festival & Vendor Platform",
-    hero_h1_1: 'Where Events',
-    hero_h1_2: 'Meet Their',
-    hero_h1_3: 'Perfect Vendors',
-    hero_sub: 'Festmore connects event organisers with verified vendors across 11 countries. List your festival, find vendor spots, or discover the world\'s best events.',
-    hero_cta1: '🎪 List Your Event — from Free',
-    hero_cta2: '🏪 Become a Vendor — €49/yr',
-
-    // Stats
-    stat_events: 'Events',
-    stat_vendors: 'Vendors',
-    stat_countries: 'Countries',
-    stat_subscribers: 'Subscribers',
-
-    // Trust bar
-    trust_1: 'Secure Stripe Payments',
-    trust_2: 'Verified Vendor Profiles',
-    trust_3: '11 Countries Covered',
-    trust_4: 'Free Listings Available',
-    trust_5: 'Daily New Events Added',
-
-    // Why section
-    why_tag: 'Why Festmore',
-    why_h: 'Everything You Need to Grow Your Event Business',
-    why_sub: 'Whether you\'re an event organiser or a vendor — Festmore makes the connection simple, fast and profitable.',
-
-    // Pricing
-    pricing_tag: 'Simple Pricing',
-    pricing_h: 'Start Free. Grow Fast.\nPay Only When You\'re Ready.',
-    pricing_sub: 'No hidden fees. No long contracts. Cancel anytime.',
-    for_organisers: 'For Event Organisers',
-    for_vendors: 'For Vendors',
-    list_event_cta: 'List Your Event — Start Free →',
-    vendor_cta: 'Create Vendor Profile — €49/year →',
-
-    // How it works
-    how_tag: 'Simple Process',
-    how_h: 'Live in Minutes',
-    step1_title: 'Fill in your details',
-    step1_desc: 'Add your event or vendor profile — takes less than 5 minutes.',
-    step2_title: 'Choose your plan',
-    step2_desc: 'Start free or choose Standard/Premium for maximum visibility.',
-    step3_title: 'Go live instantly',
-    step3_desc: 'Free listings go live immediately. Paid listings within minutes.',
-    step4_title: 'Start getting discovered',
-    step4_desc: 'Visitors across 11 countries can now find you on Festmore and Google.',
-
-    // Browse
-    browse_events: 'Browse Events',
-    browse_sub: 'Find exactly the type of event you love',
-    view_all: 'View all',
-    events_label: 'events',
-    featured_events: 'Featured Events',
-    featured_sub: 'Hand-picked events you cannot miss',
-    browse_country: 'Browse by Country',
-    festival_guides: 'Festival Guides',
-    guides_sub: 'Expert guides updated daily',
-    all_articles: 'articles',
-
-    // Newsletter
-    newsletter_h: 'Never Miss an Event',
-    newsletter_sub: 'Get the best festivals and vendor opportunities delivered every week.',
-    newsletter_placeholder: 'Your email address',
-    newsletter_btn: 'Subscribe Free →',
-    newsletter_success: 'You are subscribed! Welcome to Festmore.',
-
-    // Urgency
-    urgency_h: '🔥 Join {events}+ events and {vendors}+ vendors already on Festmore',
-    urgency_sub: 'Start free today — upgrade when you\'re ready. No commitment required.',
-    urgency_btn1: 'List Your Event →',
-    urgency_btn2: 'Become a Vendor →',
-
-    // Footer
-    footer_desc: 'Europe\'s festival and vendor marketplace. Connecting event organisers with verified vendors across 11 countries.',
-    footer_for_org: 'For Organisers',
-    footer_for_ven: 'For Vendors',
-    footer_about: 'Festmore',
-    footer_list: 'List Your Event',
-    footer_pricing: 'Pricing Plans',
-    footer_find_vendors: 'Find Vendors',
-    footer_browse: 'Browse Events',
-    footer_create: 'Create Profile',
-    footer_guide: 'Vendor Guide',
-    footer_contact: 'Contact Us',
-    footer_about_us: 'About Us',
-    footer_articles: 'Festival Guides',
-    footer_privacy: 'Privacy Policy',
-    footer_rights: 'All rights reserved',
-
-    // Language name
-    lang_name: 'English',
-    lang_flag: '🇬🇧',
-    dir: 'ltr',
-  },
-
-  // ─── GERMAN ───
-  de: {
-    nav_all: 'Alle',
-    nav_festivals: 'Festivals',
-    nav_markets: 'Märkte',
-    nav_xmas: 'Weihnachtsmärkte',
-    nav_concerts: 'Konzerte',
-    nav_city: 'Stadtveranstaltungen',
-    nav_flea: 'Flohmärkte',
-    nav_articles: 'Artikel',
-    nav_vendors: 'Anbieter',
-    nav_pricing: '💰 Preise',
-    nav_login: 'Anmelden',
-    nav_list_event: '+ Event eintragen',
-    nav_dashboard: 'Dashboard',
-    nav_logout: 'Abmelden',
-    nav_register: 'Registrieren',
-    nav_become_vendor: 'Anbieter werden',
-    nav_search: 'Events, Städte, Länder suchen…',
-
-    hero_badge: 'Europas #1 Festival & Anbieter-Plattform',
-    hero_h1_1: 'Wo Events',
-    hero_h1_2: 'ihre perfekten',
-    hero_h1_3: 'Anbieter finden',
-    hero_sub: 'Festmore verbindet Veranstaltungsorganisatoren mit verifizierten Anbietern in 11 Ländern. Tragen Sie Ihr Festival ein, finden Sie Anbieterplätze oder entdecken Sie die besten Events.',
-    hero_cta1: '🎪 Event eintragen — kostenlos',
-    hero_cta2: '🏪 Anbieter werden — 49€/Jahr',
-
-    stat_events: 'Events',
-    stat_vendors: 'Anbieter',
-    stat_countries: 'Länder',
-    stat_subscribers: 'Abonnenten',
-
-    trust_1: 'Sichere Stripe-Zahlung',
-    trust_2: 'Verifizierte Anbieterprofile',
-    trust_3: '11 Länder abgedeckt',
-    trust_4: 'Kostenlose Einträge verfügbar',
-    trust_5: 'Täglich neue Events',
-
-    why_tag: 'Warum Festmore',
-    why_h: 'Alles, was Sie für Ihr Event-Business brauchen',
-    why_sub: 'Egal ob Veranstalter oder Anbieter — Festmore macht die Verbindung einfach, schnell und profitabel.',
-
-    pricing_tag: 'Einfache Preise',
-    pricing_h: 'Kostenlos starten. Schnell wachsen.\nNur zahlen, wenn Sie bereit sind.',
-    pricing_sub: 'Keine versteckten Gebühren. Keine langen Verträge. Jederzeit kündbar.',
-    for_organisers: 'Für Veranstalter',
-    for_vendors: 'Für Anbieter',
-    list_event_cta: 'Event eintragen — kostenlos starten →',
-    vendor_cta: 'Anbieterprofil erstellen — 49€/Jahr →',
-
-    how_tag: 'Einfacher Prozess',
-    how_h: 'In Minuten live',
-    step1_title: 'Details ausfüllen',
-    step1_desc: 'Event oder Anbieterprofil eintragen — dauert weniger als 5 Minuten.',
-    step2_title: 'Plan wählen',
-    step2_desc: 'Kostenlos starten oder Standard/Premium für maximale Sichtbarkeit wählen.',
-    step3_title: 'Sofort live gehen',
-    step3_desc: 'Kostenlose Einträge gehen sofort live. Bezahlte Einträge in Minuten.',
-    step4_title: 'Entdeckt werden',
-    step4_desc: 'Besucher aus 11 Ländern können Sie jetzt auf Festmore und Google finden.',
-
-    browse_events: 'Events durchsuchen',
-    browse_sub: 'Finden Sie genau den Event-Typ, den Sie lieben',
-    view_all: 'Alle anzeigen',
-    events_label: 'Events',
-    featured_events: 'Empfohlene Events',
-    featured_sub: 'Handverlesene Events, die Sie nicht verpassen sollten',
-    browse_country: 'Nach Land durchsuchen',
-    festival_guides: 'Festival-Guides',
-    guides_sub: 'Expertenguides täglich aktualisiert',
-    all_articles: 'Artikel',
-
-    newsletter_h: 'Kein Event verpassen',
-    newsletter_sub: 'Die besten Festivals und Anbietermöglichkeiten jede Woche per E-Mail.',
-    newsletter_placeholder: 'Ihre E-Mail-Adresse',
-    newsletter_btn: 'Kostenlos abonnieren →',
-    newsletter_success: 'Sie sind angemeldet! Willkommen bei Festmore.',
-
-    urgency_h: '🔥 Schließen Sie sich {events}+ Events und {vendors}+ Anbietern an',
-    urgency_sub: 'Heute kostenlos starten — upgraden Sie, wenn Sie bereit sind.',
-    urgency_btn1: 'Event eintragen →',
-    urgency_btn2: 'Anbieter werden →',
-
-    footer_desc: 'Europas Festival- und Anbieter-Marktplatz. Wir verbinden Veranstalter mit verifizierten Anbietern in 11 Ländern.',
-    footer_for_org: 'Für Veranstalter',
-    footer_for_ven: 'Für Anbieter',
-    footer_about: 'Festmore',
-    footer_list: 'Event eintragen',
-    footer_pricing: 'Preispläne',
-    footer_find_vendors: 'Anbieter finden',
-    footer_browse: 'Events durchsuchen',
-    footer_create: 'Profil erstellen',
-    footer_guide: 'Anbieter-Guide',
-    footer_contact: 'Kontakt',
-    footer_about_us: 'Über uns',
-    footer_articles: 'Festival-Guides',
-    footer_privacy: 'Datenschutz',
-    footer_rights: 'Alle Rechte vorbehalten',
-    lang_name: 'Deutsch',
-    lang_flag: '🇩🇪',
-    dir: 'ltr',
-  },
-
-  // ─── DANISH ───
-  dk: {
-    nav_all: 'Alle',
-    nav_festivals: 'Festivaler',
-    nav_markets: 'Markeder',
-    nav_xmas: 'Julmarkeder',
-    nav_concerts: 'Koncerter',
-    nav_city: 'Bybegivenheder',
-    nav_flea: 'Loppemarkeder',
-    nav_articles: 'Artikler',
-    nav_vendors: 'Sælgere',
-    nav_pricing: '💰 Priser',
-    nav_login: 'Log ind',
-    nav_list_event: '+ Tilmeld event',
-    nav_dashboard: 'Dashboard',
-    nav_logout: 'Log ud',
-    nav_register: 'Registrer',
-    nav_become_vendor: 'Bliv sælger',
-    nav_search: 'Søg events, byer, lande…',
-
-    hero_badge: 'Europas #1 Festival & Sælger Platform',
-    hero_h1_1: 'Hvor Events',
-    hero_h1_2: 'møder deres',
-    hero_h1_3: 'perfekte sælgere',
-    hero_sub: 'Festmore forbinder eventarrangører med verificerede sælgere i 11 lande. Tilmeld dit festival, find sælgerpladser eller opdag verdens bedste events.',
-    hero_cta1: '🎪 Tilmeld dit event — gratis',
-    hero_cta2: '🏪 Bliv sælger — €49/år',
-
-    stat_events: 'Events',
-    stat_vendors: 'Sælgere',
-    stat_countries: 'Lande',
-    stat_subscribers: 'Abonnenter',
-
-    trust_1: 'Sikker Stripe betaling',
-    trust_2: 'Verificerede sælgerprofiler',
-    trust_3: '11 lande dækket',
-    trust_4: 'Gratis tilmeldinger tilgængelige',
-    trust_5: 'Dagligt nye events tilføjet',
-
-    why_tag: 'Hvorfor Festmore',
-    why_h: 'Alt hvad du behøver for at vokse din eventvirksomhed',
-    why_sub: 'Uanset om du er arrangør eller sælger — Festmore gør forbindelsen enkel, hurtig og profitabel.',
-
-    pricing_tag: 'Enkle priser',
-    pricing_h: 'Start gratis. Voks hurtigt.\nBetal kun når du er klar.',
-    pricing_sub: 'Ingen skjulte gebyrer. Ingen lange kontrakter. Annuller når som helst.',
-    for_organisers: 'Til Arrangører',
-    for_vendors: 'Til Sælgere',
-    list_event_cta: 'Tilmeld dit event — start gratis →',
-    vendor_cta: 'Opret sælgerprofil — €49/år →',
-
-    how_tag: 'Enkel proces',
-    how_h: 'Live på få minutter',
-    step1_title: 'Udfyld dine oplysninger',
-    step1_desc: 'Tilmeld dit event eller sælgerprofil — tager mindre end 5 minutter.',
-    step2_title: 'Vælg din plan',
-    step2_desc: 'Start gratis eller vælg Standard/Premium for maksimal synlighed.',
-    step3_title: 'Gå live med det samme',
-    step3_desc: 'Gratis tilmeldinger går live øjeblikkeligt. Betalte tilmeldinger på få minutter.',
-    step4_title: 'Bliv opdaget',
-    step4_desc: 'Besøgende fra 11 lande kan nu finde dig på Festmore og Google.',
-
-    browse_events: 'Gennemse events',
-    browse_sub: 'Find præcis den type event du elsker',
-    view_all: 'Se alle',
-    events_label: 'events',
-    featured_events: 'Udvalgte events',
-    featured_sub: 'Håndplukkede events du ikke må gå glip af',
-    browse_country: 'Gennemse efter land',
-    festival_guides: 'Festival guides',
-    guides_sub: 'Ekspertguider opdateret dagligt',
-    all_articles: 'artikler',
-
-    newsletter_h: 'Gå aldrig glip af et event',
-    newsletter_sub: 'Få de bedste festivaler og sælgermuligheder leveret hver uge.',
-    newsletter_placeholder: 'Din e-mailadresse',
-    newsletter_btn: 'Abonner gratis →',
-    newsletter_success: 'Du er tilmeldt! Velkommen til Festmore.',
-
-    urgency_h: '🔥 Tilslut dig {events}+ events og {vendors}+ sælgere allerede på Festmore',
-    urgency_sub: 'Start gratis i dag — opgrader når du er klar.',
-    urgency_btn1: 'Tilmeld dit event →',
-    urgency_btn2: 'Bliv sælger →',
-
-    footer_desc: 'Europas festival- og sælgermarkedsplads. Forbinder eventarrangører med verificerede sælgere i 11 lande.',
-    footer_for_org: 'Til Arrangører',
-    footer_for_ven: 'Til Sælgere',
-    footer_about: 'Festmore',
-    footer_list: 'Tilmeld event',
-    footer_pricing: 'Prisplaner',
-    footer_find_vendors: 'Find sælgere',
-    footer_browse: 'Gennemse events',
-    footer_create: 'Opret profil',
-    footer_guide: 'Sælger guide',
-    footer_contact: 'Kontakt',
-    footer_about_us: 'Om os',
-    footer_articles: 'Festival guides',
-    footer_privacy: 'Privatlivspolitik',
-    footer_rights: 'Alle rettigheder forbeholdes',
-    lang_name: 'Dansk',
-    lang_flag: '🇩🇰',
-    dir: 'ltr',
-  },
-
-  // ─── DUTCH ───
-  nl: {
-    nav_all: 'Alle',
-    nav_festivals: 'Festivals',
-    nav_markets: 'Markten',
-    nav_xmas: 'Kerstmarkten',
-    nav_concerts: 'Concerten',
-    nav_city: 'Stadsevenementen',
-    nav_flea: 'Vlooienmarkten',
-    nav_articles: 'Artikelen',
-    nav_vendors: 'Verkopers',
-    nav_pricing: '💰 Prijzen',
-    nav_login: 'Inloggen',
-    nav_list_event: '+ Event plaatsen',
-    nav_dashboard: 'Dashboard',
-    nav_logout: 'Uitloggen',
-    nav_register: 'Registreren',
-    nav_become_vendor: 'Verkoper worden',
-    nav_search: 'Zoek evenementen, steden, landen…',
-
-    hero_badge: 'Europa\'s #1 Festival & Verkoper Platform',
-    hero_h1_1: 'Waar Evenementen',
-    hero_h1_2: 'hun perfecte',
-    hero_h1_3: 'Verkopers ontmoeten',
-    hero_sub: 'Festmore verbindt evenementenorganisatoren met geverifieerde verkopers in 11 landen. Plaats uw festival, vind verkopersplekken of ontdek de beste evenementen.',
-    hero_cta1: '🎪 Evenement plaatsen — gratis',
-    hero_cta2: '🏪 Verkoper worden — €49/jaar',
-
-    stat_events: 'Evenementen',
-    stat_vendors: 'Verkopers',
-    stat_countries: 'Landen',
-    stat_subscribers: 'Abonnees',
-
-    trust_1: 'Veilige Stripe betalingen',
-    trust_2: 'Geverifieerde verkopersprofielen',
-    trust_3: '11 landen gedekt',
-    trust_4: 'Gratis vermeldingen beschikbaar',
-    trust_5: 'Dagelijks nieuwe evenementen',
-
-    why_tag: 'Waarom Festmore',
-    why_h: 'Alles wat u nodig heeft om uw evenementenbedrijf te laten groeien',
-    why_sub: 'Of u nu een organisator of verkoper bent — Festmore maakt de verbinding eenvoudig, snel en winstgevend.',
-
-    pricing_tag: 'Eenvoudige prijzen',
-    pricing_h: 'Gratis starten. Snel groeien.\nAlleen betalen als u er klaar voor bent.',
-    pricing_sub: 'Geen verborgen kosten. Geen lange contracten. Altijd opzegbaar.',
-    for_organisers: 'Voor Organisatoren',
-    for_vendors: 'Voor Verkopers',
-    list_event_cta: 'Evenement plaatsen — gratis starten →',
-    vendor_cta: 'Verkopersprofiel aanmaken — €49/jaar →',
-
-    how_tag: 'Eenvoudig proces',
-    how_h: 'Live in minuten',
-    step1_title: 'Vul uw gegevens in',
-    step1_desc: 'Voeg uw evenement of verkopersprofiel toe — duurt minder dan 5 minuten.',
-    step2_title: 'Kies uw plan',
-    step2_desc: 'Start gratis of kies Standard/Premium voor maximale zichtbaarheid.',
-    step3_title: 'Ga direct live',
-    step3_desc: 'Gratis vermeldingen gaan direct live. Betaalde vermeldingen binnen minuten.',
-    step4_title: 'Word ontdekt',
-    step4_desc: 'Bezoekers uit 11 landen kunnen u nu vinden op Festmore en Google.',
-
-    browse_events: 'Evenementen bekijken',
-    browse_sub: 'Vind precies het type evenement dat u zoekt',
-    view_all: 'Bekijk alle',
-    events_label: 'evenementen',
-    featured_events: 'Uitgelichte evenementen',
-    featured_sub: 'Handgeselecteerde evenementen die u niet mag missen',
-    browse_country: 'Bladeren per land',
-    festival_guides: 'Festival gidsen',
-    guides_sub: 'Expertgidsen dagelijks bijgewerkt',
-    all_articles: 'artikelen',
-
-    newsletter_h: 'Mis nooit een evenement',
-    newsletter_sub: 'Ontvang wekelijks de beste festivals en verkopersmogelijkheden.',
-    newsletter_placeholder: 'Uw e-mailadres',
-    newsletter_btn: 'Gratis abonneren →',
-    newsletter_success: 'U bent geabonneerd! Welkom bij Festmore.',
-
-    urgency_h: '🔥 Sluit u aan bij {events}+ evenementen en {vendors}+ verkopers op Festmore',
-    urgency_sub: 'Vandaag gratis beginnen — upgraden wanneer u er klaar voor bent.',
-    urgency_btn1: 'Evenement plaatsen →',
-    urgency_btn2: 'Verkoper worden →',
-
-    footer_desc: 'Europa\'s festival- en verkopersmarktplaats. Verbindt evenementenorganisatoren met geverifieerde verkopers in 11 landen.',
-    footer_for_org: 'Voor Organisatoren',
-    footer_for_ven: 'Voor Verkopers',
-    footer_about: 'Festmore',
-    footer_list: 'Evenement plaatsen',
-    footer_pricing: 'Prijsplannen',
-    footer_find_vendors: 'Verkopers vinden',
-    footer_browse: 'Evenementen bekijken',
-    footer_create: 'Profiel aanmaken',
-    footer_guide: 'Verkopersgids',
-    footer_contact: 'Contact',
-    footer_about_us: 'Over ons',
-    footer_articles: 'Festival gidsen',
-    footer_privacy: 'Privacybeleid',
-    footer_rights: 'Alle rechten voorbehouden',
-    lang_name: 'Nederlands',
-    lang_flag: '🇳🇱',
-    dir: 'ltr',
-  },
-
-  // ─── FRENCH ───
-  fr: {
-    nav_all: 'Tout',
-    nav_festivals: 'Festivals',
-    nav_markets: 'Marchés',
-    nav_xmas: 'Marchés de Noël',
-    nav_concerts: 'Concerts',
-    nav_city: 'Événements urbains',
-    nav_flea: 'Marchés aux puces',
-    nav_articles: 'Articles',
-    nav_vendors: 'Vendeurs',
-    nav_pricing: '💰 Tarifs',
-    nav_login: 'Connexion',
-    nav_list_event: '+ Ajouter un événement',
-    nav_dashboard: 'Tableau de bord',
-    nav_logout: 'Déconnexion',
-    nav_register: "S'inscrire",
-    nav_become_vendor: 'Devenir vendeur',
-    nav_search: 'Rechercher événements, villes, pays…',
-
-    hero_badge: 'La plateforme #1 festivals et vendeurs en Europe',
-    hero_h1_1: 'Là où les événements',
-    hero_h1_2: 'rencontrent leurs',
-    hero_h1_3: 'vendeurs parfaits',
-    hero_sub: 'Festmore connecte les organisateurs d\'événements avec des vendeurs vérifiés dans 11 pays. Listez votre festival, trouvez des emplacements ou découvrez les meilleurs événements.',
-    hero_cta1: '🎪 Lister votre événement — gratuit',
-    hero_cta2: '🏪 Devenir vendeur — 49€/an',
-
-    stat_events: 'Événements',
-    stat_vendors: 'Vendeurs',
-    stat_countries: 'Pays',
-    stat_subscribers: 'Abonnés',
-
-    trust_1: 'Paiements Stripe sécurisés',
-    trust_2: 'Profils vendeurs vérifiés',
-    trust_3: '11 pays couverts',
-    trust_4: 'Annonces gratuites disponibles',
-    trust_5: 'Nouveaux événements quotidiens',
-
-    why_tag: 'Pourquoi Festmore',
-    why_h: 'Tout ce dont vous avez besoin pour développer votre activité événementielle',
-    why_sub: 'Que vous soyez organisateur ou vendeur — Festmore rend la connexion simple, rapide et rentable.',
-
-    pricing_tag: 'Tarification simple',
-    pricing_h: 'Commencez gratuitement. Grandissez vite.\nPayez seulement quand vous êtes prêt.',
-    pricing_sub: 'Pas de frais cachés. Pas de longs contrats. Annulation à tout moment.',
-    for_organisers: 'Pour les Organisateurs',
-    for_vendors: 'Pour les Vendeurs',
-    list_event_cta: 'Lister votre événement — commencer gratuitement →',
-    vendor_cta: 'Créer un profil vendeur — 49€/an →',
-
-    how_tag: 'Processus simple',
-    how_h: 'En ligne en quelques minutes',
-    step1_title: 'Remplissez vos informations',
-    step1_desc: 'Ajoutez votre événement ou profil vendeur — moins de 5 minutes.',
-    step2_title: 'Choisissez votre plan',
-    step2_desc: 'Commencez gratuitement ou choisissez Standard/Premium pour plus de visibilité.',
-    step3_title: 'Mise en ligne instantanée',
-    step3_desc: 'Les annonces gratuites sont en ligne immédiatement. Les payantes en quelques minutes.',
-    step4_title: 'Commencez à être découvert',
-    step4_desc: 'Les visiteurs de 11 pays peuvent maintenant vous trouver sur Festmore et Google.',
-
-    browse_events: 'Parcourir les événements',
-    browse_sub: 'Trouvez exactement le type d\'événement que vous aimez',
-    view_all: 'Voir tous',
-    events_label: 'événements',
-    featured_events: 'Événements en vedette',
-    featured_sub: 'Événements sélectionnés à ne pas manquer',
-    browse_country: 'Parcourir par pays',
-    festival_guides: 'Guides festivals',
-    guides_sub: 'Guides experts mis à jour quotidiennement',
-    all_articles: 'articles',
-
-    newsletter_h: 'Ne manquez jamais un événement',
-    newsletter_sub: 'Recevez chaque semaine les meilleurs festivals et opportunités vendeurs.',
-    newsletter_placeholder: 'Votre adresse e-mail',
-    newsletter_btn: 'S\'abonner gratuitement →',
-    newsletter_success: 'Vous êtes abonné ! Bienvenue sur Festmore.',
-
-    urgency_h: '🔥 Rejoignez {events}+ événements et {vendors}+ vendeurs déjà sur Festmore',
-    urgency_sub: 'Commencez gratuitement aujourd\'hui — upgradez quand vous êtes prêt.',
-    urgency_btn1: 'Lister votre événement →',
-    urgency_btn2: 'Devenir vendeur →',
-
-    footer_desc: 'La marketplace européenne festivals et vendeurs. Connecte les organisateurs avec des vendeurs vérifiés dans 11 pays.',
-    footer_for_org: 'Pour les Organisateurs',
-    footer_for_ven: 'Pour les Vendeurs',
-    footer_about: 'Festmore',
-    footer_list: 'Lister un événement',
-    footer_pricing: 'Plans tarifaires',
-    footer_find_vendors: 'Trouver des vendeurs',
-    footer_browse: 'Parcourir les événements',
-    footer_create: 'Créer un profil',
-    footer_guide: 'Guide vendeur',
-    footer_contact: 'Contact',
-    footer_about_us: 'À propos',
-    footer_articles: 'Guides festivals',
-    footer_privacy: 'Politique de confidentialité',
-    footer_rights: 'Tous droits réservés',
-    lang_name: 'Français',
-    lang_flag: '🇫🇷',
-    dir: 'ltr',
-  },
-
-  // ─── SWEDISH ───
-  se: {
-    nav_all: 'Alla',
-    nav_festivals: 'Festivaler',
-    nav_markets: 'Marknader',
-    nav_xmas: 'Julmarknader',
-    nav_concerts: 'Konserter',
-    nav_city: 'Stadsevenemang',
-    nav_flea: 'Loppmarknader',
-    nav_articles: 'Artiklar',
-    nav_vendors: 'Säljare',
-    nav_pricing: '💰 Priser',
-    nav_login: 'Logga in',
-    nav_list_event: '+ Lägg till event',
-    nav_dashboard: 'Instrumentpanel',
-    nav_logout: 'Logga ut',
-    nav_register: 'Registrera',
-    nav_become_vendor: 'Bli säljare',
-    nav_search: 'Sök event, städer, länder…',
-
-    hero_badge: 'Europas #1 Festival & Säljare Plattform',
-    hero_h1_1: 'Där Events',
-    hero_h1_2: 'möter sina',
-    hero_h1_3: 'perfekta Säljare',
-    hero_sub: 'Festmore förbinder evenemangsarrangörer med verifierade säljare i 11 länder. Lista ditt festival, hitta säljarplatser eller upptäck världens bästa event.',
-    hero_cta1: '🎪 Lista ditt event — gratis',
-    hero_cta2: '🏪 Bli säljare — €49/år',
-
-    stat_events: 'Event',
-    stat_vendors: 'Säljare',
-    stat_countries: 'Länder',
-    stat_subscribers: 'Prenumeranter',
-
-    trust_1: 'Säkra Stripe-betalningar',
-    trust_2: 'Verifierade säljareprofiler',
-    trust_3: '11 länder täckta',
-    trust_4: 'Gratis listor tillgängliga',
-    trust_5: 'Dagligen nya event tillagda',
-
-    why_tag: 'Varför Festmore',
-    why_h: 'Allt du behöver för att växa ditt eventföretag',
-    why_sub: 'Oavsett om du är arrangör eller säljare — Festmore gör kopplingen enkel, snabb och lönsam.',
-
-    pricing_tag: 'Enkla priser',
-    pricing_h: 'Börja gratis. Väx snabbt.\nBetala bara när du är redo.',
-    pricing_sub: 'Inga dolda avgifter. Inga långa kontrakt. Avbryt när som helst.',
-    for_organisers: 'För Arrangörer',
-    for_vendors: 'För Säljare',
-    list_event_cta: 'Lista ditt event — börja gratis →',
-    vendor_cta: 'Skapa säljareprofil — €49/år →',
-
-    how_tag: 'Enkel process',
-    how_h: 'Live på några minuter',
-    step1_title: 'Fyll i dina uppgifter',
-    step1_desc: 'Lägg till ditt event eller säljareprofil — tar mindre än 5 minuter.',
-    step2_title: 'Välj din plan',
-    step2_desc: 'Börja gratis eller välj Standard/Premium för maximal synlighet.',
-    step3_title: 'Gå live direkt',
-    step3_desc: 'Gratis listor går live omedelbart. Betalda listor inom minuter.',
-    step4_title: 'Börja bli upptäckt',
-    step4_desc: 'Besökare från 11 länder kan nu hitta dig på Festmore och Google.',
-
-    browse_events: 'Bläddra bland event',
-    browse_sub: 'Hitta precis den typ av event du älskar',
-    view_all: 'Visa alla',
-    events_label: 'event',
-    featured_events: 'Utvalda event',
-    featured_sub: 'Handplockade event du inte får missa',
-    browse_country: 'Bläddra efter land',
-    festival_guides: 'Festivalguider',
-    guides_sub: 'Expertguider uppdaterade dagligen',
-    all_articles: 'artiklar',
-
-    newsletter_h: 'Missa aldrig ett event',
-    newsletter_sub: 'Få de bästa festivalerna och säljaremöjligheterna varje vecka.',
-    newsletter_placeholder: 'Din e-postadress',
-    newsletter_btn: 'Prenumerera gratis →',
-    newsletter_success: 'Du prenumererar nu! Välkommen till Festmore.',
-
-    urgency_h: '🔥 Gå med {events}+ event och {vendors}+ säljare redan på Festmore',
-    urgency_sub: 'Börja gratis idag — uppgradera när du är redo.',
-    urgency_btn1: 'Lista ditt event →',
-    urgency_btn2: 'Bli säljare →',
-
-    footer_desc: 'Europas festival- och säljare-marknadsplats. Förbinder evenemangsarrangörer med verifierade säljare i 11 länder.',
-    footer_for_org: 'För Arrangörer',
-    footer_for_ven: 'För Säljare',
-    footer_about: 'Festmore',
-    footer_list: 'Lista event',
-    footer_pricing: 'Prisplaner',
-    footer_find_vendors: 'Hitta säljare',
-    footer_browse: 'Bläddra bland event',
-    footer_create: 'Skapa profil',
-    footer_guide: 'Säljareguide',
-    footer_contact: 'Kontakt',
-    footer_about_us: 'Om oss',
-    footer_articles: 'Festivalguider',
-    footer_privacy: 'Integritetspolicy',
-    footer_rights: 'Alla rättigheter förbehållna',
-    lang_name: 'Svenska',
-    lang_flag: '🇸🇪',
-    dir: 'ltr',
-  },
-
-  // ─── ARABIC ───
-  ar: {
-    nav_all: 'الكل',
-    nav_festivals: 'المهرجانات',
-    nav_markets: 'الأسواق',
-    nav_xmas: 'أسواق الكريسماس',
-    nav_concerts: 'الحفلات',
-    nav_city: 'فعاليات المدينة',
-    nav_flea: 'أسواق البضائع المستعملة',
-    nav_articles: 'المقالات',
-    nav_vendors: 'البائعون',
-    nav_pricing: '💰 الأسعار',
-    nav_login: 'تسجيل الدخول',
-    nav_list_event: '+ أضف فعالية',
-    nav_dashboard: 'لوحة التحكم',
-    nav_logout: 'تسجيل الخروج',
-    nav_register: 'التسجيل',
-    nav_become_vendor: 'كن بائعاً',
-    nav_search: 'ابحث عن فعاليات ومدن وبلدان…',
-
-    hero_badge: 'منصة المهرجانات والبائعين #1 في أوروبا',
-    hero_h1_1: 'حيث تلتقي الفعاليات',
-    hero_h1_2: 'مع',
-    hero_h1_3: 'بائعيها المثاليين',
-    hero_sub: 'فيستمور يربط منظمي الفعاليات بالبائعين الموثقين في 11 دولة. أضف مهرجانك أو اعثر على أماكن للبيع أو اكتشف أفضل الفعاليات.',
-    hero_cta1: '🎪 أضف فعاليتك — مجاناً',
-    hero_cta2: '🏪 كن بائعاً — €49/سنة',
-
-    stat_events: 'فعالية',
-    stat_vendors: 'بائع',
-    stat_countries: 'دولة',
-    stat_subscribers: 'مشترك',
-
-    trust_1: 'مدفوعات آمنة عبر Stripe',
-    trust_2: 'ملفات بائعين موثقة',
-    trust_3: '11 دولة مشمولة',
-    trust_4: 'إدراجات مجانية متاحة',
-    trust_5: 'فعاليات جديدة يومياً',
-
-    why_tag: 'لماذا فيستمور',
-    why_h: 'كل ما تحتاجه لتنمية أعمالك في مجال الفعاليات',
-    why_sub: 'سواء كنت منظماً أو بائعاً — فيستمور يجعل التواصل بسيطاً وسريعاً ومربحاً.',
-
-    pricing_tag: 'أسعار بسيطة',
-    pricing_h: 'ابدأ مجاناً. انمُ بسرعة.\nادفع فقط عندما تكون مستعداً.',
-    pricing_sub: 'لا رسوم خفية. لا عقود طويلة. إلغاء في أي وقت.',
-    for_organisers: 'للمنظمين',
-    for_vendors: 'للبائعين',
-    list_event_cta: 'أضف فعاليتك — ابدأ مجاناً ←',
-    vendor_cta: 'أنشئ ملف بائع — €49/سنة ←',
-
-    how_tag: 'عملية بسيطة',
-    how_h: 'مباشر في دقائق',
-    step1_title: 'أدخل بياناتك',
-    step1_desc: 'أضف فعاليتك أو ملفك كبائع — يستغرق أقل من 5 دقائق.',
-    step2_title: 'اختر خطتك',
-    step2_desc: 'ابدأ مجاناً أو اختر Standard/Premium لأقصى قدر من الظهور.',
-    step3_title: 'انشر فوراً',
-    step3_desc: 'الإدراجات المجانية تنشر فوراً. الإدراجات المدفوعة في دقائق.',
-    step4_title: 'ابدأ بالظهور',
-    step4_desc: 'يمكن للزوار من 11 دولة الآن العثور عليك على Festmore وGoogle.',
-
-    browse_events: 'تصفح الفعاليات',
-    browse_sub: 'اعثر على النوع الذي تحبه',
-    view_all: 'عرض الكل',
-    events_label: 'فعالية',
-    featured_events: 'الفعاليات المميزة',
-    featured_sub: 'فعاليات مختارة بعناية لا تفوتها',
-    browse_country: 'تصفح حسب الدولة',
-    festival_guides: 'أدلة المهرجانات',
-    guides_sub: 'أدلة الخبراء محدثة يومياً',
-    all_articles: 'مقال',
-
-    newsletter_h: 'لا تفوت أي فعالية',
-    newsletter_sub: 'احصل على أفضل المهرجانات وفرص البائعين كل أسبوع.',
-    newsletter_placeholder: 'عنوان بريدك الإلكتروني',
-    newsletter_btn: 'اشترك مجاناً ←',
-    newsletter_success: '!لقد اشتركت! مرحباً بك في Festmore',
-
-    urgency_h: '🔥 انضم إلى {events}+ فعالية و{vendors}+ بائع على Festmore',
-    urgency_sub: 'ابدأ مجاناً اليوم — قم بالترقية عندما تكون مستعداً.',
-    urgency_btn1: 'أضف فعاليتك ←',
-    urgency_btn2: 'كن بائعاً ←',
-
-    footer_desc: 'سوق المهرجانات والبائعين في أوروبا. يربط منظمي الفعاليات بالبائعين الموثقين في 11 دولة.',
-    footer_for_org: 'للمنظمين',
-    footer_for_ven: 'للبائعين',
-    footer_about: 'فيستمور',
-    footer_list: 'أضف فعالية',
-    footer_pricing: 'خطط الأسعار',
-    footer_find_vendors: 'ابحث عن بائعين',
-    footer_browse: 'تصفح الفعاليات',
-    footer_create: 'أنشئ ملفاً',
-    footer_guide: 'دليل البائعين',
-    footer_contact: 'اتصل بنا',
-    footer_about_us: 'من نحن',
-    footer_articles: 'أدلة المهرجانات',
-    footer_privacy: 'سياسة الخصوصية',
-    footer_rights: 'جميع الحقوق محفوظة',
-    lang_name: 'العربية',
-    lang_flag: '🇦🇪',
-    dir: 'rtl',
-  },
-
-  // ─── CHINESE ───
-  zh: {
-    nav_all: '全部',
-    nav_festivals: '节日',
-    nav_markets: '市集',
-    nav_xmas: '圣诞市集',
-    nav_concerts: '音乐会',
-    nav_city: '城市活动',
-    nav_flea: '跳蚤市场',
-    nav_articles: '文章',
-    nav_vendors: '商贩',
-    nav_pricing: '💰 价格',
-    nav_login: '登录',
-    nav_list_event: '+ 发布活动',
-    nav_dashboard: '仪表板',
-    nav_logout: '登出',
-    nav_register: '注册',
-    nav_become_vendor: '成为商贩',
-    nav_search: '搜索活动、城市、国家…',
-
-    hero_badge: '欧洲第一节日和商贩平台',
-    hero_h1_1: '活动与',
-    hero_h1_2: '完美商贩',
-    hero_h1_3: '相遇之地',
-    hero_sub: 'Festmore连接活动组织者与11个国家的认证商贩。发布您的节日、寻找摊位或发现全球最佳活动。',
-    hero_cta1: '🎪 发布活动 — 免费',
-    hero_cta2: '🏪 成为商贩 — €49/年',
-
-    stat_events: '活动',
-    stat_vendors: '商贩',
-    stat_countries: '国家',
-    stat_subscribers: '订阅者',
-
-    trust_1: '安全Stripe支付',
-    trust_2: '认证商贩档案',
-    trust_3: '覆盖11个国家',
-    trust_4: '免费发布可用',
-    trust_5: '每日新增活动',
-
-    why_tag: '为什么选择Festmore',
-    why_h: '发展活动业务所需的一切',
-    why_sub: '无论您是活动组织者还是商贩 — Festmore让连接变得简单、快速且有利可图。',
-
-    pricing_tag: '简单定价',
-    pricing_h: '免费开始。快速成长。\n准备好了再付费。',
-    pricing_sub: '无隐藏费用。无长期合同。随时取消。',
-    for_organisers: '活动组织者',
-    for_vendors: '商贩',
-    list_event_cta: '发布活动 — 免费开始 →',
-    vendor_cta: '创建商贩档案 — €49/年 →',
-
-    how_tag: '简单流程',
-    how_h: '几分钟内上线',
-    step1_title: '填写您的信息',
-    step1_desc: '添加您的活动或商贩档案 — 不到5分钟。',
-    step2_title: '选择您的方案',
-    step2_desc: '免费开始或选择标准版/高级版以获得最大曝光度。',
-    step3_title: '立即上线',
-    step3_desc: '免费发布立即上线。付费发布在几分钟内完成。',
-    step4_title: '开始被发现',
-    step4_desc: '来自11个国家的访客现在可以在Festmore和Google上找到您。',
-
-    browse_events: '浏览活动',
-    browse_sub: '找到您喜欢的活动类型',
-    view_all: '查看全部',
-    events_label: '活动',
-    featured_events: '精选活动',
-    featured_sub: '精心挑选的不可错过活动',
-    browse_country: '按国家浏览',
-    festival_guides: '节日指南',
-    guides_sub: '专家指南每日更新',
-    all_articles: '篇文章',
-
-    newsletter_h: '不错过任何活动',
-    newsletter_sub: '每周获取最佳节日和商贩机会。',
-    newsletter_placeholder: '您的电子邮件地址',
-    newsletter_btn: '免费订阅 →',
-    newsletter_success: '您已订阅！欢迎来到Festmore。',
-
-    urgency_h: '🔥 加入Festmore上的{events}+活动和{vendors}+商贩',
-    urgency_sub: '今天免费开始 — 准备好时再升级。',
-    urgency_btn1: '发布您的活动 →',
-    urgency_btn2: '成为商贩 →',
-
-    footer_desc: '欧洲的节日和商贩市场。连接活动组织者与11个国家的认证商贩。',
-    footer_for_org: '活动组织者',
-    footer_for_ven: '商贩',
-    footer_about: 'Festmore',
-    footer_list: '发布活动',
-    footer_pricing: '价格方案',
-    footer_find_vendors: '寻找商贩',
-    footer_browse: '浏览活动',
-    footer_create: '创建档案',
-    footer_guide: '商贩指南',
-    footer_contact: '联系我们',
-    footer_about_us: '关于我们',
-    footer_articles: '节日指南',
-    footer_privacy: '隐私政策',
-    footer_rights: '版权所有',
-    lang_name: '中文',
-    lang_flag: '🇨🇳',
-    dir: 'ltr',
-  },
-};
-
-// ─────────────────────────────────────
-// GET LANGUAGE FROM REQUEST
-// ─────────────────────────────────────
-function getLang(req) {
-  // 1. Check URL param: ?lang=de
-  if (req.query && req.query.lang && translations[req.query.lang]) {
-    if (req.session) req.session.lang = req.query.lang;
-    return req.query.lang;
-  }
-
-  // 2. Check session
-  if (req.session && req.session.lang && translations[req.session.lang]) {
-    return req.session.lang;
-  }
-
-  // 3. Check browser Accept-Language header
-  const acceptLang = req.headers && req.headers['accept-language'];
-  if (acceptLang) {
-    const browserLang = acceptLang.substring(0, 2).toLowerCase();
-    const langMap = { de:'de', da:'dk', nl:'nl', fr:'fr', sv:'se', ar:'ar', zh:'zh' };
-    if (langMap[browserLang]) return langMap[browserLang];
-  }
-
-  return 'en';
-}
-
-// ─────────────────────────────────────
-// GET TRANSLATIONS
-// ─────────────────────────────────────
-function t(req) {
+// routes/home.js — MULTI-LANGUAGE VERSION
+const express = require('express');
+const router  = express.Router();
+const db      = require('../db');
+const { t, getLang, langSwitcher } = require('./utils/i18n');
+
+router.get('/', (req, res) => {
+  const featured      = db.prepare(`SELECT * FROM events WHERE status='active' AND featured=1 ORDER BY views DESC LIMIT 6`).all();
+  const recent        = db.prepare(`SELECT * FROM events WHERE status='active' ORDER BY created_at DESC LIMIT 6`).all();
+  const articles      = db.prepare(`SELECT id,title,slug,excerpt,image_url,category,created_at FROM articles WHERE status='published' ORDER BY created_at DESC LIMIT 3`).all();
+  const countryCounts = db.prepare(`SELECT country, COUNT(*) as count FROM events WHERE status='active' GROUP BY country ORDER BY count DESC`).all();
+  const catCounts     = db.prepare(`SELECT category, COUNT(*) as count FROM events WHERE status='active' GROUP BY category ORDER BY count DESC`).all();
+  const stats = {
+    events:      db.prepare("SELECT COUNT(*) as n FROM events WHERE status='active'").get().n,
+    vendors:     db.prepare("SELECT COUNT(*) as n FROM vendors WHERE status='active'").get().n,
+    articles:    db.prepare("SELECT COUNT(*) as n FROM articles WHERE status='published'").get().n,
+    subscribers: db.prepare("SELECT COUNT(*) as n FROM subscribers WHERE active=1").get().n,
+  };
+  const tr   = t(req);
   const lang = getLang(req);
-  return translations[lang] || translations.en;
-}
+  res.send(renderHome({ featured, recent, articles, countryCounts, catCounts, stats, user: req.session.user, tr, lang, langHtml: langSwitcher(req) }));
+});
 
-// ─────────────────────────────────────
-// LANGUAGE SWITCHER HTML
-// ─────────────────────────────────────
-function langSwitcher(req) {
-  const current = getLang(req);
-  const langs = [
-    { code:'en', flag:'🇬🇧', name:'EN' },
-    { code:'de', flag:'🇩🇪', name:'DE' },
-    { code:'dk', flag:'🇩🇰', name:'DA' },
-    { code:'nl', flag:'🇳🇱', name:'NL' },
-    { code:'fr', flag:'🇫🇷', name:'FR' },
-    { code:'se', flag:'🇸🇪', name:'SV' },
-    { code:'ar', flag:'🇦🇪', name:'AR' },
-    { code:'zh', flag:'🇨🇳', name:'ZH' },
-  ];
-
-  return `<div class="lang-switcher" id="lang-switcher">
-  <button class="lang-current" onclick="document.getElementById('lang-dropdown').classList.toggle('open')" aria-label="Change language">
-    ${langs.find(l => l.code === current)?.flag || '🌍'} ${(current).toUpperCase()} ▾
-  </button>
-  <div class="lang-dropdown" id="lang-dropdown">
-    ${langs.map(l => `<a href="?lang=${l.code}" class="lang-option ${l.code === current ? 'active' : ''}">${l.flag} ${l.name}</a>`).join('')}
-  </div>
-</div>
-<style>
-.lang-switcher { position:relative; }
-.lang-current {
-  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
-  color:rgba(255,255,255,.8); padding:6px 12px; border-radius:8px;
-  font-size:12px; font-weight:700; cursor:pointer; transition:all .2s;
-  white-space:nowrap;
-}
-.lang-current:hover { background:rgba(255,255,255,.15); }
-.lang-dropdown {
-  display:none; position:absolute; top:calc(100% + 8px); right:0;
-  background:#1a1612; border:1px solid rgba(255,255,255,.1);
-  border-radius:12px; padding:6px; min-width:120px;
-  box-shadow:0 20px 40px rgba(0,0,0,.4); z-index:999;
-  display:none; flex-direction:column; gap:2px;
-}
-.lang-dropdown.open { display:flex; }
-.lang-option {
-  padding:7px 12px; border-radius:8px; font-size:12px; font-weight:600;
-  color:rgba(255,255,255,.7); text-decoration:none; transition:all .15s;
-  white-space:nowrap;
-}
-.lang-option:hover { background:rgba(255,255,255,.08); color:#fff; }
-.lang-option.active { background:rgba(232,71,10,.2); color:#ff7043; }
-</style>
-<script>
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#lang-switcher')) {
-    var dd = document.getElementById('lang-dropdown');
-    if (dd) dd.classList.remove('open');
+router.post('/subscribe', (req, res) => {
+  const { email, name, country } = req.body;
+  if (!email) return res.json({ ok: false, msg: 'Email required' });
+  try {
+    db.prepare(`INSERT OR IGNORE INTO subscribers (email, name, country) VALUES (?, ?, ?)`).run(email, name || '', country || '');
+    res.json({ ok: true, msg: 'Subscribed! Welcome to Festmore.' });
+  } catch {
+    res.json({ ok: false, msg: 'Already subscribed!' });
   }
 });
-</script>`;
+
+// Set language via cookie
+router.get('/set-lang/:lang', (req, res) => {
+  if (req.session) req.session.lang = req.params.lang;
+  const back = req.headers.referer || '/';
+  res.redirect(back);
+});
+
+module.exports = router;
+
+const CATS = { festival:'🎪',concert:'🎵',market:'🛍️',christmas:'🎄',exhibition:'🖼️',business:'💼',kids:'🎠',comics:'🎮',flea:'🏺',online:'💻',city:'🏙️',messe:'🏛️' };
+const CAT_LABELS = { festival:'Festivals',concert:'Concerts',market:'Markets',christmas:'Xmas Markets',exhibition:'Exhibitions',business:'Business',kids:'Kids Events',comics:'Comics & Gaming',flea:'Flea Markets',online:'Online Events',city:'City Events',messe:'Trade Fairs' };
+const FLAGS = { BE:'🇧🇪',CN:'🇨🇳',DK:'🇩🇰',FR:'🇫🇷',DE:'🇩🇪',NL:'🇳🇱',PL:'🇵🇱',SE:'🇸🇪',AE:'🇦🇪',GB:'🇬🇧',US:'🇺🇸' };
+const COUNTRY_NAMES = { BE:'Belgium',CN:'China',DK:'Denmark',FR:'France',DE:'Germany',NL:'Netherlands',PL:'Poland',SE:'Sweden',AE:'UAE',GB:'United Kingdom',US:'USA' };
+const IMGS = {
+  festival:'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=75',
+  concert:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=75',
+  market:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=75',
+  christmas:'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=600&q=75',
+  exhibition:'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=75',
+  business:'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=75',
+  kids:'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=75',
+  comics:'https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?w=600&q=75',
+  flea:'https://images.unsplash.com/photo-1558402847-7f9d6d65b41c?w=600&q=75',
+  online:'https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=600&q=75',
+  city:'https://images.unsplash.com/photo-1467803738586-46b7eb7b16a1?w=600&q=75',
+  messe:'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&q=75',
+};
+
+function renderHome({ featured, recent, articles, countryCounts, catCounts, stats, user, tr, lang, langHtml }) {
+  const ev = stats.events;
+  const vn = stats.vendors;
+  const ar = stats.articles;
+  const sb = stats.subscribers;
+  const isRtl = tr.dir === 'rtl';
+
+  return `<!DOCTYPE html>
+<html lang="${lang}" dir="${tr.dir || 'ltr'}">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Festmore — Europe's Festival &amp; Event Platform for Organisers and Vendors</title>
+<meta name="description" content="List your festival, market or event on Festmore and reach thousands of visitors. Verified vendor profiles connect you with event organisers across 11 countries."/>
+<meta name="robots" content="index,follow"/>
+<link rel="canonical" href="https://festmore.com/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Festmore"/>
+<meta property="og:title" content="Festmore — Europe's Festival &amp; Event Platform"/>
+<meta property="og:description" content="List your festival or create a verified vendor profile. Reach thousands of visitors across 11 countries."/>
+<meta property="og:image" content="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:url" content="https://festmore.com/"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Festmore — Europe's Festival &amp; Event Platform"/>
+<meta name="twitter:description" content="List your festival or create a verified vendor profile."/>
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Festmore","url":"https://festmore.com","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://festmore.com/events?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Festmore","url":"https://festmore.com","description":"Europe's festival and vendor marketplace","contactPoint":{"@type":"ContactPoint","email":"hello@festmore.com","contactType":"customer service"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/css/main.css"/>
+${isRtl ? '<style>body{font-family:\'Bricolage Grotesque\',sans-serif;} .fm-hero-content,.fm-dual-cards,.fm-why-grid,.fm-how-steps{direction:rtl;} .fm-hero-stats{direction:rtl;}</style>' : ''}
+<style>
+body { font-family: 'Bricolage Grotesque', sans-serif; }
+.fm-hero { background:#0a0a0a; min-height:92vh; display:flex; align-items:center; position:relative; overflow:hidden; }
+.fm-hero-bg { position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1400&q=60');background-size:cover;background-position:center;opacity:.25; }
+.fm-hero-gradient { position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,10,10,.98) 0%,rgba(10,10,10,.7) 50%,rgba(232,71,10,.15) 100%); }
+.fm-hero-content { position:relative;z-index:2;max-width:1440px;margin:0 auto;padding:80px 40px;display:grid;grid-template-columns:1.1fr 0.9fr;gap:80px;align-items:center; }
+.fm-hero-badge { display:inline-flex;align-items:center;gap:8px;background:rgba(232,71,10,.15);border:1px solid rgba(232,71,10,.3);color:#ff7043;font-size:12px;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px;letter-spacing:.8px;text-transform:uppercase; }
+.fm-hero-badge-dot { width:6px;height:6px;border-radius:50%;background:#ff7043;animation:pulse 2s ease infinite; }
+.fm-hero h1 { font-family:'DM Serif Display',serif;font-size:clamp(40px,5.5vw,72px);color:#fff;line-height:1.05;margin-bottom:20px;font-weight:400; }
+.fm-hero h1 em { color:#e8470a;font-style:italic; }
+.fm-hero-sub { font-size:17px;color:rgba(255,255,255,.6);line-height:1.75;max-width:520px;margin-bottom:36px; }
+.fm-hero-ctas { display:flex;gap:12px;flex-wrap:wrap;margin-bottom:52px; }
+.fm-cta-primary { display:inline-flex;align-items:center;gap:8px;background:#e8470a;color:#fff;padding:15px 32px;border-radius:12px;font-size:15px;font-weight:700;transition:all .2s;box-shadow:0 8px 32px rgba(232,71,10,.4);text-decoration:none; }
+.fm-cta-primary:hover { background:#c23d09;transform:translateY(-2px); }
+.fm-cta-secondary { display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.2);padding:15px 32px;border-radius:12px;font-size:15px;font-weight:600;transition:all .2s;text-decoration:none; }
+.fm-cta-secondary:hover { background:rgba(255,255,255,.14); }
+.fm-hero-stats { display:flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden; }
+.fm-hstat { flex:1;padding:18px 24px;text-align:center;border-right:1px solid rgba(255,255,255,.08);min-width:90px; }
+.fm-hstat:last-child { border-right:none; }
+.fm-hstat-n { font-family:'DM Serif Display',serif;font-size:28px;color:#fff;display:block;line-height:1; }
+.fm-hstat-l { font-size:11px;color:rgba(255,255,255,.4);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-top:4px;display:block; }
+.fm-hero-right { position:relative;height:480px; }
+.fm-float-card { position:absolute;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:20px 22px;animation:float 4s ease-in-out infinite; }
+.fm-float-card:nth-child(2) { animation-delay:-1.5s; }
+.fm-float-card:nth-child(3) { animation-delay:-3s; }
+.fm-card-1 { top:0;right:20px;width:260px; }
+.fm-card-2 { top:160px;left:0;width:240px;animation-delay:-2s; }
+.fm-card-3 { bottom:40px;right:40px;width:220px; }
+.fm-card-icon { font-size:28px;margin-bottom:10px;display:block; }
+.fm-card-title { font-size:13px;font-weight:700;color:#fff;margin-bottom:4px; }
+.fm-card-sub { font-size:12px;color:rgba(255,255,255,.5);line-height:1.5; }
+.fm-card-price { display:inline-block;margin-top:12px;background:#e8470a;color:#fff;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700; }
+.fm-card-green { background:#4a7c59; }
+.fm-trust { background:#111;border-bottom:1px solid #1a1a1a;padding:16px 0; }
+.fm-trust-inner { max-width:1440px;margin:0 auto;padding:0 40px;display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap; }
+.fm-trust-item { display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(255,255,255,.5); }
+.fm-trust-dot { color:#e8470a;font-size:16px; }
+.fm-why { background:#fff;padding:96px 0; }
+.fm-why-inner { max-width:1440px;margin:0 auto;padding:0 40px; }
+.fm-section-tag { display:inline-flex;align-items:center;gap:6px;background:rgba(232,71,10,.07);border:1px solid rgba(232,71,10,.15);color:#e8470a;font-size:11px;font-weight:800;padding:4px 14px;border-radius:99px;margin-bottom:16px;letter-spacing:1px;text-transform:uppercase; }
+.fm-section-h { font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,48px);font-weight:400;margin-bottom:14px; }
+.fm-why-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px; }
+.fm-why-card { background:#faf8f3;border:1px solid #e8e2d9;border-radius:20px;padding:32px 28px;transition:all .25s; }
+.fm-why-card:hover { border-color:#e8470a;box-shadow:0 20px 60px rgba(26,22,18,.1);transform:translateY(-4px); }
+.fm-why-icon { font-size:36px;margin-bottom:16px;display:block; }
+.fm-why-title { font-size:18px;font-weight:700;color:#1a1612;margin-bottom:8px; }
+.fm-why-desc { font-size:14px;color:#7a6f68;line-height:1.7; }
+.fm-dual { background:#0a0a0a;padding:96px 0;position:relative;overflow:hidden; }
+.fm-dual::before { content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(232,71,10,.12) 0%,transparent 70%); }
+.fm-dual-inner { max-width:1200px;margin:0 auto;padding:0 40px; }
+.fm-dual-header { text-align:center;margin-bottom:56px; }
+.fm-dual-header h2 { font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,52px);font-weight:400;color:#fff;margin-bottom:14px; }
+.fm-dual-header p { font-size:16px;color:rgba(255,255,255,.5);max-width:520px;margin:0 auto;line-height:1.75; }
+.fm-dual-cards { display:grid;grid-template-columns:1fr 1fr;gap:20px; }
+.fm-plan-card { border-radius:24px;padding:44px 40px;position:relative;overflow:hidden; }
+.fm-plan-organiser { background:linear-gradient(145deg,#1a1612,#2d2520);border:1px solid rgba(232,71,10,.25); }
+.fm-plan-vendor { background:linear-gradient(145deg,#0d1f15,#1a3d28);border:1px solid rgba(74,124,89,.3); }
+.fm-plan-glow-org { position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(232,71,10,.2) 0%,transparent 70%); }
+.fm-plan-glow-ven { position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(74,124,89,.3) 0%,transparent 70%); }
+.fm-plan-tag { display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:4px 14px;border-radius:99px;margin-bottom:20px; }
+.fm-tag-org { background:rgba(232,71,10,.2);color:#ff7043; }
+.fm-tag-ven { background:rgba(74,124,89,.25);color:#7ec99a; }
+.fm-plan-emoji { font-size:48px;margin-bottom:16px;display:block; }
+.fm-plan-h { font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;color:#fff;margin-bottom:10px;line-height:1.15; }
+.fm-plan-sub { font-size:14.5px;color:rgba(255,255,255,.5);line-height:1.75;margin-bottom:28px; }
+.fm-plan-price { background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px 20px;margin-bottom:28px; }
+.fm-plan-price-n { font-family:'DM Serif Display',serif;font-size:42px;color:#fff;line-height:1; }
+.fm-plan-price-per { color:rgba(255,255,255,.4);font-size:14px;margin-left:4px; }
+.fm-plan-price-note { font-size:12px;color:rgba(255,255,255,.35);margin-top:4px; }
+.fm-plan-benefit { display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px;color:rgba(255,255,255,.72); }
+.fm-plan-benefit:last-of-type { border-bottom:none; }
+.fm-plan-cta-org { display:block;text-align:center;margin-top:28px;background:#e8470a;color:#fff;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:700;transition:all .2s;text-decoration:none;box-shadow:0 8px 24px rgba(232,71,10,.35); }
+.fm-plan-cta-org:hover { background:#c23d09;transform:translateY(-2px); }
+.fm-plan-cta-ven { display:block;text-align:center;margin-top:28px;background:#fff;color:#1a3d28;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:700;transition:all .2s;text-decoration:none; }
+.fm-plan-cta-ven:hover { background:#f0f0f0;transform:translateY(-2px); }
+.fm-proof { background:#faf8f3;padding:80px 0; }
+.fm-proof-inner { max-width:1100px;margin:0 auto;padding:0 40px;text-align:center; }
+.fm-proof-stats { display:flex;justify-content:center;background:#fff;border:1px solid #e8e2d9;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(26,22,18,.06);margin-bottom:56px; }
+.fm-proof-stat { flex:1;padding:32px 24px;text-align:center;border-right:1px solid #e8e2d9; }
+.fm-proof-stat:last-child { border-right:none; }
+.fm-proof-n { font-family:'DM Serif Display',serif;font-size:44px;color:#1a1612;line-height:1;display:block; }
+.fm-proof-l { font-size:12px;font-weight:700;color:#b5ada6;text-transform:uppercase;letter-spacing:.8px;margin-top:6px;display:block; }
+.fm-testimonials { display:grid;grid-template-columns:repeat(3,1fr);gap:20px;text-align:left; }
+.fm-testi { background:#fff;border:1px solid #e8e2d9;border-radius:16px;padding:24px 26px; }
+.fm-testi-stars { color:#e8470a;font-size:14px;margin-bottom:12px;letter-spacing:2px; }
+.fm-testi-text { font-size:14px;color:#3d3530;line-height:1.75;margin-bottom:16px;font-style:italic; }
+.fm-testi-author { display:flex;align-items:center;gap:10px; }
+.fm-testi-avatar { width:40px;height:40px;border-radius:50%;background:#e8470a;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700;flex-shrink:0; }
+.fm-testi-name { font-size:13px;font-weight:700;color:#1a1612; }
+.fm-testi-role { font-size:11px;color:#b5ada6; }
+.fm-how { background:#fff;padding:96px 0; }
+.fm-how-inner { max-width:1100px;margin:0 auto;padding:0 40px; }
+.fm-how-steps { display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:56px; }
+.fm-step { text-align:center;padding:28px 20px;border:1px solid #e8e2d9;border-radius:20px;background:#faf8f3; }
+.fm-step-num { width:48px;height:48px;border-radius:50%;background:#e8470a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin:0 auto 16px; }
+.fm-step-title { font-size:16px;font-weight:700;color:#1a1612;margin-bottom:8px; }
+.fm-step-desc { font-size:13px;color:#7a6f68;line-height:1.65; }
+.fm-urgency { background:linear-gradient(135deg,#e8470a,#c23d09);padding:28px 0;position:relative;overflow:hidden; }
+.fm-urgency-inner { max-width:1440px;margin:0 auto;padding:0 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;position:relative; }
+.fm-urgency-text h3 { font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;color:#fff;margin-bottom:4px; }
+.fm-urgency-text p { font-size:14px;color:rgba(255,255,255,.75); }
+.fm-urgency-btns { display:flex;gap:10px;flex-wrap:wrap; }
+.fm-urgency-btn-w { background:#fff;color:#e8470a;padding:12px 24px;border-radius:99px;font-size:13.5px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s; }
+.fm-urgency-btn-w:hover { transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2); }
+.fm-urgency-btn-t { background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.4);padding:12px 24px;border-radius:99px;font-size:13.5px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s; }
+.fm-urgency-btn-t:hover { background:rgba(255,255,255,.25); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);} }
+@keyframes float { 0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);} }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:.6;transform:scale(1.2);} }
+@media(max-width:900px){.fm-hero-content{grid-template-columns:1fr;gap:40px;padding:60px 24px;}.fm-hero-right{display:none;}.fm-why-grid{grid-template-columns:1fr;}.fm-dual-cards{grid-template-columns:1fr;}.fm-proof-stats{flex-direction:column;}.fm-testimonials{grid-template-columns:1fr;}.fm-how-steps{grid-template-columns:1fr 1fr;}.fm-dual-inner,.fm-why-inner,.fm-proof-inner,.fm-how-inner{padding:0 24px;}.fm-urgency-inner{padding:0 24px;}.fm-trust-inner{padding:0 24px;gap:20px;}}
+</style>
+</head>
+<body>
+
+${renderNav(user, tr, langHtml)}
+
+<!-- HERO -->
+<section class="fm-hero">
+  <div class="fm-hero-bg"></div>
+  <div class="fm-hero-gradient"></div>
+  <div class="fm-hero-content">
+    <div class="fm-hero-left">
+      <div class="fm-hero-badge"><span class="fm-hero-badge-dot"></span>${tr.hero_badge}</div>
+      <h1>${tr.hero_h1_1}<br/>${tr.hero_h1_2}<br/><em>${tr.hero_h1_3}</em></h1>
+      <p class="fm-hero-sub">${tr.hero_sub}</p>
+      <div class="fm-hero-ctas">
+        <a href="/events/submit" class="fm-cta-primary">${tr.hero_cta1}</a>
+        <a href="/vendors/register" class="fm-cta-secondary">${tr.hero_cta2}</a>
+      </div>
+      <div class="fm-hero-stats">
+        <div class="fm-hstat"><span class="fm-hstat-n">${ev}+</span><span class="fm-hstat-l">${tr.stat_events}</span></div>
+        <div class="fm-hstat"><span class="fm-hstat-n">${vn}+</span><span class="fm-hstat-l">${tr.stat_vendors}</span></div>
+        <div class="fm-hstat"><span class="fm-hstat-n">11</span><span class="fm-hstat-l">${tr.stat_countries}</span></div>
+        <div class="fm-hstat"><span class="fm-hstat-n">${sb}+</span><span class="fm-hstat-l">${tr.stat_subscribers}</span></div>
+      </div>
+    </div>
+    <div class="fm-hero-right">
+      <div class="fm-float-card fm-card-1"><span class="fm-card-icon">🎪</span><div class="fm-card-title">Berlin Christmas Market 2025</div><div class="fm-card-sub">4M visitors expected · 200 vendor spots</div><span class="fm-card-price">✅ Verified Listing</span></div>
+      <div class="fm-float-card fm-card-2"><span class="fm-card-icon">🏪</span><div class="fm-card-title">Bratwurst Brothers</div><div class="fm-card-sub">Munich · Food & Drinks · 84 events attended</div><span class="fm-card-price fm-card-green">✅ Verified Vendor</span></div>
+      <div class="fm-float-card fm-card-3"><span class="fm-card-icon">💰</span><div class="fm-card-title">New Application!</div><div class="fm-card-sub">Nordic Street Food applied to Roskilde Festival 2026</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="fm-trust">
+  <div class="fm-trust-inner">
+    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_1}</div>
+    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_2}</div>
+    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_3}</div>
+    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_4}</div>
+    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_5}</div>
+  </div>
+</div>
+
+<div class="ad-leaderboard"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
+
+<!-- WHY FESTMORE -->
+<section class="fm-why">
+  <div class="fm-why-inner">
+    <div style="text-align:center;">
+      <div class="fm-section-tag">${tr.why_tag}</div>
+      <h2 class="fm-section-h" style="text-align:center;">${tr.why_h}</h2>
+      <p style="font-size:16px;color:#7a6f68;max-width:560px;margin:0 auto;line-height:1.75;">${tr.why_sub}</p>
+    </div>
+    <div class="fm-why-grid">
+      ${[
+        ['🌍','Reach 11 Countries','Your listing is visible to visitors, organisers and vendors across Germany, Denmark, Netherlands, UK, France, Sweden, Belgium, Poland, UAE, USA and China.'],
+        ['🔍','SEO-Optimised Pages','Every listing gets its own SEO page that ranks on Google. Visitors searching for events in your city find you directly.'],
+        ['📧','Newsletter to '+sb+'+ Subscribers','Paid listings are featured in our weekly newsletter to '+sb+'+ subscribers actively looking for events and vendors.'],
+        ['✅','Verified Badge System','Paid vendors and events get a Verified badge that builds trust with organisers and visitors.'],
+        ['🏪','Vendor Marketplace','The only European platform where vendors can apply directly to events with available spots.'],
+        ['📊','Real Analytics','Track how many people view your listing and where they come from.'],
+      ].map(([icon,title,desc]) => `<div class="fm-why-card"><span class="fm-why-icon">${icon}</span><div class="fm-why-title">${title}</div><div class="fm-why-desc">${desc}</div></div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="fm-dual">
+  <div class="fm-dual-inner">
+    <div class="fm-dual-header">
+      <div class="fm-section-tag" style="background:rgba(232,71,10,.15);color:#ff7043;">${tr.pricing_tag}</div>
+      <h2>${tr.pricing_h.replace('\n','<br/>')}</h2>
+      <p>${tr.pricing_sub}</p>
+    </div>
+    <div class="fm-dual-cards">
+      <div class="fm-plan-card fm-plan-organiser">
+        <div class="fm-plan-glow-org"></div>
+        <span class="fm-plan-tag fm-tag-org">${tr.for_organisers}</span>
+        <span class="fm-plan-emoji">🎪</span>
+        <h3 class="fm-plan-h">Get Your Event in Front of Thousands of Visitors</h3>
+        <p class="fm-plan-sub">Choose your plan — start free and upgrade when you want more visibility.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:28px;">
+          ${[['Free','€0','Basic'],['Standard','€79/yr','Full'],['Premium','€149/yr','Top']].map(([n,p,d])=>`<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 12px;text-align:center;"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">${n}</div><div style="font-family:'DM Serif Display',serif;font-size:20px;color:#fff;">${p}</div><div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;">${d}</div></div>`).join('')}
+        </div>
+        ${['Live within 24 hours','Visible in 11 countries','SEO page with your own URL','Weekly newsletter inclusion','Connect with verified vendors','Track views and analytics'].map(b=>`<div class="fm-plan-benefit">✅ ${b}</div>`).join('')}
+        <a href="/events/pricing" class="fm-plan-cta-org">${tr.list_event_cta}</a>
+      </div>
+      <div class="fm-plan-card fm-plan-vendor">
+        <div class="fm-plan-glow-ven"></div>
+        <span class="fm-plan-tag fm-tag-ven">${tr.for_vendors}</span>
+        <span class="fm-plan-emoji">🏪</span>
+        <h3 class="fm-plan-h">Get Booked at Europe's Best Festivals and Markets</h3>
+        <p class="fm-plan-sub">One verified profile. Unlimited opportunities. Less than €5/month.</p>
+        <div class="fm-plan-price"><div><span class="fm-plan-price-n">€49</span><span class="fm-plan-price-per">/year</span></div><div class="fm-plan-price-note">Less than €5/month · One booking pays for years</div></div>
+        ${['Verified badge on your profile','Apply directly to festivals and markets','Discovered by organisers in 11 countries','Featured in weekly newsletter','See who views your profile','Stand out from unverified competitors'].map(b=>`<div class="fm-plan-benefit">✅ ${b}</div>`).join('')}
+        <a href="/vendors/register" class="fm-plan-cta-ven">${tr.vendor_cta}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="fm-proof">
+  <div class="fm-proof-inner">
+    <div class="fm-section-tag">By the Numbers</div>
+    <h2 class="fm-section-h">A Growing Platform You Can Trust</h2>
+    <div class="fm-proof-stats" style="margin-top:36px;">
+      <div class="fm-proof-stat"><span class="fm-proof-n">${ev}+</span><span class="fm-proof-l">${tr.stat_events}</span></div>
+      <div class="fm-proof-stat"><span class="fm-proof-n">${vn}+</span><span class="fm-proof-l">${tr.stat_vendors}</span></div>
+      <div class="fm-proof-stat"><span class="fm-proof-n">11</span><span class="fm-proof-l">${tr.stat_countries}</span></div>
+      <div class="fm-proof-stat"><span class="fm-proof-n">${sb}+</span><span class="fm-proof-l">${tr.stat_subscribers}</span></div>
+      <div class="fm-proof-stat"><span class="fm-proof-n">${ar}+</span><span class="fm-proof-l">Articles</span></div>
+    </div>
+    <div class="fm-testimonials" style="margin-top:48px;">
+      ${[
+        ['M','Marcus Weber','Event Organiser, Berlin','"Festmore gave our Christmas market incredible online visibility. We received vendor applications within the first week of listing."'],
+        ['A','Anna Lindqvist','Street Food Vendor, Stockholm','"As a vendor, finding the right events used to take hours. Festmore makes it simple — I found 3 new bookings in my first month."'],
+        ['P','Pieter van den Berg','Market Organiser, Amsterdam','"The vendor marketplace is genuinely useful. We found exactly the food vendors we needed for our spring market through Festmore."'],
+      ].map(([i,n,r,q])=>`<div class="fm-testi"><div class="fm-testi-stars">★★★★★</div><div class="fm-testi-text">${q}</div><div class="fm-testi-author"><div class="fm-testi-avatar">${i}</div><div><div class="fm-testi-name">${n}</div><div class="fm-testi-role">${r}</div></div></div></div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="fm-how">
+  <div class="fm-how-inner">
+    <div style="text-align:center;">
+      <div class="fm-section-tag">${tr.how_tag}</div>
+      <h2 class="fm-section-h" style="text-align:center;">${tr.how_h}</h2>
+    </div>
+    <div class="fm-how-steps">
+      <div class="fm-step"><div class="fm-step-num">1</div><div style="font-size:28px;margin-bottom:12px;">📝</div><div class="fm-step-title">${tr.step1_title}</div><div class="fm-step-desc">${tr.step1_desc}</div></div>
+      <div class="fm-step"><div class="fm-step-num">2</div><div style="font-size:28px;margin-bottom:12px;">💳</div><div class="fm-step-title">${tr.step2_title}</div><div class="fm-step-desc">${tr.step2_desc}</div></div>
+      <div class="fm-step"><div class="fm-step-num">3</div><div style="font-size:28px;margin-bottom:12px;">✅</div><div class="fm-step-title">${tr.step3_title}</div><div class="fm-step-desc">${tr.step3_desc}</div></div>
+      <div class="fm-step"><div class="fm-step-num">4</div><div style="font-size:28px;margin-bottom:12px;">📈</div><div class="fm-step-title">${tr.step4_title}</div><div class="fm-step-desc">${tr.step4_desc}</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="ad-leaderboard"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
+
+<!-- BROWSE CATEGORIES -->
+<section class="section section-warm">
+  <div class="container">
+    <div class="section-header">
+      <div><h2 class="section-title">${tr.browse_events}</h2><p class="section-sub">${tr.browse_sub}</p></div>
+      <a href="/events" class="section-link">${tr.view_all} ${ev}+ ${tr.events_label} →</a>
+    </div>
+    <div class="cats-grid">
+      ${Object.entries(CATS).map(([k,icon]) => {
+        const count = (catCounts.find(c => c.category===k)||{count:0}).count;
+        return '<a href="/events?category='+k+'" class="cat-card"><span class="cat-icon">'+icon+'</span><span class="cat-name">'+CAT_LABELS[k]+'</span><span class="cat-count">'+count+' '+tr.events_label+'</span></a>';
+      }).join('')}
+    </div>
+  </div>
+</section>
+
+${featured.length ? `
+<section class="section section-dark">
+  <div class="container">
+    <div class="section-header section-header-light">
+      <div><h2 class="section-title light">${tr.featured_events}</h2><p class="section-sub light">${tr.featured_sub}</p></div>
+      <a href="/events" class="section-link light">${tr.view_all} →</a>
+    </div>
+    <div class="events-grid">${featured.map(e=>eventCardHTML(e)).join('')}</div>
+  </div>
+</section>` : ''}
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div><h2 class="section-title">${tr.browse_country}</h2></div>
+    </div>
+    <div class="countries-grid">
+      ${countryCounts.map(c=>'<a href="/events?country='+c.country+'" class="country-card"><span class="country-flag">'+(FLAGS[c.country]||'')+'</span><span class="country-name">'+(COUNTRY_NAMES[c.country]||c.country)+'</span><span class="country-count">'+c.count+' '+tr.events_label+'</span></a>').join('')}
+    </div>
+  </div>
+</section>
+
+${articles.length ? `
+<section class="section section-warm">
+  <div class="container">
+    <div class="section-header">
+      <div><h2 class="section-title">${tr.festival_guides}</h2><p class="section-sub">${tr.guides_sub}</p></div>
+      <a href="/articles" class="section-link">${tr.view_all} ${ar}+ ${tr.all_articles} →</a>
+    </div>
+    <div class="articles-grid">
+      ${articles.map(a=>'<a href="/articles/'+a.slug+'" class="article-card"><div class="article-img"><img src="'+(a.image_url||IMGS.festival)+'" alt="'+a.title+'" loading="lazy"/></div><div class="article-body"><div class="article-cat">'+(CATS[a.category]||'')+' '+(a.category||'Guide')+'</div><h3>'+a.title+'</h3><p>'+(a.excerpt||'').substring(0,100)+'…</p></div></a>').join('')}
+    </div>
+  </div>
+</section>` : ''}
+
+<!-- NEWSLETTER -->
+<section class="section">
+  <div class="container">
+    <div class="newsletter-box">
+      <div class="newsletter-left">
+        <h2>${tr.newsletter_h}</h2>
+        <p>${tr.newsletter_sub} ${sb}+ subscribers.</p>
+      </div>
+      <form class="newsletter-form" id="newsletter-form">
+        <input type="email" name="email" placeholder="${tr.newsletter_placeholder}" required class="nl-input"/>
+        <button type="submit" class="btn btn-primary">${tr.newsletter_btn}</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- URGENCY -->
+<div class="fm-urgency">
+  <div class="fm-urgency-inner">
+    <div class="fm-urgency-text">
+      <h3>${tr.urgency_h.replace('{events}',ev).replace('{vendors}',vn)}</h3>
+      <p>${tr.urgency_sub}</p>
+    </div>
+    <div class="fm-urgency-btns">
+      <a href="/events/submit" class="fm-urgency-btn-w">${tr.urgency_btn1}</a>
+      <a href="/vendors/register" class="fm-urgency-btn-t">${tr.urgency_btn2}</a>
+    </div>
+  </div>
+</div>
+
+${renderFooter(stats, tr)}
+
+<script>
+document.getElementById('newsletter-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var data={};
+  new FormData(e.target).forEach(function(v,k){data[k]=v;});
+  fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(function(r){return r.json();})
+    .then(function(json){
+      if(json.ok){document.getElementById('newsletter-form').innerHTML='<p style="color:#4a7c59;font-weight:700;font-size:16px;padding:20px 0;">${tr.newsletter_success}</p>';}
+      else{alert(json.msg);}
+    });
+});
+</script>
+</body>
+</html>`;
 }
 
-module.exports = { t, getLang, langSwitcher, translations };
+function eventCardHTML(e) {
+  const img = e.image_url || IMGS[e.category] || IMGS.festival;
+  const flag = FLAGS[e.country] || '';
+  const icon = CATS[e.category] || '';
+  const isFree = e.price_display === 'Free';
+  const isFL = e.payment_status === 'free';
+  return '<article class="event-card"><a href="/events/'+e.slug+'"><div class="event-img"><img src="'+img+'" alt="'+e.title+'" loading="lazy"/><div class="event-img-overlay"></div><div class="event-badges">'+(e.featured?'<span class="badge badge-feat">★ Featured</span>':'')+'<span class="badge badge-cat">'+icon+' '+e.category+'</span>'+(isFree?'<span class="badge badge-free">Free</span>':'')+(isFL?'<span class="badge" style="background:rgba(0,0,0,.4);color:#fff;">🔓 Unverified</span>':'<span class="badge" style="background:#4a7c59;color:#fff;">✅ Verified</span>')+'</div></div><div class="event-body"><div class="event-date">'+(e.date_display||e.start_date)+'</div><h3>'+e.title+'</h3><div class="event-loc">'+flag+' '+e.city+'</div><div class="event-footer"><span class="event-stat">'+(e.attendees||0).toLocaleString()+' visitors</span><span class="event-price '+(isFree?'price-free':'price-paid')+'">'+e.price_display+'</span></div></div></a></article>';
+}
+
+function renderNav(user, tr, langHtml) {
+  const userLinks = user
+    ? '<a href="/dashboard" class="btn btn-outline btn-sm">'+tr.nav_dashboard+'</a><a href="/auth/logout" class="btn btn-ghost btn-sm">'+tr.nav_logout+'</a>'
+    : '<a href="/auth/login" class="btn btn-outline btn-sm">'+tr.nav_login+'</a><a href="/events/submit" class="btn btn-primary btn-sm">'+tr.nav_list_event+'</a>';
+  return '<nav class="main-nav"><div class="nav-inner"><a href="/" class="logo"><span class="logo-fest">Fest</span><span class="logo-more">more</span><span class="logo-dot"></span></a><form class="nav-search" action="/events" method="GET"><span style="color:var(--ink4);font-size:15px;">🔍</span><input type="text" name="q" placeholder="'+tr.nav_search+'"/></form><div class="nav-right" style="display:flex;align-items:center;gap:8px;">'+langHtml+userLinks+'</div><button class="nav-burger" onclick="document.querySelector(\'.nav-mobile\').classList.toggle(\'open\')">☰</button></div><div class="nav-cats-bar"><a href="/events" class="nav-cat">🌍 '+tr.nav_all+'</a><a href="/events?category=festival" class="nav-cat">🎪 '+tr.nav_festivals+'</a><a href="/events?category=market" class="nav-cat">🛍️ '+tr.nav_markets+'</a><a href="/events?category=christmas" class="nav-cat">🎄 '+tr.nav_xmas+'</a><a href="/events?category=concert" class="nav-cat">🎵 '+tr.nav_concerts+'</a><a href="/events?category=city" class="nav-cat">🏙️ '+tr.nav_city+'</a><a href="/events?category=flea" class="nav-cat">🏺 '+tr.nav_flea+'</a><a href="/articles" class="nav-cat">📰 '+tr.nav_articles+'</a><a href="/vendors" class="nav-cat">🏪 '+tr.nav_vendors+'</a><a href="/events/pricing" class="nav-cat" style="color:var(--flame);font-weight:700;">'+tr.nav_pricing+'</a></div><div class="nav-mobile"><a href="/events">'+tr.nav_all+'</a><a href="/articles">'+tr.nav_articles+'</a><a href="/vendors">'+tr.nav_vendors+'</a><a href="/events/submit">'+tr.nav_list_event+'</a><a href="/vendors/register">'+tr.nav_become_vendor+'</a><a href="/events/pricing">'+tr.nav_pricing+'</a>'+(user?'<a href="/dashboard">'+tr.nav_dashboard+'</a><a href="/auth/logout">'+tr.nav_logout+'</a>':'<a href="/auth/login">'+tr.nav_login+'</a>')+'</div></nav>';
+}
+
+function renderFooter(stats, tr) {
+  return '<footer><div class="footer-top"><div class="footer-brand"><div class="logo" style="margin-bottom:14px;"><span class="logo-fest" style="color:#fff;">Fest</span><span class="logo-more">more</span></div><p>'+tr.footer_desc+'</p></div><div class="footer-col"><h4>'+tr.footer_for_org+'</h4><a href="/events/submit">'+tr.footer_list+'</a><a href="/events/pricing">'+tr.footer_pricing+'</a><a href="/vendors">'+tr.footer_find_vendors+'</a><a href="/events">'+tr.footer_browse+'</a></div><div class="footer-col"><h4>'+tr.footer_for_ven+'</h4><a href="/vendors/register">'+tr.footer_create+'</a><a href="/events">'+tr.footer_browse+'</a><a href="/contact">'+tr.footer_contact+'</a></div><div class="footer-col"><h4>'+tr.footer_about+'</h4><a href="/about">'+tr.footer_about_us+'</a><a href="/articles">'+tr.footer_articles+'</a><a href="/contact">'+tr.footer_contact+'</a><a href="/privacy">'+tr.footer_privacy+'</a></div></div><div class="footer-bottom"><span>© '+new Date().getFullYear()+' Festmore.com — '+tr.footer_rights+'</span><span>'+stats.events+'+ '+tr.stat_events+' · '+stats.vendors+'+ '+tr.stat_vendors+'</span></div></footer>';
+}
+
+module.exports.renderNav = renderNav;
+module.exports.renderFooter = renderFooter;
+module.exports.eventCardHTML = eventCardHTML;
+module.exports.IMGS = IMGS;
+module.exports.FLAGS = FLAGS;
+module.exports.CATS = CATS;
+module.exports.COUNTRY_NAMES = COUNTRY_NAMES;
