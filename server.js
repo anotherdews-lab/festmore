@@ -53,6 +53,30 @@ app.use('/admin',     require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
 app.use('/', require('./routes/pages'));
 
+app.get('/test-email', async (req, res) => {
+  const nodemailer = require('nodemailer');
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+  });
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      subject: 'Festmore Email Test',
+      text: 'Email working! USER: ' + process.env.EMAIL_USER
+    });
+    res.send('✅ Email sent to ' + process.env.EMAIL_USER + ' — check inbox and spam!');
+  } catch(err) {
+    res.send('❌ Error: ' + err.message);
+  }
+});
+
+// ─────────────────────────────────────
+// 404 PAGE
+// ─────────────────────────────────────
+
+
 // ─────────────────────────────────────
 // 404 PAGE
 // ─────────────────────────────────────
@@ -145,24 +169,6 @@ try {
   }
 } catch(err) { console.log('SEO articles:', err.message); }
 
-app.get('/test-email', async (req, res) => {
-  const nodemailer = require('nodemailer');
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-  });
-  try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: 'Festmore Email Test',
-      text: 'Email working! USER: ' + process.env.EMAIL_USER
-    });
-    res.send('✅ Email sent to ' + process.env.EMAIL_USER + ' — check inbox and spam!');
-  } catch(err) {
-    res.send('❌ Error: ' + err.message);
-  }
-});
 
 
 app.listen(PORT, '0.0.0.0', () => {
