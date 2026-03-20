@@ -460,8 +460,19 @@ ${renderNav(user)}
         <div class="form-group"><label class="form-label">Website</label><input class="form-input" type="url" name="website" placeholder="https://your-business.com"/></div>
         <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" name="phone" placeholder="+45 12 34 56 78"/></div>
         <div class="form-group"><label class="form-label">Email *</label><input class="form-input" type="email" name="email" required placeholder="your@email.com"/></div>
+       
         <div class="form-group full"><label class="form-label">Business Description</label><textarea class="form-input" name="description" rows="4" placeholder="Describe your business, what you offer and what makes you great for events…"></textarea></div>
       </div>
+
+      <!-- PHOTO UPLOAD NOTE -->
+      <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:28px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px;">📸 Photos (optional — up to 6)</label>
+        <p style="font-size:13px;color:var(--ink4);margin-bottom:16px;line-height:1.5;">Upload photos of your stall, trailer, products and setup. Vendors with photos get booked significantly more often.</p>
+        <div style="background:var(--ivory);border:1.5px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;color:var(--ink3);font-size:13px;">
+          📷 Photo upload available in your dashboard after your profile is created and payment confirmed
+        </div>
+      </div>
+
       <div class="form-submit-area">
         <div class="price-summary"><strong>Verified Vendor Profile — €49/year</strong><span>Secure payment via Stripe · Cancel anytime</span></div>
         <button type="submit" class="btn btn-primary btn-xl" style="max-width:280px;background:#4a7c59;box-shadow:0 8px 24px rgba(74,124,89,.35);">Continue to Payment →</button>
