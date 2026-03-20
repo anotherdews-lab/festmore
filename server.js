@@ -160,6 +160,12 @@ try {
   }
 } catch(err) { console.log('SEO articles:', err.message); }
 
+try {
+  if (require('fs').existsSync('./add-new-country-content.js')) {
+    require('./add-new-country-content.js');
+  }
+} catch(err) { console.log('New content:', err.message); }
+
 
 
 app.listen(PORT, '0.0.0.0', () => {
