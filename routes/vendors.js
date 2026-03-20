@@ -4,9 +4,13 @@ const router  = express.Router();
 const db      = require('../db');
 const stripe  = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_live_placeholder');
 
-const FLAGS = { BE:'🇧🇪',CN:'🇨🇳',DK:'🇩🇰',FR:'🇫🇷',DE:'🇩🇪',NL:'🇳🇱',PL:'🇵🇱',SE:'🇸🇪',AE:'🇦🇪',GB:'🇬🇧',US:'🇺🇸' };
-const COUNTRY_NAMES = { BE:'Belgium',CN:'China',DK:'Denmark',FR:'France',DE:'Germany',NL:'Netherlands',PL:'Poland',SE:'Sweden',AE:'UAE',GB:'United Kingdom',US:'USA' };
-const CATS = ['Food & Drinks','Artisan Crafts','Technology','Event Decor','Entertainment','Photography','Kids Activities','Fashion & Apparel','Art & Prints','Live Music','Retail','Services'];
+const FLAGS = { BE:'🇧🇪',CN:'🇨🇳',DK:'🇩🇰',FR:'🇫🇷',DE:'🇩🇪',NL:'🇳🇱',PL:'🇵🇱',SE:'🇸🇪',AE:'🇦🇪',GB:'🇬🇧',US:'🇺🇸',NO:'🇳🇴', FI:'🇫🇮', AT:'🇦🇹', CH:'🇨🇭', IT:'🇮🇹',
+ES:'🇪🇸', PT:'🇵🇹', IE:'🇮🇪', CZ:'🇨🇿', HU:'🇭🇺',
+GR:'🇬🇷', HR:'🇭🇷', IN:'🇮🇳', TH:'🇹🇭', JP:'🇯🇵', };
+const COUNTRY_NAMES = { BE:'Belgium',CN:'China',DK:'Denmark',FR:'France',DE:'Germany',NL:'Netherlands',PL:'Poland',SE:'Sweden',AE:'UAE',GB:'United Kingdom',US:'USA',NO:'Norway', FI:'Finland', AT:'Austria', CH:'Switzerland', IT:'Italy',
+ES:'Spain', PT:'Portugal', IE:'Ireland', CZ:'Czech Republic', HU:'Hungary',
+GR:'Greece', HR:'Croatia', IN:'India', TH:'Thailand', JP:'Japan', };
+const CATS = ['Food & Drinks','Artisan Crafts','Technology','Event Decor','Entertainment','Photography','Kids Activities','Fashion & Apparel','Art & Prints','Live Music','Retail','Services' ];
 
 const CAT_IMGS = {
   'Food & Drinks':     'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=75',
