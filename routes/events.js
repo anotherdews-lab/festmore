@@ -489,8 +489,18 @@ ${renderNavSimple(user)}
         <div class="form-group"><label class="form-label">Event Website</label><input class="form-input" type="url" name="website" placeholder="https://your-event.com"/></div>
         <div class="form-group full"><label class="form-label">Event Description *</label><textarea class="form-input" name="description" rows="5" placeholder="Describe your event in detail…"></textarea></div>
         <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" type="text" name="name" placeholder="Your full name"/></div>
-        <div class="form-group"><label class="form-label">Your Email</label><input class="form-input" type="email" name="email" placeholder="your@email.com"/></div>
+       <div class="form-group"><label class="form-label">Your Email</label><input class="form-input" type="email" name="email" placeholder="your@email.com"/></div>
       </div>
+
+      <!-- PHOTO UPLOAD -->
+      <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:28px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px;">📸 Photos (optional — up to 6)</label>
+        <p style="font-size:13px;color:var(--ink4);margin-bottom:16px;line-height:1.5;">Upload photos of your event, venue, flyer or past editions. Available after your listing is created and payment confirmed.</p>
+        <div style="background:var(--ivory);border:1.5px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;color:var(--ink3);font-size:13px;">
+          📷 Photo upload available in your dashboard after listing is created
+        </div>
+      </div>
+
       <div class="form-submit-area">
         <div class="price-summary">
           <strong id="submit-price">${plan==='free'?'Free Listing':plan==='premium'?'Premium: €149/year':'Standard: €79/year'}</strong>

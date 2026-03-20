@@ -166,6 +166,14 @@ try {
   }
 } catch(err) { console.log('New content:', err.message); }
 
+app.use('/photos', require('./routes/photos'));
+
+try {
+  if (require('fs').existsSync('./add-photos-columns.js')) {
+    require('./add-photos-columns.js');
+  }
+} catch(err) { console.log('Photos columns:', err.message); }
+
 
 
 app.listen(PORT, '0.0.0.0', () => {
