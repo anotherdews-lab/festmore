@@ -54,9 +54,9 @@ app.use('/applications', require('./routes/applications'));
 app.use('/', require('./routes/pages'));
 
 app.get('/test-email', async (req, res) => {
-  const { Resend } = require('resend');
-  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
+    const { Resend } = require('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: 'Festmore <onboarding@resend.dev>',
       to: process.env.EMAIL_USER,
@@ -68,18 +68,6 @@ app.get('/test-email', async (req, res) => {
     res.send('❌ Error: ' + err.message);
   }
 });
-  try {
-    await transporter.verify();
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: 'Festmore Email Test',
-      text: 'It works! Email: ' + process.env.EMAIL_USER
-    });
-    res.send('✅ Email sent! Check inbox and spam.');
-  } catch(err) {
-    res.send('❌ Error: ' + err.message);
-  }
 });
 // ─────────────────────────────────────
 // 404 PAGE
