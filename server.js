@@ -54,16 +54,19 @@ app.use('/applications', require('./routes/applications'));
 app.use('/', require('./routes/pages'));
 
 app.get('/test-email', async (req, res) => {
-  const nodemailer = require('nodemailer');
- const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: { rejectUnauthorized: false }
+  const { Resend } = require('resend');
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  try {
+    await resend.emails.send({
+      from: 'Festmore <onboarding@resend.dev>',
+      to: process.env.EMAIL_USER,
+      subject: 'Festmore Email Test',
+      text: 'Email is working! Sent via Resend.'
+    });
+    res.send('✅ Email sent! Check inbox and spam.');
+  } catch(err) {
+    res.send('❌ Error: ' + err.message);
+  }
 });
   try {
     await transporter.verify();
