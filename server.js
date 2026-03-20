@@ -55,16 +55,16 @@ app.use('/', require('./routes/pages'));
 
 app.get('/test-email', async (req, res) => {
   const nodemailer = require('nodemailer');
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    },
-    tls: { rejectUnauthorized: false }
-  });
+ const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: { rejectUnauthorized: false }
+});
   try {
     await transporter.verify();
     await transporter.sendMail({
