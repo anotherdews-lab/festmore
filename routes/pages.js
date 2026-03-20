@@ -83,10 +83,28 @@ router.post('/contact', async (req, res) => {
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-    });
+  const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+await resend.emails.send({
+  from: 'Festmore <onboarding@resend.dev>',
+  to: process.env.EMAIL_USER,
+  replyTo: email,
+  subject: `[Festmore] ${type || 'Enquiry'} from ${name}`,
+  html: `<h2>New message from ${name}</h2>
+  <p><strong>Email:</strong> ${email}</p>
+  <p><strong>Phone:</strong> ${phone || '—'}</p>
+  <p><strong>Type:</strong> ${type || 'General'}</p>
+  <p><strong>Subject:</strong> ${subject || '—'}</p>
+  <p><strong>Message:</strong><br/>${message.replace(/\n/g,'<br/>')}</p>`
+});
+
+await resend.emails.send({
+  from: 'Festmore <onboarding@resend.dev>',
+  to: email,
+  subject: 'We received your message — Festmore',
+  html: `<h2>Hi ${name}!</h2><p>Thanks for contacting Festmore. We reply within 24 hours.</p><p>Your message: ${message.substring(0,200)}</p>`
+});
 
     // Email TO you with full details
     await transporter.sendMail({
