@@ -198,6 +198,12 @@ try {
   }
 } catch(err) { console.log('Photos:', err.message); }
 
+try {
+  if (require('fs').existsSync('./update-event-photos.js')) {
+    require('./update-event-photos.js');
+  }
+} catch(err) { console.log('Photo update:', err.message); }
+
 
 
 app.listen(PORT, '0.0.0.0', () => {
