@@ -6,7 +6,7 @@ const { t, getLang, langSwitcher } = require('./utils/i18n');
 
 router.get('/', (req, res) => {
   const featured      = db.prepare(`SELECT * FROM events WHERE status='active' AND featured=1 ORDER BY views DESC LIMIT 6`).all();
-  const recent        = db.prepare(`SELECT * FROM events WHERE status='active' ORDER BY created_at DESC LIMIT 6`).all();
+const recent = db.prepare(`SELECT * FROM events WHERE status='active' ORDER BY featured DESC, views DESC, id DESC LIMIT 6`).all();
   const articles      = db.prepare(`SELECT id,title,slug,excerpt,image_url,category,created_at FROM articles WHERE status='published' ORDER BY created_at DESC LIMIT 3`).all();
   const countryCounts = db.prepare(`SELECT country, COUNT(*) as count FROM events WHERE status='active' GROUP BY country ORDER BY count DESC`).all();
   const catCounts     = db.prepare(`SELECT category, COUNT(*) as count FROM events WHERE status='active' GROUP BY category ORDER BY count DESC`).all();
@@ -374,7 +374,7 @@ ${renderNav(user, tr, langHtml)}
       <a href="/events" class="section-link">${tr.view_all} ${ev}+ ${tr.events_label} →</a>
     </div>
     <div class="events-grid">
-      ${recent.map(e=>eventCardHTML(e)).join('')}
+     ${(recent.length ? recent : featured).map(e=>eventCardHTML(e)).join('')}
     </div>
     <div style="text-align:center;margin-top:32px;">
       <a href="/events" class="btn btn-primary btn-lg" style="padding:16px 48px;font-size:16px;">
