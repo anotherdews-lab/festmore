@@ -76,6 +76,15 @@ try {
     require('./add-high-traffic-events.js');
   }
 } catch(err) { console.log('High traffic events:', err.message); }
+
+// Redirect ghost WordPress URLs to real pages
+app.get('/', (req, res, next) => {
+  if (req.query.mep_events) {
+    const slug = req.query.mep_events;
+    return res.redirect(301, '/events/' + slug);
+  }
+  next();
+});
 // ─────────────────────────────────────
 // 404 PAGE
 // ─────────────────────────────────────
