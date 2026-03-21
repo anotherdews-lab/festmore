@@ -204,6 +204,12 @@ try {
   }
 } catch(err) { console.log('Photo update:', err.message); }
 
+try {
+  if (require('fs').existsSync('./update-dates-2026.js')) {
+    require('./update-dates-2026.js');
+  }
+} catch(err) { console.log('Date update:', err.message); }
+
 
 
 app.listen(PORT, '0.0.0.0', () => {
