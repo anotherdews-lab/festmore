@@ -362,6 +362,50 @@ ${renderNav(user, tr, langHtml)}
 
 <div class="ad-leaderboard"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>
 
+<!-- HAPPENING SOON — REAL EVENTS -->
+<section class="section" style="padding-top:56px;padding-bottom:40px;">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(232,71,10,.08);border:1px solid rgba(232,71,10,.15);color:var(--flame);font-size:11px;font-weight:800;padding:3px 12px;border-radius:99px;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;">🔥 Happening Soon</div>
+        <h2 class="section-title">Events You Cannot Miss</h2>
+        <p class="section-sub">Hand-picked upcoming events across Europe and beyond</p>
+      </div>
+      <a href="/events" class="section-link">${tr.view_all} ${ev}+ ${tr.events_label} →</a>
+    </div>
+    <div class="events-grid">
+      ${recent.map(e=>eventCardHTML(e)).join('')}
+    </div>
+    <div style="text-align:center;margin-top:32px;">
+      <a href="/events" class="btn btn-primary btn-lg" style="padding:16px 48px;font-size:16px;">
+        Explore All ${ev}+ Events →
+      </a>
+      <div style="margin-top:12px;font-size:13px;color:var(--ink4);">
+        Festivals · Markets · Concerts · Christmas Markets · and more
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOP SEARCHES THIS WEEK -->
+<section style="background:var(--ink);padding:32px 0;">
+  <div class="container">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;">
+      <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;">🔍 Trending:</span>
+      ${[
+        ["Pol'and'Rock 2026", "/festival/polandrock-2026"],
+        ["Glastonbury 2026", "/events?q=glastonbury"],
+        ["Tomorrowland 2026", "/events?q=tomorrowland"],
+        ["Roskilde Festival", "/events?q=roskilde"],
+        ["Christmas Markets", "/events?category=christmas"],
+        ["Free Festivals", "/events?price=free"],
+        ["Rock am Ring 2026", "/events?q=rock+am+ring"],
+      ].map(([label, href]) => `
+      <a href="${href}" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);padding:7px 16px;border-radius:99px;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s;border:1px solid rgba(255,255,255,.1);" onmouseover="this.style.background='rgba(255,255,255,.15)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.color='rgba(255,255,255,.75)'">${label}</a>`).join('')}
+    </div>
+  </div>
+</section>
+
 <!-- BROWSE CATEGORIES -->
 <section class="section section-warm">
   <div class="container">
