@@ -68,6 +68,14 @@ app.get('/test-email', async (req, res) => {
     res.send('❌ Error: ' + err.message);
   }
 });
+
+app.use('/festival', require('./routes/landing'));
+
+try {
+  if (require('fs').existsSync('./add-high-traffic-events.js')) {
+    require('./add-high-traffic-events.js');
+  }
+} catch(err) { console.log('High traffic events:', err.message); }
 // ─────────────────────────────────────
 // 404 PAGE
 // ─────────────────────────────────────
