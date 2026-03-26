@@ -436,7 +436,7 @@ ${renderNav(user)}
   ${error?`<div class="alert alert-error">⚠️ ${error}</div>`:''}
   ${success?`<div class="alert alert-success">✅ ${success}</div>`:''}
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:36px;">
-    ${[['✅','Verified Badge','Stand out with a profile that organisers trust'],['🌍','11 Countries','Visible to organisers across Europe'],['🎪','Apply to Events','Apply directly to festivals with vendor spots']].map(([i,t,d])=>`<div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center;"><div style="font-size:24px;margin-bottom:8px;">${i}</div><div style="font-size:14px;font-weight:700;margin-bottom:4px;">${t}</div><div style="font-size:12px;color:var(--ink3);line-height:1.5;">${d}</div></div>`).join('')}
+    ${[['✅','Verified Badge','Stand out with a profile that organisers trust'],['🌍','Worldwide','Visible to organisers across Europe, Asia and beyond'],['🎪','Apply to Events','Apply directly to festivals with vendor spots']].map(([i,t,d])=>`<div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center;"><div style="font-size:24px;margin-bottom:8px;">${i}</div><div style="font-size:14px;font-weight:700;margin-bottom:4px;">${t}</div><div style="font-size:12px;color:var(--ink3);line-height:1.5;">${d}</div></div>`).join('')}
   </div>
   <div class="form-card">
     <div class="form-card-header"><h2>Business Details</h2><div class="price-badge">€49/year</div></div>
