@@ -31,8 +31,9 @@ GR:'Greece', HR:'Croatia', IN:'India', TH:'Thailand', JP:'Japan', };
 // EVENTS LISTING PAGE
 // ─────────────────────────────────────
 router.get('/', (req, res) => {
-  const { q='', country='ALL', category='ALL', price='ALL', sort='featured', page=1 } = req.query;
+  const { q='', country='ALL', category='ALL', price='ALL', sort='featured', page=1, when='', city='' } = req.query;
   const perPage = 12;
+
   const offset  = (parseInt(page)-1) * perPage;
   let where = ["e.status='active'"];
   let params = [];
@@ -40,6 +41,12 @@ router.get('/', (req, res) => {
   if (category !== 'ALL')  { where.push("e.category=?");  params.push(category); }
   if (price === 'free')    { where.push("e.price_display='Free'"); }
   if (price === 'paid')    { where.push("e.price_display!='Free'"); }
+  if (city) { where.push("(e.city LIKE ? OR e.country LIKE ?)"); params.push(`%${city}%`,`%${city}%`); }
+const now = new Date();
+if (when==='weekend'){const fri=new Date(now);fri.setDate(now.getDate()+(5-now.getDay()));const sun=new Date(fri);sun.setDate(fri.getDate()+2);where.push("e.start_date>=? AND e.start_date<=?");params.push(fri.toISOString().split('T')[0],sun.toISOString().split('T')[0]);}
+else if (when==='week'){const w=new Date(now);w.setDate(now.getDate()+7);where.push("e.start_date>=? AND e.start_date<=?");params.push(now.toISOString().split('T')[0],w.toISOString().split('T')[0]);}
+else if (when==='month'){const m=new Date(now);m.setDate(now.getDate()+30);where.push("e.start_date>=? AND e.start_date<=?");params.push(now.toISOString().split('T')[0],m.toISOString().split('T')[0]);}
+else if (when==='summer'){where.push("e.start_date>=? AND e.start_date<=?");params.push('2026-06-01','2026-08-31');}
   if (q) {
     where.push("(e.title LIKE ? OR e.city LIKE ? OR e.description LIKE ? OR e.tags LIKE ?)");
     params.push(`%${q}%`,`%${q}%`,`%${q}%`,`%${q}%`);
