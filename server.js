@@ -137,6 +137,7 @@ runScript('add-photos-columns.js', 'Photos columns');
 // STEP 2 — Add all events (order matters — most specific last so they override)
 runScript('add-us-city-events.js',       'US city events');
 runScript('add-sample-vendors.js',       'Sample vendors');
+runScript('add-bhatti-catering.js',      'Bhatti Catering');
 runScript('add-holland-flea-markets.js', 'Holland flea markets');
 runScript('add-europe-events.js',        'Europe events');
 runScript('add-new-countries.js',        'New countries events');
