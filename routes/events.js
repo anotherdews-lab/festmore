@@ -413,144 +413,283 @@ ${renderFooterSimple()}</body></html>`;
 // ─────────────────────────────────────
 // SUBMIT FORM — WITH PLAN SELECTOR
 // ─────────────────────────────────────
+// PASTE THIS FUNCTION INTO routes/events.js
+// Replace the entire renderSubmitPage function (lines 405-536)
+// Payment system is INTACT — do not modify the POST handler
+
 function renderSubmitPage(user, success, error, selectedPlan) {
   const plan = selectedPlan || 'standard';
-  return `<!DOCTYPE html><html lang="en"><head>
+  const IS = `width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:12px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;transition:border-color .2s;`;
+  const LS = `font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;`;
+  const GS = `margin-bottom:20px;`;
+  const SS = `background:#fff;border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:20px;`;
+
+  return `<!DOCTYPE html>
+<html lang="en"><head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Submit Your Event — Festmore</title>
-<meta name="description" content="List your festival, market, concert or event on Festmore. Free listing available — or go Standard for just €79/year."/>
+<title>List Your Event on Festmore — Get Discovered Worldwide</title>
+<meta name="description" content="List your festival, market, concert or event on Festmore. Free listing available — or go Standard for just €79/year. Reach thousands of visitors worldwide."/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/main.css"/>
+<style>
+.plan-card{border:2px solid var(--border);background:#fff;border-radius:18px;padding:22px 20px;cursor:pointer;transition:all .2s;text-align:center;position:relative;}
+.plan-card:hover{border-color:var(--flame);transform:translateY(-2px);}
+.plan-card.active-free{border-color:var(--sage);background:rgba(74,124,89,.04);}
+.plan-card.active-standard{border-color:var(--flame);background:rgba(232,71,10,.04);}
+.plan-card.active-premium{border-color:var(--gold);background:rgba(201,146,42,.04);}
+.plan-popular{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--flame);color:#fff;font-size:10px;font-weight:800;padding:3px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;}
+.what-you-get{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px;}
+.wyg-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;}
+.plan-features{background:var(--ivory);border-radius:12px;padding:16px 20px;margin-bottom:28px;display:none;}
+.plan-features.visible{display:block;}
+.feat-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13.5px;color:var(--ink2);}
+textarea{resize:vertical;}
+.checkbox-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.checkbox-item{display:flex;align-items:center;gap:8px;background:var(--ivory);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .2s;}
+.checkbox-item:hover{border-color:var(--flame);}
+.checkbox-item input[type=checkbox]{accent-color:var(--flame);}
+@media(max-width:600px){.what-you-get{grid-template-columns:1fr;}.checkbox-grid{grid-template-columns:1fr;}}
+</style>
 </head><body>
 ${renderNavSimple(user)}
 
-<div class="page-hero-small" style="background:linear-gradient(135deg,#e8470a,#c2410c);">
-  <div class="container">
-    <h1 style="color:#fff;">List Your Event on Festmore</h1>
-    <p style="color:rgba(255,255,255,.8);">Free, Standard (€79/yr) or Premium (€149/yr) — you choose</p>
+<!-- HERO -->
+<div style="background:linear-gradient(135deg,#1a0a00,#3d1200);padding:64px 0;position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(232,71,10,.25) 0%,transparent 70%);"></div>
+  <div class="container" style="position:relative;max-width:860px;text-align:center;">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(232,71,10,.15);border:1px solid rgba(232,71,10,.35);color:#ff7043;font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px;margin-bottom:20px;letter-spacing:.8px;text-transform:uppercase;">🎪 List Your Event</div>
+    <h1 style="font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,52px);font-weight:400;color:#fff;margin-bottom:14px;">Get Your Event in Front of<br/>Thousands of Visitors</h1>
+    <p style="color:rgba(255,255,255,.55);font-size:16px;line-height:1.75;max-width:600px;margin:0 auto;">Free listing available. Upgrade to Standard or Premium for maximum visibility, newsletter inclusion and SEO boost across 26 countries.</p>
   </div>
 </div>
 
-<div class="container" style="padding:48px 0;max-width:820px;">
-  ${error ? `<div class="alert alert-error">⚠️ ${error}</div>` : ''}
-  ${success ? `<div class="alert alert-success">✅ ${success}</div>` : ''}
+<div class="container" style="padding:48px 0;max-width:880px;">
+  ${error ? `<div class="alert alert-error" style="margin-bottom:24px;">⚠️ ${error}</div>` : ''}
+  ${success ? `<div class="alert alert-success" style="margin-bottom:24px;">✅ ${success}</div>` : ''}
+
+  <!-- WHAT YOU GET -->
+  <div class="what-you-get">
+    ${[
+      ['🌍','Worldwide Visibility','Reach visitors across 26 countries and 90+ city pages'],
+      ['🔍','Ranks on Google','Your own SEO page that appears in Google search results'],
+      ['📧','Newsletter to 500+ Subscribers','Weekly newsletter to active event-goers and vendors'],
+      ['🏪','Vendor Marketplace','Food trucks and vendors can apply directly to your event'],
+      ['📊','Real Analytics','Track views, clicks and where your visitors come from'],
+      ['✅','Verified Badge','Build trust with the Festmore Verified badge'],
+    ].map(([i,t,d]) => `<div class="wyg-card"><div style="font-size:28px;margin-bottom:8px;">${i}</div><div style="font-size:14px;font-weight:700;margin-bottom:4px;">${t}</div><div style="font-size:12px;color:var(--ink3);line-height:1.5;">${d}</div></div>`).join('')}
+  </div>
 
   <!-- PLAN SELECTOR -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:36px;">
+  <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:20px;">Choose Your Plan</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:12px;">
     ${[
-      { id:'free', label:'Free', price:'€0', desc:'Basic listing', color:'var(--sage)' },
-      { id:'standard', label:'Standard', price:'€79/yr', desc:'Full featured listing', color:'var(--flame)' },
-      { id:'premium', label:'Premium', price:'€149/yr', desc:'Top placement + newsletter', color:'var(--gold)' },
+      { id:'free', label:'Free', price:'€0', period:'forever', color:'var(--sage)', desc:'Get started today', features:['✅ Live within 24 hours','✅ Basic listing page','✅ Visible in search','❌ Not featured','❌ No newsletter','❌ No SEO boost'] },
+      { id:'standard', label:'Standard', price:'€79', period:'/year', color:'var(--flame)', desc:'Most popular', popular:true, features:['✅ Live within 24 hours','✅ Full SEO listing page','✅ Featured in search results','✅ Weekly newsletter','✅ Your own Festmore URL','✅ View analytics & insights','✅ Connect with verified vendors','✅ Priority support'] },
+      { id:'premium', label:'Premium', price:'€149', period:'/year', color:'var(--gold)', desc:'Maximum exposure', features:['⭐ Everything in Standard','⭐ Top of all search results','⭐ Homepage featured placement','⭐ Dedicated newsletter feature','⭐ Social media promotion','⭐ Priority listing in 26 countries','⭐ Vendor spotlight in newsletter','⭐ Direct account manager'] },
     ].map(p => `
-    <div onclick="selectPlan('${p.id}')" id="plan-${p.id}" style="border:2px solid ${plan===p.id?p.color:'var(--border)'};background:${plan===p.id?'rgba(232,71,10,.04)':'#fff'};border-radius:16px;padding:18px 16px;cursor:pointer;transition:all .2s;text-align:center;">
-      <div style="font-size:12px;font-weight:700;color:${p.color};text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">${p.label}</div>
-      <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--ink);margin-bottom:3px;">${p.price}</div>
-      <div style="font-size:12px;color:var(--ink4);">${p.desc}</div>
+    <div class="plan-card ${plan===p.id?'active-'+p.id:''}" id="plan-${p.id}" onclick="selectPlan('${p.id}')">
+      ${p.popular ? '<div class="plan-popular">Most Popular</div>' : ''}
+      <div style="font-size:12px;font-weight:700;color:${p.color};text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">${p.label}</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:32px;color:var(--ink);line-height:1;">${p.price}</div>
+      <div style="font-size:12px;color:var(--ink4);margin-bottom:8px;">${p.period}</div>
+      <div style="font-size:12px;color:var(--ink3);">${p.desc}</div>
     </div>`).join('')}
   </div>
 
-  <!-- PLAN COMPARISON -->
-  <div id="plan-info-free" style="display:${plan==='free'?'block':'none'};background:rgba(74,124,89,.07);border:1px solid rgba(74,124,89,.2);border-radius:12px;padding:16px 20px;margin-bottom:28px;">
-    <div style="font-weight:700;color:var(--sage);margin-bottom:8px;">Free Plan — What you get:</div>
-    <div style="font-size:13.5px;color:var(--ink2);line-height:1.9;">✅ Basic event listing · ✅ Visible in search · ❌ Not featured · ❌ No newsletter · ❌ No SEO boost</div>
-    <div style="font-size:12.5px;color:var(--ink3);margin-top:8px;">You can upgrade to Standard or Premium at any time from your dashboard.</div>
-  </div>
-  <div id="plan-info-standard" style="display:${plan==='standard'?'block':'none'};background:rgba(232,71,10,.06);border:1px solid rgba(232,71,10,.2);border-radius:12px;padding:16px 20px;margin-bottom:28px;">
-    <div style="font-weight:700;color:var(--flame);margin-bottom:8px;">Standard Plan — €79/year:</div>
-    <div style="font-size:13.5px;color:var(--ink2);line-height:1.9;">✅ Full SEO listing · ✅ Featured in search · ✅ Weekly newsletter · ✅ Your own URL · ✅ View analytics · ✅ Priority support</div>
-  </div>
-  <div id="plan-info-premium" style="display:${plan==='premium'?'block':'none'};background:rgba(201,146,42,.07);border:1px solid rgba(201,146,42,.25);border-radius:12px;padding:16px 20px;margin-bottom:28px;">
-    <div style="font-weight:700;color:var(--gold);margin-bottom:8px;">Premium Plan — €149/year:</div>
-    <div style="font-size:13.5px;color:var(--ink2);line-height:1.9;">⭐ Everything in Standard · ⭐ Top of search results · ⭐ Homepage featured · ⭐ Dedicated newsletter feature · ⭐ Social media promotion</div>
-  </div>
+  <!-- PLAN FEATURES -->
+  ${[
+    { id:'free', color:'rgba(74,124,89,.07)', border:'rgba(74,124,89,.2)', titleColor:'var(--sage)', title:'Free Plan — What you get:', features:['✅ Basic event listing · ✅ Visible in search · ❌ Not featured · ❌ No newsletter · ❌ No SEO boost'] },
+    { id:'standard', color:'rgba(232,71,10,.05)', border:'rgba(232,71,10,.2)', titleColor:'var(--flame)', title:'Standard Plan — €79/year:', features:['✅ Full SEO listing · ✅ Featured in search · ✅ Weekly newsletter · ✅ Your own URL · ✅ Analytics · ✅ Connect with vendors · ✅ Priority support'] },
+    { id:'premium', color:'rgba(201,146,42,.05)', border:'rgba(201,146,42,.25)', titleColor:'var(--gold)', title:'Premium Plan — €149/year:', features:['⭐ Everything in Standard · ⭐ Top placement · ⭐ Homepage featured · ⭐ Dedicated newsletter · ⭐ Social media promotion · ⭐ Account manager'] },
+  ].map(p => `
+  <div id="plan-info-${p.id}" class="plan-features ${plan===p.id?'visible':''}" style="background:${p.color};border:1px solid ${p.border};">
+    <div style="font-weight:700;color:${p.titleColor};margin-bottom:8px;">${p.title}</div>
+    <div style="font-size:13.5px;color:var(--ink2);line-height:1.9;">${p.features[0]}</div>
+    ${p.id==='free'?'<div style="font-size:12.5px;color:var(--ink3);margin-top:8px;">You can upgrade to Standard or Premium at any time from your dashboard.</div>':''}
+  </div>`).join('')}
 
-  <div class="form-card">
-    <div class="form-card-header">
-      <h2>Event Details</h2>
-      <div id="price-badge-display" class="price-badge">${plan==='free'?'Free':plan==='premium'?'€149/yr':'€79/yr'}</div>
-    </div>
-    <form method="POST" action="/events/submit" id="submit-form">
-      <input type="hidden" name="plan" id="plan-input" value="${plan}"/>
-      <div class="form-grid">
-        <div class="form-group full"><label class="form-label">Event Name *</label><input class="form-input" type="text" name="title" placeholder="e.g. Berlin Christmas Market 2025" required/></div>
-        <div class="form-group"><label class="form-label">Category *</label>
-          <select class="form-input" name="category" required>
+  <form method="POST" action="/events/submit" id="submit-form">
+    <input type="hidden" name="plan" id="plan-input" value="${plan}"/>
+
+    <!-- SECTION 1 — EVENT IDENTITY -->
+    <div style="${SS}">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">1. Event Identity</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">The basics — what is your event and where does it take place?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="${GS}grid-column:1/-1;"><label style="${LS}">Event Name *</label><input type="text" name="title" required placeholder="e.g. Berlin Christmas Market 2026" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Category *</label>
+          <select name="category" required style="${IS}">
             <option value="">Select category…</option>
             ${Object.entries({festival:'🎪 Festival',concert:'🎵 Concert',market:'🛍️ Market',christmas:'🎄 Christmas Market',exhibition:'🖼️ Exhibition',business:'💼 Business / Fair',kids:'🎠 Kids Event',comics:'🎮 Comics & Gaming',flea:'🏺 Flea Market',online:'💻 Online Event',city:'🏙️ City Event',messe:'🏛️ Trade Fair'}).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Country *</label>
-          <select class="form-input" name="country" required>
+        <div style="${GS}"><label style="${LS}">Country *</label>
+          <select name="country" required style="${IS}">
             <option value="">Select country…</option>
             ${Object.entries(COUNTRY_NAMES).map(([k,v])=>`<option value="${k}">${FLAGS[k]} ${v}</option>`).join('')}
           </select>
         </div>
-        <div class="form-group"><label class="form-label">City *</label><input class="form-input" type="text" name="city" placeholder="e.g. Berlin" required/></div>
-        <div class="form-group"><label class="form-label">Address / Venue</label><input class="form-input" type="text" name="address" placeholder="e.g. Gendarmenmarkt Square"/></div>
-        <div class="form-group"><label class="form-label">Start Date *</label><input class="form-input" type="date" name="start_date" required/></div>
-        <div class="form-group"><label class="form-label">End Date</label><input class="form-input" type="date" name="end_date"/></div>
-        <div class="form-group full"><label class="form-label">Dates as Displayed</label><input class="form-input" type="text" name="date_display" placeholder="e.g. Nov 27 – Dec 24, 2025"/></div>
-        <div class="form-group"><label class="form-label">Entry Price</label><input class="form-input" type="text" name="price_display" placeholder="Free, €12, €8–€45…"/></div>
-        <div class="form-group"><label class="form-label">Expected Visitors</label><input class="form-input" type="number" name="attendees" placeholder="e.g. 5000"/></div>
-        <div class="form-group"><label class="form-label">Vendor Spots Available</label><input class="form-input" type="number" name="vendor_spots" placeholder="e.g. 50"/></div>
-        <div class="form-group"><label class="form-label">Event Website</label><input class="form-input" type="url" name="website" placeholder="https://your-event.com"/></div>
-        <div class="form-group full"><label class="form-label">Event Description *</label><textarea class="form-input" name="description" rows="5" placeholder="Describe your event in detail…"></textarea></div>
-        <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" type="text" name="name" placeholder="Your full name"/></div>
-       <div class="form-group"><label class="form-label">Your Email</label><input class="form-input" type="email" name="email" placeholder="your@email.com"/></div>
+        <div style="${GS}"><label style="${LS}">City *</label><input type="text" name="city" required placeholder="e.g. Berlin" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Venue / Address</label><input type="text" name="address" placeholder="e.g. Gendarmenmarkt Square, Berlin" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Entry Price</label><input type="text" name="price_display" placeholder="Free, €12, €8–€45, From €25…" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Event Website</label><input type="url" name="website" placeholder="https://your-event.com" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Ticket Link</label><input type="url" name="ticket_url" placeholder="https://ticketmaster.com/your-event" style="${IS}"/></div>
       </div>
+    </div>
 
-      <!-- PHOTO UPLOAD -->
-      <div style="margin-top:28px;border-top:1px solid var(--border);padding-top:28px;">
-        <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px;">📸 Photos (optional — up to 6)</label>
-        <p style="font-size:13px;color:var(--ink4);margin-bottom:16px;line-height:1.5;">Upload photos of your event, venue, flyer or past editions. Available after your listing is created and payment confirmed.</p>
-        <div style="background:var(--ivory);border:1.5px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;color:var(--ink3);font-size:13px;">
-          📷 Photo upload available in your dashboard after listing is created
+    <!-- SECTION 2 — DATES & TIMES -->
+    <div style="${SS}">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">2. Dates & Times</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">When does your event take place?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="${GS}"><label style="${LS}">Start Date *</label><input type="date" name="start_date" required style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">End Date</label><input type="date" name="end_date" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Opening Hours</label><input type="text" name="opening_hours" placeholder="e.g. Mon–Sat 10:00–21:00, Sun 11:00–18:00" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Dates as Displayed on Page</label><input type="text" name="date_display" placeholder="e.g. 27 Nov – 24 Dec 2026" style="${IS}"/></div>
+      </div>
+    </div>
+
+    <!-- SECTION 3 — EVENT DETAILS -->
+    <div style="${SS}">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">3. Event Details</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">Tell visitors and vendors everything they need to know about your event.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="${GS}grid-column:1/-1;"><label style="${LS}">Event Description *</label><textarea name="description" required placeholder="Describe your event in detail — what makes it special, what visitors can expect, entertainment, food, atmosphere, history…" style="${IS}" rows="6"></textarea></div>
+        <div style="${GS}"><label style="${LS}">Expected Visitors</label><input type="number" name="attendees" placeholder="e.g. 5000" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Vendor / Exhibitor Spots Available</label><input type="number" name="vendor_spots" placeholder="e.g. 50" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Edition / Year (if recurring)</label><input type="text" name="edition" placeholder="e.g. 32nd edition, Est. 1988" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Languages at Event</label><input type="text" name="event_languages" placeholder="e.g. Danish, English, German" style="${IS}"/></div>
+      </div>
+    </div>
+
+    <!-- SECTION 4 — HIGHLIGHTS & PROGRAMME -->
+    <div style="${SS}">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">4. Highlights & Programme</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">What makes your event unmissable? This is what convinces people to buy tickets and attend.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="${GS}grid-column:1/-1;"><label style="${LS}">Main Highlights</label><textarea name="highlights" placeholder="e.g. Live music from Kandis and Rasmus Bjerg · 200+ market stalls · Circus and family entertainment · Grand Prix Show · MusikBingo…" style="${IS}" rows="4"></textarea></div>
+        <div style="${GS}grid-column:1/-1;"><label style="${LS}">Headliners / Featured Artists / Performers</label><input type="text" name="headliners" placeholder="e.g. Rasmus Bjerg, Kandis, Motor Mille, Gry" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Entertainment Types</label>
+          <div class="checkbox-grid" style="margin-top:6px;">
+            ${['Live Music','Family Entertainment','Children\'s Activities','Food & Drinks','Market Stalls','Sports','Comedy','Theatre','Art & Culture','Fireworks','Parade','Dance'].map(t=>`<label class="checkbox-item"><input type="checkbox" name="entertainment_types" value="${t}"/><span style="font-size:13px;">${t}</span></label>`).join('')}
+          </div>
+        </div>
+        <div style="${GS}"><label style="${LS}">Visitor Facilities</label>
+          <div class="checkbox-grid" style="margin-top:6px;">
+            ${['Parking Available','Public Transport','Wheelchair Accessible','Free Entry','Family Friendly','Camping','Pet Friendly','Food Stalls','Toilets','First Aid'].map(t=>`<label class="checkbox-item"><input type="checkbox" name="facilities" value="${t}"/><span style="font-size:13px;">${t}</span></label>`).join('')}
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="form-submit-area">
-        <div class="price-summary">
-          <strong id="submit-price">${plan==='free'?'Free Listing':plan==='premium'?'Premium: €149/year':'Standard: €79/year'}</strong>
-          <span>${plan==='free'?'No payment required — upgrade anytime':'Secure payment via Stripe'}</span>
-        </div>
-        <button type="submit" class="btn btn-primary btn-xl" style="max-width:280px;" id="submit-btn">
-          ${plan==='free'?'List for Free →':'Continue to Payment →'}
-        </button>
+    <!-- SECTION 5 — FOR VENDORS -->
+    <div style="${SS}">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">5. For Vendors & Exhibitors</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">Are you looking for food trucks, artisans or other vendors? Tell them what you need.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="${GS}grid-column:1/-1;"><label style="${LS}">What Kind of Vendors Are You Looking For?</label><textarea name="vendor_info" placeholder="e.g. We are looking for food trucks, street food vendors, artisan crafts, clothing stalls and family entertainment. Foodtrucks are especially welcome…" style="${IS}" rows="4"></textarea></div>
+        <div style="${GS}"><label style="${LS}">Vendor Application Deadline</label><input type="date" name="vendor_deadline" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Vendor Application Email / Link</label><input type="text" name="vendor_apply" placeholder="vendors@your-event.com or application URL" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Stall Cost for Vendors</label><input type="text" name="vendor_cost" placeholder="e.g. €150–€400 per stall, Contact for pricing" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Space Available per Vendor</label><input type="text" name="vendor_space" placeholder="e.g. 3×3m standard, larger on request" style="${IS}"/></div>
       </div>
-    </form>
-  </div>
+    </div>
 
-  <div style="text-align:center;margin-top:16px;">
-    <a href="/events/pricing" style="color:var(--ink3);font-size:13.5px;">Compare all plans →</a>
-  </div>
+    <!-- SECTION 6 — SOCIAL & MEDIA -->
+    <div style="${SS}">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">6. Social Media & Media</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">Link your social media so visitors can follow your event.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="${GS}"><label style="${LS}">📸 Instagram</label><input type="text" name="instagram" placeholder="@yourevent" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">👥 Facebook Page</label><input type="text" name="facebook" placeholder="facebook.com/yourevent" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">🎵 TikTok</label><input type="text" name="tiktok" placeholder="@yourevent" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">🎬 Promo Video (YouTube/Vimeo)</label><input type="url" name="video_url" placeholder="https://youtube.com/watch?v=..." style="${IS}"/></div>
+      </div>
+    </div>
+
+    <!-- SECTION 7 — PHOTOS -->
+    <div style="${SS}">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">7. Photos</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">Events with photos get 5× more clicks than those without.</p>
+      <div style="background:linear-gradient(135deg,rgba(232,71,10,.04),rgba(232,71,10,.08));border:1.5px dashed rgba(232,71,10,.3);border-radius:14px;padding:28px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">📸</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;">Upload up to 6 photos after listing</h3>
+        <p style="font-size:13px;color:var(--ink3);line-height:1.6;max-width:480px;margin:0 auto;">Once your listing is live in your dashboard you can add photos of your event, venue, crowd and past editions. Photos are the #1 factor that makes visitors click on your event.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 8 — YOUR DETAILS -->
+    <div style="${SS}">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">8. Your Contact Details</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">We'll send your listing confirmation and login details here.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="${GS}"><label style="${LS}">Your Name *</label><input type="text" name="name" required placeholder="Your full name" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Your Email *</label><input type="email" name="email" required placeholder="your@email.com" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Organisation / Company</label><input type="text" name="organisation" placeholder="e.g. Roskilde Market ApS" style="${IS}"/></div>
+        <div style="${GS}"><label style="${LS}">Phone</label><input type="tel" name="phone_organiser" placeholder="+45 12 34 56 78" style="${IS}"/></div>
+      </div>
+    </div>
+
+    <!-- PAYMENT SECTION -->
+    <div style="background:var(--ink);border-radius:20px;padding:36px;margin-bottom:24px;">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;">
+        <div>
+          <h3 style="font-family:'DM Serif Display',serif;font-size:26px;font-weight:400;color:#fff;margin-bottom:8px;">Ready to get discovered?</h3>
+          <p style="color:rgba(255,255,255,.5);font-size:14px;line-height:1.6;margin-bottom:16px;" id="plan-desc-text">${plan==='free'?'Your free listing goes live within 24 hours. Upgrade anytime from your dashboard.':plan==='premium'?'Premium gives you top placement, homepage feature and dedicated newsletter.':'Standard gives you full SEO, newsletter inclusion and featured placement.'}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            ${['🌍 Worldwide visibility','🔍 Google ranking','📧 Newsletter','🏪 Vendor marketplace'].map(f=>`<span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600;">${f}</span>`).join('')}
+          </div>
+        </div>
+        <div style="text-align:center;flex-shrink:0;">
+          <div style="font-family:'DM Serif Display',serif;font-size:52px;color:#fff;line-height:1;" id="price-display">${plan==='free'?'€0':plan==='premium'?'€149':'€79'}</div>
+          <div style="color:rgba(255,255,255,.4);font-size:13px;margin-bottom:16px;" id="price-period">${plan==='free'?'free forever':'/year'}</div>
+          <button type="submit" id="submit-btn" style="background:${plan==='free'?'#4a7c59':'#e8470a'};color:#fff;border:none;padding:16px 36px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(232,71,10,.4);transition:all .2s;" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
+            ${plan==='free'?'List for Free →':'Continue to Payment →'}
+          </button>
+          <div style="color:rgba(255,255,255,.3);font-size:12px;margin-top:10px;">${plan==='free'?'No credit card required':'🔒 Secure payment via Stripe'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:40px;">
+      <a href="/events/pricing" style="color:var(--ink3);font-size:13.5px;">Compare all plans in detail →</a>
+    </div>
+  </form>
 </div>
 
 ${renderFooterSimple()}
 <script>
 function selectPlan(plan) {
+  // Update card styles
+  document.getElementById('plan-free').className = 'plan-card' + (plan==='free'?' active-free':'');
+  document.getElementById('plan-standard').className = 'plan-card' + (plan==='standard'?' active-standard':'');
+  document.getElementById('plan-premium').className = 'plan-card' + (plan==='premium'?' active-premium':'');
+
+  // Show/hide features
   ['free','standard','premium'].forEach(p => {
-    const el = document.getElementById('plan-'+p);
-    const info = document.getElementById('plan-info-'+p);
-    const colors = {free:'var(--sage)',standard:'var(--flame)',premium:'var(--gold)'};
-    if (p === plan) {
-      el.style.borderColor = colors[p];
-      el.style.background = 'rgba(232,71,10,.04)';
-      info.style.display = 'block';
-    } else {
-      el.style.borderColor = 'var(--border)';
-      el.style.background = '#fff';
-      info.style.display = 'none';
-    }
+    document.getElementById('plan-info-'+p).classList.toggle('visible', p===plan);
   });
+
+  // Update hidden input
   document.getElementById('plan-input').value = plan;
-  const prices = {free:'Free Listing',standard:'Standard: €79/year',premium:'Premium: €149/year'};
-  const badges = {free:'Free',standard:'€79/yr',premium:'€149/yr'};
-  const btns = {free:'List for Free →',standard:'Continue to Payment →',premium:'Continue to Payment →'};
-  const subs = {free:'No payment required — upgrade anytime',standard:'Secure payment via Stripe',premium:'Secure payment via Stripe'};
-  document.getElementById('submit-price').textContent = prices[plan];
-  document.getElementById('price-badge-display').textContent = badges[plan];
+
+  // Update payment section
+  const prices = {free:'€0', standard:'€79', premium:'€149'};
+  const periods = {free:'free forever', standard:'/year', premium:'/year'};
+  const btns = {free:'List for Free →', standard:'Continue to Payment →', premium:'Continue to Payment →'};
+  const descs = {
+    free:'Your free listing goes live within 24 hours. Upgrade anytime from your dashboard.',
+    standard:'Standard gives you full SEO, newsletter inclusion and featured placement in search.',
+    premium:'Premium gives you top placement, homepage feature and dedicated newsletter spotlight.'
+  };
+  const colors = {free:'#4a7c59', standard:'#e8470a', premium:'#c9922a'};
+  const notes = {free:'No credit card required', standard:'🔒 Secure payment via Stripe', premium:'🔒 Secure payment via Stripe'};
+
+  document.getElementById('price-display').textContent = prices[plan];
+  document.getElementById('price-period').textContent = periods[plan];
   document.getElementById('submit-btn').textContent = btns[plan];
-  document.querySelector('.price-summary span').textContent = subs[plan];
+  document.getElementById('submit-btn').style.background = colors[plan];
+  document.getElementById('plan-desc-text').textContent = descs[plan];
 }
 </script>
 </body></html>`;
