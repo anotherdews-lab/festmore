@@ -336,7 +336,17 @@ ${renderNav(user, tr, langHtml)}
   <div class="fm-hero-inner">
     <div class="fm-hero-badge"><span class="fm-hero-badge-dot"></span>${tr.hero_badge}</div>
     <h1>${tr.hero_h1_1} ${tr.hero_h1_2}<br/><em>${tr.hero_h1_3}</em></h1>
-    <p class="fm-hero-sub">${tr.hero_sub}</p>
+     <p class="fm-hero-sub">${tr.hero_sub}</p>
+
+    <!-- TWO CORE BUTTONS -->
+    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;">
+      <a href="/events/submit" style="display:inline-flex;align-items:center;gap:10px;background:#e8470a;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(232,71,10,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        🎪 List Your Event — from Free
+      </a>
+      <a href="/vendors/register" style="display:inline-flex;align-items:center;gap:10px;background:#4a7c59;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(74,124,89,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        🏪 Become a Vendor — €49/yr
+      </a>
+    </div>
 
     <!-- BIG SEARCH BAR -->
     <div class="fm-search-wrap">
