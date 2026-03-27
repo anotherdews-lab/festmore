@@ -35,6 +35,7 @@ app.use((req, res, next) => {
 // ROUTES
 // ─────────────────────────────────────
 app.use('/',             require('./routes/home'));
+app.use('/events/in',    require('./routes/cities'));
 app.use('/events',       require('./routes/events'));
 app.use('/vendors',      require('./routes/vendors'));
 app.use('/articles',     require('./routes/articles'));
