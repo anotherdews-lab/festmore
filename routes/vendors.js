@@ -89,8 +89,9 @@ router.post('/register', async (req, res) => {
     db.prepare(`INSERT OR IGNORE INTO payments (stripe_session_id,amount,type,status,reference_id) VALUES (?,?,?,?,?)`)
       .run(session.id, parseInt(process.env.PRICE_VENDOR_YEARLY)||4900, 'vendor_profile', 'pending', vendorId);
     res.redirect(session.url);
-  } catch (err) {
-    res.redirect('/vendors/register?error=Payment+unavailable.+Please+try+again.');
+   } catch (err) {
+    console.error('Stripe vendor error:', err.message);
+    res.redirect('/vendors/register?error=Payment+unavailable.+Please+try+again.+'+encodeURIComponent(err.message));
   }
 });
 
