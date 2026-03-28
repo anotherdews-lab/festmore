@@ -147,6 +147,7 @@ runScript('add-new-country-content.js',  'New country content');
 // STEP 3 — Add articles
 runScript('add-trending-articles.js', 'Trending articles');
 runScript('add-seo-articles.js',      'SEO articles');
+runScript('add-seo-articles-2026.js', 'SEO articles 2026');
 
 // STEP 4 — Add subscribers
 runScript('add-subscribers.js', 'Subscribers');
