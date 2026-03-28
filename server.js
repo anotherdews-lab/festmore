@@ -45,7 +45,7 @@ app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
-app.use('/photos',       require('./routes/photos'));
+// app.use('/photos', require('./routes/photos'));
 app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
