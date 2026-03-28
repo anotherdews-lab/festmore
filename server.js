@@ -181,17 +181,9 @@ try {
 
     console.log('\n✅ Seeding complete!\n');
 
-  } else {
-    // ── DATABASE ALREADY HAS DATA — preserve it ──
-    console.log('✅ Database populated — skipping seed scripts');
-    console.log('🎉 Google-indexed pages preserved across this deploy!\n');
-
-    // Only run scripts that ADD new content safely (INSERT OR IGNORE)
-    // These are safe to run every deploy because they skip existing records
-    runScript('add-high-traffic-events-2026.js', 'High traffic events 2026');
-    runScript('add-seo-articles-2026.js',        'SEO articles 2026');
-    runScript('add-kløften-festival.js',         'Kløften Festival');
-    runScript('add-bhatti-catering.js',          'Bhatti Catering');
+ } else {
+    console.log('✅ Database populated — skipping ALL scripts');
+    console.log('🎉 Pages preserved!\n');
   }
 
 } catch(err) {
