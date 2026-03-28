@@ -581,19 +581,45 @@ ${renderNav(user, tr, langHtml)}
   </div>
 </section>
 
-<!-- ARTICLES -->
+<!-- LATEST ARTICLES — after trending bar -->
 ${articles.length ? `
-<section style="background:#faf8f3;padding:64px 0;">
+<section style="background:#fff;padding:64px 0;">
   <div style="max-width:1300px;margin:0 auto;padding:0 40px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;">
       <div>
-        <div class="fm-section-tag">${tr.festival_guides}</div>
-        <h2 class="fm-section-h" style="margin-bottom:0;">${tr.guides_sub}</h2>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(232,71,10,.07);border:1px solid rgba(232,71,10,.15);color:#e8470a;font-size:11px;font-weight:800;padding:3px 14px;border-radius:99px;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;">📰 Latest Articles</div>
+        <h2 style="font-family:'DM Serif Display',serif;font-size:clamp(24px,3vw,38px);font-weight:400;color:#1a1612;margin-bottom:4px;">News, Guides & Festival Stories</h2>
+        <p style="font-size:14px;color:#7a6f68;">Fresh articles about events, world news and festival culture</p>
       </div>
-      <a href="/articles" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;">${tr.view_all} ${ar}+ →</a>
+      <a href="/articles" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">${tr.view_all} ${ar}+ →</a>
     </div>
-    <div class="articles-grid">
-      ${articles.map(a=>`<a href="/articles/${a.slug}" class="article-card"><div class="article-img"><img src="${a.image_url||IMGS.festival}" alt="${a.title}" loading="lazy"/></div><div class="article-body"><div class="article-cat">${CATS[a.category]||''} ${a.category||'Guide'}</div><h3>${a.title}</h3><p>${(a.excerpt||'').substring(0,100)}…</p></div></a>`).join('')}
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+      ${articles.map(a => {
+        const catColors = {news:'#e8470a',festival:'#4a7c59',guide:'#c9922a',christmas:'#1a6b8a',market:'#7c4a59'};
+        const catColor = catColors[a.category] || '#e8470a';
+        return `<a href="/articles/${a.slug}" style="background:#fff;border:1px solid #e8e2d9;border-radius:20px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:all .25s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 20px 60px rgba(26,22,18,.1)';this.style.borderColor='#e8470a'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='#e8e2d9'">
+          <div style="height:200px;overflow:hidden;position:relative;">
+            <img src="${a.image_url || IMGS.festival}" alt="${a.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .4s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform=''"/>
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(26,22,18,.4) 0%,transparent 60%);"></div>
+            <div style="position:absolute;top:12px;left:12px;">
+              <span style="background:${catColor};color:#fff;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">${a.category || 'Article'}</span>
+            </div>
+          </div>
+          <div style="padding:22px;flex:1;display:flex;flex-direction:column;">
+            <h3 style="font-family:'DM Serif Display',serif;font-size:19px;font-weight:400;color:#1a1612;margin-bottom:10px;line-height:1.3;flex:1;">${a.title}</h3>
+            <p style="font-size:13px;color:#7a6f68;line-height:1.6;margin-bottom:16px;">${(a.excerpt||'').substring(0,110)}…</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid #f0ece4;">
+              <span style="font-size:11px;color:#b5ada6;">${new Date(a.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span>
+              <span style="font-size:13px;font-weight:700;color:#e8470a;">Read more →</span>
+            </div>
+          </div>
+        </a>`;
+      }).join('')}
+    </div>
+    <div style="text-align:center;margin-top:32px;">
+      <a href="/articles" style="display:inline-flex;align-items:center;gap:8px;background:#1a1612;color:#fff;padding:14px 40px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='#e8470a'" onmouseout="this.style.background='#1a1612'">
+        Read All ${ar}+ Articles →
+      </a>
     </div>
   </div>
 </section>` : ''}
