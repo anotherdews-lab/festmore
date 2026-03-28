@@ -570,6 +570,31 @@ ${renderNav(user)}
         <p style="font-size:13px;color:var(--ink3);line-height:1.6;max-width:480px;margin:0 auto;">Once your payment is confirmed your profile goes live in your dashboard where you can add photos of your stall, food truck, products and previous events.</p>
       </div>
     </div>
+     <!-- TERMS & RULES -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:20px;">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:6px;">📋 Terms, Rules &amp; Conditions</h2>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">Please read carefully before submitting.</p>
+      <div style="background:rgba(232,71,10,.04);border:1.5px solid rgba(232,71,10,.2);border-radius:14px;padding:20px 24px;margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">💳 No Refund Policy</div>
+        <p style="font-size:13px;color:var(--ink3);line-height:1.7;margin:0;">All payments are <strong>final and non-refundable</strong>. Once your profile is live, no refunds will be issued. For errors contact <a href="mailto:contact@festmore.com" style="color:var(--flame);">contact@festmore.com</a> and we will correct it free of charge.</p>
+      </div>
+      <div style="background:rgba(74,124,89,.04);border:1.5px solid rgba(74,124,89,.2);border-radius:14px;padding:20px 24px;margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">✅ Accuracy of Information</div>
+        <p style="font-size:13px;color:var(--ink3);line-height:1.7;margin:0;">You are responsible for ensuring all information submitted is accurate and truthful. Festmore reserves the right to remove profiles containing false or misleading information without refund.</p>
+      </div>
+      <div style="background:rgba(201,146,42,.04);border:1.5px solid rgba(201,146,42,.25);border-radius:14px;padding:20px 24px;margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:8px;">🚫 Prohibited Content</div>
+        <p style="font-size:13px;color:var(--ink3);line-height:1.7;margin:0 0 10px;">The following are strictly prohibited and will result in immediate removal without refund: illegal activities · violence or hate content · discrimination · adult content · scams or fraudulent profiles · illegal substances · copyright violations · spam · political extremism.</p>
+      </div>
+      <div style="background:var(--ivory);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;">
+        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">📧 Questions or Issues?</div>
+        <p style="font-size:13px;color:var(--ink3);line-height:1.7;margin:0;">Contact us at <a href="mailto:contact@festmore.com" style="color:var(--flame);font-weight:600;">contact@festmore.com</a>. We respond within 24 hours on business days.</p>
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:var(--ivory);border:2px solid var(--border);border-radius:12px;padding:16px 18px;" id="terms-label">
+        <input type="checkbox" name="terms_agreed" value="1" required style="margin-top:2px;accent-color:var(--flame);width:18px;height:18px;flex-shrink:0;" onchange="document.getElementById('terms-label').style.borderColor=this.checked?'var(--flame)':'var(--border)'"/>
+        <span style="font-size:13px;color:var(--ink2);line-height:1.6;">I have read and agree to the <strong>Terms and Conditions</strong> above, including the <strong>no refund policy</strong>. I confirm my vendor profile complies with all applicable laws and Festmore's content rules.</span>
+      </label>
+    </div>
 
     <!-- PAYMENT -->
     <div style="background:var(--ink);border-radius:20px;padding:36px;margin-bottom:24px;">
