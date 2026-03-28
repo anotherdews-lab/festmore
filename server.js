@@ -143,6 +143,7 @@ runScript('add-europe-events.js',        'Europe events');
 runScript('add-new-countries.js',        'New countries events');
 runScript('add-high-traffic-events.js',  'High traffic events');
 runScript('add-new-country-content.js',  'New country content');
+runScript('add-high-traffic-events-2026.js', 'High traffic events 2026');
 
 // STEP 3 — Add articles
 runScript('add-trending-articles.js', 'Trending articles');
