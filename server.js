@@ -118,44 +118,93 @@ cron.schedule('0 2 * * *', async () => {
 });
 
 // ─────────────────────────────────────
-// STARTUP SCRIPTS — run in correct order
+// HELPER — run a seed script safely
 // ─────────────────────────────────────
 function runScript(file, label) {
   try {
     if (fs.existsSync('./' + file)) {
       require('./' + file);
-      console.log('✅ ' + label + ' done');
+      console.log('✅ ' + label);
+    } else {
+      console.log('⏭️  ' + label + ' — not found, skipping');
     }
   } catch(err) {
-    console.log('⚠️ ' + label + ':', err.message);
+    console.log('⚠️  ' + label + ':', err.message);
   }
 }
 
-// STEP 1 — Database columns
-runScript('add-photos-columns.js', 'Photos columns');
+// ─────────────────────────────────────
+// STARTUP — SMART SEEDING
+//
+// THE KEY FIX FOR GOOGLE:
+// We check if the database already has data before seeding.
+// If it does — we skip ALL seed scripts so Railway never
+// wipes your events between deploys.
+// Google can now index your pages permanently.
+// ─────────────────────────────────────
+try {
+  const db = require('./db');
+  const eventCount = db.prepare('SELECT COUNT(*) as n FROM events').get().n;
 
-// STEP 2 — Add all events (order matters — most specific last so they override)
-runScript('add-us-city-events.js',       'US city events');
-runScript('add-sample-vendors.js',       'Sample vendors');
-runScript('add-bhatti-catering.js',      'Bhatti Catering');
-runScript('add-holland-flea-markets.js', 'Holland flea markets');
-runScript('add-europe-events.js',        'Europe events');
-runScript('add-new-countries.js',        'New countries events');
-runScript('add-high-traffic-events.js',  'High traffic events');
-runScript('add-new-country-content.js',  'New country content');
-runScript('add-high-traffic-events-2026.js', 'High traffic events 2026');
+  console.log(`\n📊 Database: ${eventCount} events found`);
 
-// STEP 3 — Add articles
-runScript('add-trending-articles.js', 'Trending articles');
-runScript('add-seo-articles.js',      'SEO articles');
-runScript('add-seo-articles-2026.js', 'SEO articles 2026');
+  if (eventCount < 50) {
+    // ── FIRST BOOT or empty database — seed everything ──
+    console.log('🌱 Empty database detected — seeding now...\n');
 
-// STEP 4 — Add subscribers
-runScript('add-subscribers.js', 'Subscribers');
+    // STEP 1 — columns
+    runScript('add-photos-columns.js',           'Photos columns');
 
-// STEP 5 — Update/fix data AFTER all events are added
-runScript('update-dates-2026.js',    'Update dates to 2026');
-runScript('update-event-photos.js',  'Update event photos');
+    // STEP 2 — events & vendors
+    runScript('add-us-city-events.js',           'US city events');
+    runScript('add-sample-vendors.js',           'Sample vendors');
+    runScript('add-bhatti-catering.js',          'Bhatti Catering');
+    runScript('add-holland-flea-markets.js',     'Holland flea markets');
+    runScript('add-europe-events.js',            'Europe events');
+    runScript('add-new-countries.js',            'New countries events');
+    runScript('add-high-traffic-events.js',      'High traffic events');
+    runScript('add-new-country-content.js',      'New country content');
+    runScript('add-high-traffic-events-2026.js', 'High traffic events 2026');
+    runScript('add-kløften-festival.js',         'Kløften Festival');
+
+    // STEP 3 — articles
+    runScript('add-trending-articles.js',        'Trending articles');
+    runScript('add-seo-articles.js',             'SEO articles');
+    runScript('add-seo-articles-2026.js',        'SEO articles 2026');
+
+    // STEP 4 — subscribers
+    runScript('add-subscribers.js',              'Subscribers');
+
+    // STEP 5 — fix data after seeding
+    runScript('update-dates-2026.js',            'Update dates to 2026');
+    runScript('update-event-photos.js',          'Update event photos');
+
+    console.log('\n✅ Seeding complete!\n');
+
+  } else {
+    // ── DATABASE ALREADY HAS DATA — preserve it ──
+    console.log('✅ Database populated — skipping seed scripts');
+    console.log('🎉 Google-indexed pages preserved across this deploy!\n');
+
+    // Only run scripts that ADD new content safely (INSERT OR IGNORE)
+    // These are safe to run every deploy because they skip existing records
+    runScript('add-high-traffic-events-2026.js', 'High traffic events 2026');
+    runScript('add-seo-articles-2026.js',        'SEO articles 2026');
+    runScript('add-kløften-festival.js',         'Kløften Festival');
+    runScript('add-bhatti-catering.js',          'Bhatti Catering');
+  }
+
+} catch(err) {
+  console.log('⚠️  Startup check error:', err.message);
+  // If table doesn't exist yet, run setup first
+  try {
+    console.log('Running database setup...');
+    require('./db/setup');
+    console.log('✅ Database setup complete');
+  } catch(e) {
+    console.log('Setup error:', e.message);
+  }
+}
 
 // ─────────────────────────────────────
 // START SERVER
