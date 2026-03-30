@@ -11,7 +11,7 @@ router.get('/sitemap.xml', (req, res) => {
   const events   = db.prepare("SELECT slug, updated_at, created_at FROM events WHERE status='active' ORDER BY created_at DESC").all();
   const articles = db.prepare("SELECT slug, created_at FROM articles WHERE status='published' ORDER BY created_at DESC").all();
   const vendors  = db.prepare("SELECT slug, created_at FROM vendors WHERE status='active' ORDER BY created_at DESC").all();
-
+const { CITIES } = require('./cities');
   const today = new Date().toISOString().substring(0, 10);
 
   // Static pages with priorities
@@ -80,7 +80,19 @@ ${vendors.map(v => `  <url>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>`).join('\n')}
+  <url>
+    <loc>${SITE_URL}/events/in</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
 
+${CITIES.map(c => `  <url>
+    <loc>${SITE_URL}/events/in/${c.slug}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`).join('\n')}
 </urlset>`;
 
   res.header('Content-Type', 'application/xml');
