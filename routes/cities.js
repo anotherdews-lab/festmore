@@ -260,8 +260,8 @@ router.get('/:city', (req, res) => {
 
   const showEvents = cityEvents.length > 0 ? cityEvents : countryEvents;
 
-  const year = new Date().getFullYear();
-  const nextYear = year + 1;
+  const year = 2026;
+const nextYear = 2026;
 
   res.send(renderCityPage({ city, showEvents, nearbyCities, year, nextYear, user: req.session.user }));
 });
