@@ -161,8 +161,13 @@ router.post('/register', async (req, res) => {
 router.get('/payment-success', (req, res) => {
   const { vendor_id } = req.query;
   if (vendor_id) {
-    db.prepare("UPDATE vendors SET status='active',payment_status='paid',verified=1 WHERE id=?").run(parseInt(vendor_id));
-    db.prepare("UPDATE payments SET status='completed' WHERE reference_id=?").run(parseInt(vendor_id));
+    try {
+      db.prepare("UPDATE vendors SET status='active', payment_status='paid', verified=1 WHERE id=?").run(parseInt(vendor_id));
+      db.prepare("UPDATE payments SET status='completed' WHERE reference_id=?").run(parseInt(vendor_id));
+      console.log('✅ Vendor activated: ID', vendor_id);
+    } catch(err) {
+      console.error('❌ Vendor activation error:', err.message);
+    }
   }
   const vendor = vendor_id ? db.prepare("SELECT * FROM vendors WHERE id=?").get(parseInt(vendor_id)) : null;
   res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Welcome to Festmore!</title>
@@ -193,6 +198,28 @@ router.get('/payment-success', (req, res) => {
     <a href="/dashboard" class="btn btn-outline btn-lg">Go to Dashboard →</a>
   </div>
 </div></body></html>`);
+});
+
+// STRIPE WEBHOOK — activates vendor even if redirect fails
+router.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch(err) {
+    console.error('Webhook error:', err.message);
+    return res.status(400).send('Webhook Error');
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const vendorId = session.metadata?.vendor_id;
+    if (vendorId && session.metadata?.type === 'vendor_profile') {
+      db.prepare("UPDATE vendors SET status='active', payment_status='paid', verified=1 WHERE id=?").run(parseInt(vendorId));
+      db.prepare("UPDATE payments SET status='completed' WHERE reference_id=?").run(parseInt(vendorId));
+      console.log('✅ Vendor activated via webhook: ID', vendorId);
+    }
+  }
+  res.json({received: true});
 });
 
 module.exports = router;
