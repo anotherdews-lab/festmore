@@ -49,7 +49,17 @@ app.use('/applications', require('./routes/applications'));
 app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
-
+// TEMP — remove after use
+app.get('/create-admin', async (req, res) => {
+  try {
+    const db = require('./db');
+    const bcrypt = require('bcryptjs');
+    const hash = bcrypt.hashSync('Festmore2026!', 10);
+    db.prepare("INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?,?,?,?)").run('gha44ar@aim.com', hash, 'Ghaffar', 'admin');
+    db.prepare("UPDATE users SET password=?, role='admin' WHERE email='gha44ar@aim.com'").run(hash);
+    res.send('✅ Admin account created! Email: gha44ar@aim.com | Password: Festmore2026!');
+  } catch(e) { res.send('Error: ' + e.message); }
+});
 
 // ─────────────────────────────────────
 // REDIRECT GHOST WORDPRESS URLS
