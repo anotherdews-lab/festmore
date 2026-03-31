@@ -50,15 +50,6 @@ app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
 
-// TEMP — remove after first deploy
-app.get('/make-me-admin', (req, res) => {
-  try {
-    const db = require('./db');
-    db.prepare("UPDATE users SET role='admin' WHERE email='gha44ar@aim.com'").run();
-    db.prepare("UPDATE users SET role='admin' WHERE email='gha44ar@aol.com'").run();
-    res.send('✅ Admin role set! Now remove this route and redeploy.');
-  } catch(e) { res.send('Error: ' + e.message); }
-});
 
 // ─────────────────────────────────────
 // REDIRECT GHOST WORDPRESS URLS
