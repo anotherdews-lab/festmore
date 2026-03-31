@@ -737,7 +737,40 @@ function renderEventDetail(e, related, user) {
 <meta property="og:title" content="${e.title} — Festmore"/>
 <meta property="og:description" content="${(e.description||'').substring(0,200)}"/>
 <meta property="og:image" content="${img}"/>
-<script type="application/ld+json">${JSON.stringify({"@context":"https://schema.org","@type":"Event","name":e.title,"startDate":e.start_date,"endDate":e.end_date||e.start_date,"location":{"@type":"Place","name":e.address||e.city,"address":{"@type":"PostalAddress","addressLocality":e.city,"addressCountry":e.country}},"description":e.description||"","image":img,"isAccessibleForFree":e.price_display==="Free"})}</script>
+<script type="application/ld+json">${JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": e.title,
+  "startDate": e.start_date + "T00:00:00",
+  "endDate": (e.end_date || e.start_date) + "T23:59:00",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "location": {
+    "@type": "Place",
+    "name": e.address || e.city || "TBC",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": e.city || "",
+      "addressCountry": e.country || ""
+    }
+  },
+  "image": [img],
+  "description": (e.description || "").substring(0, 500),
+  "organizer": {
+    "@type": "Organization",
+    "name": "Festmore",
+    "url": "https://festmore.com"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": e.price_display === "Free" ? "0" : "0",
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/InStock",
+    "validFrom": e.created_at ? e.created_at.substring(0,10) : e.start_date,
+    "url": e.ticket_url || e.website || "https://festmore.com/events/" + e.slug
+  },
+  "isAccessibleForFree": e.price_display === "Free" || e.price_display === "Free Entry"
+})}</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/main.css"/>
 </head><body>
