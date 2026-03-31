@@ -49,6 +49,33 @@ app.get('/admin/activate-vendor', (req, res) => {
   const vendors = db.prepare("SELECT id, business_name, email, status, payment_status FROM vendors ORDER BY id DESC LIMIT 10").all();
   res.send('<pre>' + JSON.stringify(vendors, null, 2) + '</pre>');
 });
+
+app.get('/admin/create-toto-vendor', (req, res) => {
+  const db = require('./db');
+  try {
+    const result = db.prepare(`
+      INSERT INTO vendors (
+        business_name, slug, category, city, country,
+        description, email, status, payment_status, verified, premium
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+    `).run(
+      'Toto Vino e Cucina',
+      'toto-vino-e-cucina',
+      'Food & Drinks',
+      'Netherlands',
+      'NL',
+      'Italian food and wine vendor',
+      'info@totovinoecucina.nl',
+      'active',
+      'paid',
+      1,
+      0
+    );
+    res.send('✅ Vendor created! ID: ' + result.lastInsertRowid + ' — Now remove this route!');
+  } catch(err) {
+    res.send('❌ Error: ' + err.message);
+  }
+});
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
 // app.use('/photos', require('./routes/photos'));
