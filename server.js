@@ -43,6 +43,12 @@ app.use('/auth',         require('./routes/auth'));
 app.use('/dashboard',    require('./routes/dashboard'));
 app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
+// TEMP DEBUG ROUTE — remove after use
+app.get('/admin/activate-vendor', (req, res) => {
+  const db = require('./db');
+  const vendors = db.prepare("SELECT id, business_name, email, status, payment_status FROM vendors ORDER BY id DESC LIMIT 10").all();
+  res.send('<pre>' + JSON.stringify(vendors, null, 2) + '</pre>');
+});
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
 // app.use('/photos', require('./routes/photos'));
@@ -50,11 +56,6 @@ app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
 
-app.get('/admin/activate-vendor', (req, res) => {
-  const db = require('./db');
-  const vendors = db.prepare("SELECT id, business_name, email, status, payment_status FROM vendors ORDER BY id DESC LIMIT 10").all();
-  res.send('<pre>' + JSON.stringify(vendors, null, 2) + '</pre>');
-});
 
 // ─────────────────────────────────────
 // REDIRECT GHOST WORDPRESS URLS
