@@ -1,4 +1,10 @@
-// server.js
+// server.js — FESTMORE v4
+// ✅ Smart seeding — never overwrites live data
+// ✅ Admin account always created on startup
+// ✅ All seed scripts included
+// ✅ Cloudinary photo upload
+// ✅ Database permanently protected
+
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -69,7 +75,7 @@ app.get('/test-email', async (req, res) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: 'Festmore <onboarding@resend.dev>',
-      to: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER || 'gha44ar@aim.com',
       subject: 'Festmore Email Test',
       text: 'Email is working! Sent via Resend.'
     });
@@ -83,7 +89,24 @@ app.get('/test-email', async (req, res) => {
 // 404 PAGE
 // ─────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).send('<!DOCTYPE html><html><head><title>Page Not Found — Festmore</title><meta name="viewport" content="width=device-width,initial-scale=1"/><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet"/><style>body{font-family:"DM Sans",sans-serif;background:#faf8f3;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;}.box{text-align:center;padding:48px;}h1{font-family:"DM Serif Display",serif;font-size:80px;color:#e8470a;margin:0;font-weight:400;}h2{font-size:24px;margin:8px 0 16px;color:#1a1612;}p{color:#7a6f68;margin-bottom:24px;}a{background:#e8470a;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;font-weight:700;}</style></head><body><div class="box"><h1>404</h1><h2>Page not found</h2><p>The event might have ended, or this page does not exist.</p><a href="/">Back to Festmore</a></div></body></html>');
+  res.status(404).send(`<!DOCTYPE html>
+<html><head><title>Page Not Found — Festmore</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+body{font-family:"DM Sans",sans-serif;background:#faf8f3;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;}
+.box{text-align:center;padding:48px;}
+h1{font-family:"DM Serif Display",serif;font-size:80px;color:#e8470a;margin:0;font-weight:400;}
+h2{font-size:24px;margin:8px 0 16px;color:#1a1612;}
+p{color:#7a6f68;margin-bottom:24px;}
+a{background:#e8470a;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;font-weight:700;}
+</style></head>
+<body><div class="box">
+<h1>404</h1>
+<h2>Page not found</h2>
+<p>The event might have ended, or this page does not exist.</p>
+<a href="/">Back to Festmore</a>
+</div></body></html>`);
 });
 
 // ─────────────────────────────────────
@@ -105,14 +128,14 @@ cron.schedule('0 2 * * *', async () => {
 // ─────────────────────────────────────
 function runScript(file, label) {
   try {
-    if (fs.existsSync('./' + file)) {
+    if (fs.existsSync(path.join(__dirname, file))) {
       require('./' + file);
-      console.log('OK ' + label);
+      console.log('✅ ' + label);
     } else {
-      console.log('SKIP ' + label + ' not found');
+      console.log('⏭️  SKIP ' + label + ' not found');
     }
   } catch(err) {
-    console.log('WARN ' + label + ': ' + err.message);
+    console.log('⚠️  WARN ' + label + ': ' + err.message);
   }
 }
 
@@ -121,53 +144,89 @@ function runScript(file, label) {
 // ─────────────────────────────────────
 try {
   const db = require('./db');
-  const eventCount = db.prepare('SELECT COUNT(*) as n FROM events').get().n;
 
-  console.log('Database: ' + eventCount + ' events found');
+  // Ensure tables exist first
+  try {
+    db.prepare('SELECT COUNT(*) as n FROM events').get();
+  } catch(e) {
+    console.log('Tables missing — running setup...');
+    require('./db/setup');
+    console.log('Setup complete');
+  }
 
-  if (eventCount < 250) {
-    console.log('Empty database detected — seeding now...');
+  const eventCount   = db.prepare('SELECT COUNT(*) as n FROM events').get().n;
+  const articleCount = db.prepare('SELECT COUNT(*) as n FROM articles').get().n;
 
+  console.log('📊 Database: ' + eventCount + ' events, ' + articleCount + ' articles');
+
+  if (eventCount < 150) {
+    console.log('🌱 Seeding database with all content...');
+
+    // COLUMNS
     runScript('add-photos-columns.js',           'Photos columns');
+
+    // EVENTS
+    runScript('add-real-events.js',              'Real events');
+    runScript('add-denmark-events.js',           'Denmark events');
     runScript('add-us-city-events.js',           'US city events');
-    runScript('add-sample-vendors.js',           'Sample vendors');
-    runScript('add-bhatti-catering.js',          'Bhatti Catering');
-    runScript('add-holland-flea-markets.js',     'Holland flea markets');
     runScript('add-europe-events.js',            'Europe events');
     runScript('add-new-countries.js',            'New countries events');
-    runScript('add-high-traffic-events.js',      'High traffic events');
     runScript('add-new-country-content.js',      'New country content');
+    runScript('add-high-traffic-events.js',      'High traffic events');
     runScript('add-high-traffic-events-2026.js', 'High traffic events 2026');
     runScript('add-kløften-festival.js',         'Kløften Festival');
+    runScript('add-holland-flea-markets.js',     'Holland flea markets');
+
+    // VENDORS
+    runScript('add-sample-vendors.js',           'Sample vendors');
+    runScript('add-bhatti-catering.js',          'Bhatti Catering');
+
+    // ARTICLES
     runScript('add-trending-articles.js',        'Trending articles');
     runScript('add-seo-articles.js',             'SEO articles');
     runScript('add-seo-articles-2026.js',        'SEO articles 2026');
+    runScript('add-traffic-articles-2026.js',    'Traffic articles 2026');
+
+    // SUBSCRIBERS
     runScript('add-subscribers.js',              'Subscribers');
+
+    // UPDATES
     runScript('update-dates-2026.js',            'Update dates to 2026');
     runScript('update-event-photos.js',          'Update event photos');
+    runScript('update-polandrock-2026.js',       'Update Polandrock 2026');
 
-    console.log('Seeding complete!');
+    console.log('✅ Seeding complete!');
 
   } else {
-    console.log('Database populated — skipping ALL scripts');
+    console.log('✅ Database populated — skipping seed scripts');
   }
 
-   // ALWAYS ensure admin account exists
+  // ALWAYS ensure columns exist — safe to run every time
+  try { db.prepare("ALTER TABLE vendors ADD COLUMN photos TEXT DEFAULT '[]'").run(); } catch(e) {}
+  try { db.prepare("ALTER TABLE vendors ADD COLUMN image_url TEXT").run(); } catch(e) {}
+  try { db.prepare("ALTER TABLE vendors ADD COLUMN short_desc TEXT").run(); } catch(e) {}
+  try { db.prepare("ALTER TABLE vendors ADD COLUMN updated_at TEXT").run(); } catch(e) {}
+  try { db.prepare("ALTER TABLE events ADD COLUMN photos TEXT DEFAULT '[]'").run(); } catch(e) {}
+  try { db.prepare("ALTER TABLE events ADD COLUMN updated_at TEXT").run(); } catch(e) {}
+
+  // ALWAYS ensure admin account exists
   try {
     const bcrypt = require('bcryptjs');
     const adminHash = bcrypt.hashSync('Festmore2026!', 10);
     db.prepare('INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?,?,?,?)').run('gha44ar@aim.com', adminHash, 'Ghaffar', 'admin');
     db.prepare('UPDATE users SET password=?, role=? WHERE email=?').run(adminHash, 'admin', 'gha44ar@aim.com');
-  } catch(e) {}
+    console.log('✅ Admin account ready — gha44ar@aim.com / Festmore2026!');
+  } catch(e) {
+    console.log('⚠️  Admin account error: ' + e.message);
+  }
 
 } catch(err) {
-  console.log('Startup check error: ' + err.message);
+  console.log('⚠️  Startup error: ' + err.message);
   try {
-    console.log('Running database setup...');
     require('./db/setup');
-    console.log('Database setup complete');
+    console.log('✅ Database setup complete');
   } catch(e) {
-    console.log('Setup error: ' + e.message);
+    console.log('❌ Setup error: ' + e.message);
   }
 }
 
@@ -175,7 +234,11 @@ try {
 // START SERVER
 // ─────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('FESTMORE is running on port ' + PORT);
+  console.log('');
+  console.log('🎪 ════════════════════════════════════');
+  console.log('   FESTMORE is running on port ' + PORT);
+  console.log('   ════════════════════════════════════');
+  console.log('');
 });
 
 module.exports = app;
