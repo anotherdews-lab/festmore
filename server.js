@@ -43,8 +43,27 @@ app.use('/auth',         require('./routes/auth'));
 app.use('/dashboard',    require('./routes/dashboard'));
 app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
+
+app.get('/admin/fix-toto-login', (req, res) => {
+  const db = require('./db');
+  try {
+    const bcrypt = require('bcryptjs');
+    const hash = bcrypt.hashSync('toto9274', 10);
+    db.prepare(`INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?,?,?,'vendor')`)
+      .run('info@totovinoecucina.nl', hash, 'Toto Vino e Cucina');
+    db.prepare(`UPDATE users SET password=?, role='vendor' WHERE email='info@totovinoecucina.nl'`)
+      .run(hash);
+    const user = db.prepare(`SELECT id, email, role FROM users WHERE email='info@totovinoecucina.nl'`).get();
+    res.send('✅ Done! User: ' + JSON.stringify(user));
+  } catch(err) {
+    res.send('Error: ' + err.message);
+  }
+});
+```
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
+
+
 // app.use('/photos', require('./routes/photos'));
 app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
