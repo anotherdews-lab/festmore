@@ -60,6 +60,32 @@ app.use('/dashboard',    require('./routes/dashboard'));
 app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
 app.use('/upload',       require('./routes/upload'));
+app.get('/admin/full-setup', async (req, res) => {
+  const db = require('./db');
+  const bcrypt = require('bcryptjs');
+  const results = [];
+  try {
+    const photos = JSON.stringify(['https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=998,fit=crop/dJoBO4E41OcprO2x/italiaanse-wijnen-FsuBU7Td1EhC62jN.webp','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-13-ALpOD7zz9EIe6nqD.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-12-AVLzG144Ejh4a1XG.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-11-mjEQ0qOyZ2fl87aw.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=817,fit=crop/dJoBO4E41OcprO2x/pexels-alina-chernii-18771859-AoP6Z7eV59HGj7x8.jpg']);
+    const tags = JSON.stringify({tagline:'Authentic Italian food, wine & catering for unforgettable events',price_range:'€€€ Premium',travel_distance:'Anywhere in Europe',what_we_offer:'Totó Vino e Cucina offers authentic Italian catering, private dining, wine tastings and event catering.',looking_for:'Food festivals, cultural events, corporate events and private parties across Netherlands and Europe.',event_types_wanted:['Festivals','Food Markets','Corporate Events','Private Parties','Outdoor Events','Indoor Events'],availability:['January','February','March','April','May','June','July','August','September','October','November','December'],languages:'Dutch, English, Italian',certifications:'Professional catering license, Food hygiene certified',needs_electricity:'yes',needs_water:'yes',space_required:'4×4m (large stall)'});
+    const existing = db.prepare('SELECT id FROM vendors WHERE email=?').get('info@totovinoecucina.nl');
+    if (existing) {
+      db.prepare("UPDATE vendors SET business_name=?,slug=?,category=?,city=?,country=?,description=?,website=?,phone=?,status=?,payment_status=?,verified=?,tags=?,photos=?,image_url=? WHERE email=?").run('Totó Vino e Cucina','toto-vino-e-cucina','Food & Drinks','Haarlem','NL','Totó is a premium Italian catering service based in Haarlem, Netherlands. We specialise in private dining, corporate and event catering, wine tastings and Italian food experiences.','https://totovinoecucina.nl','+31 6 16340363','active','paid',1,tags,photos,'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg','info@totovinoecucina.nl');
+      results.push('Toto updated');
+    } else {
+      db.prepare("INSERT INTO vendors (business_name,slug,category,city,country,description,website,phone,email,status,payment_status,verified,premium,tags,photos,image_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run('Totó Vino e Cucina','toto-vino-e-cucina','Food & Drinks','Haarlem','NL','Totó is a premium Italian catering service based in Haarlem, Netherlands. We specialise in private dining, corporate and event catering, wine tastings and Italian food experiences.','https://totovinoecucina.nl','+31 6 16340363','info@totovinoecucina.nl','active','paid',1,0,tags,photos,'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg');
+      results.push('Toto created');
+    }
+    const hash = bcrypt.hashSync('toto9274', 10);
+    db.prepare('INSERT OR IGNORE INTO users (email,password,name,role) VALUES (?,?,?,?)').run('info@totovinoecucina.nl',hash,'Totó Vino e Cucina','vendor');
+    db.prepare('UPDATE users SET password=?,role=? WHERE email=?').run(hash,'vendor','info@totovinoecucina.nl');
+    results.push('Toto login ready');
+    const vendor = db.prepare('SELECT id,business_name,status FROM vendors WHERE email=?').get('info@totovinoecucina.nl');
+    results.push('Vendor: ' + JSON.stringify(vendor));
+    res.send('✅ DONE!<br/>' + results.join('<br/>'));
+  } catch(err) {
+    res.send('❌ Error: ' + err.message);
+  }
+});
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
 app.use('/festival',     require('./routes/landing'));
