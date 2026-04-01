@@ -3,3 +3,4 @@ node_modules/
 *.exe
 .env
 
+db/festmore.db
