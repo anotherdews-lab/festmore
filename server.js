@@ -53,7 +53,6 @@ app.use('/auth',         require('./routes/auth'));
 app.use('/dashboard',    require('./routes/dashboard'));
 app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
-app.use('/upload',       require('./routes/upload'));
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
 app.use('/festival',     require('./routes/landing'));
