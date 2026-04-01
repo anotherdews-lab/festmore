@@ -73,6 +73,21 @@ app.get('/admin/setup-toto-full', (req, res) => {
     res.send('Done! ' + JSON.stringify(vendor));
   } catch(err) { res.send('Error: ' + err.message); }
 });
+
+app.get('/admin/fix-columns', (req, res) => {
+  const db = require('./db');
+  try {
+    try { db.prepare("ALTER TABLE vendors ADD COLUMN photos TEXT DEFAULT '[]'").run(); } catch(e) {}
+    try { db.prepare("ALTER TABLE vendors ADD COLUMN image_url TEXT").run(); } catch(e) {}
+    try { db.prepare("ALTER TABLE vendors ADD COLUMN short_desc TEXT").run(); } catch(e) {}
+    try { db.prepare("ALTER TABLE vendors ADD COLUMN updated_at TEXT").run(); } catch(e) {}
+    try { db.prepare("ALTER TABLE events ADD COLUMN photos TEXT DEFAULT '[]'").run(); } catch(e) {}
+    try { db.prepare("ALTER TABLE events ADD COLUMN updated_at TEXT").run(); } catch(e) {}
+    res.send('✅ Columns added!');
+  } catch(err) {
+    res.send('Error: ' + err.message);
+  }
+});
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
 app.use('/festival',     require('./routes/landing'));
