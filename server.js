@@ -169,6 +169,14 @@ try {
     console.log('Database populated — skipping ALL scripts');
   }
 
+   // ALWAYS ensure admin account exists
+  try {
+    const bcrypt = require('bcryptjs');
+    const adminHash = bcrypt.hashSync('Festmore2026!', 10);
+    db.prepare('INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?,?,?,?)').run('gha44ar@aim.com', adminHash, 'Ghaffar', 'admin');
+    db.prepare('UPDATE users SET role=? WHERE email=?').run('admin', 'gha44ar@aim.com');
+  } catch(e) {}
+
 } catch(err) {
   console.log('Startup check error: ' + err.message);
   try {
