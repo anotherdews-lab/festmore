@@ -220,6 +220,12 @@ try {
     console.log('⚠️  Admin account error: ' + e.message);
   }
 
+  // ALWAYS ensure Toto vendor account exists
+  try {
+    const totoHash = require('bcryptjs').hashSync('toto9274', 10);
+    db.prepare('INSERT OR IGNORE INTO users (email,password,name,role) VALUES (?,?,?,?)').run('info@totovinoecucina.nl', totoHash, 'Totó Vino e Cucina', 'vendor');
+  } catch(e) {}
+
 } catch(err) {
   console.log('⚠️  Startup error: ' + err.message);
   try {

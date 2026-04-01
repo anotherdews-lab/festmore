@@ -366,6 +366,47 @@ const vendors = [
     tags: JSON.stringify(['cheese', 'artisan', 'bruges', 'belgium', 'food', 'tasting', 'european cheese']),
     image_url: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&q=75',
   },
+  // ─── PAYING CUSTOMER ───
+  {
+    business_name: 'Totó Vino e Cucina',
+    slug: 'toto-vino-e-cucina',
+    category: 'Food & Drinks',
+    city: 'Haarlem',
+    country: 'NL',
+    description: 'Totó is a premium Italian catering service based in Haarlem, Netherlands. We specialise in private dining, corporate and event catering, wine tastings and Italian food experiences. With a passion for authentic Italian cuisine and carefully selected Italian wines, we bring the warmth and flavour of Italy to your event. Our team works with fresh, seasonal and locally sourced ingredients to create unforgettable culinary experiences.',
+    website: 'https://totovinoecucina.nl',
+    email: 'info@totovinoecucina.nl',
+    phone: '+31 6 16340363',
+    rating: 5.0,
+    review_count: 0,
+    events_attended: 0,
+    premium: 0,
+    verified: 1,
+    founded_year: 2019,
+    tags: JSON.stringify({
+      tagline: 'Authentic Italian food, wine & catering for unforgettable events',
+      price_range: '€€€ Premium',
+      travel_distance: 'Anywhere in Europe',
+      what_we_offer: 'Totó Vino e Cucina offers authentic Italian catering, private dining, wine tastings and event catering.',
+      looking_for: 'Food festivals, cultural events, corporate events and private parties across the Netherlands and Europe.',
+      event_types_wanted: ['Festivals','Food Markets','Corporate Events','Private Parties','Outdoor Events','Indoor Events'],
+      availability: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+      languages: 'Dutch, English, Italian',
+      certifications: 'Professional catering license, Food hygiene certified',
+      needs_electricity: 'yes',
+      needs_water: 'yes',
+      space_required: '4×4m (large stall)'
+    }),
+    image_url: 'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg',
+    photos: JSON.stringify([
+      'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg',
+      'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=998,fit=crop/dJoBO4E41OcprO2x/italiaanse-wijnen-FsuBU7Td1EhC62jN.webp',
+      'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-13-ALpOD7zz9EIe6nqD.jpg',
+      'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-12-AVLzG144Ejh4a1XG.jpg',
+      'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-11-mjEQ0qOyZ2fl87aw.jpg',
+      'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=817,fit=crop/dJoBO4E41OcprO2x/pexels-alina-chernii-18771859-AoP6Z7eV59HGj7x8.jpg'
+    ]),
+  },
 ];
 
 let added = 0;
@@ -380,16 +421,16 @@ for (const vendor of vendors) {
       continue;
     }
 
-    db.prepare(`
+   db.prepare(`
       INSERT INTO vendors (
         business_name, slug, category, city, country,
-        description, website, email, image_url, tags,
+        description, website, email, image_url, tags, photos,
         rating, review_count, events_attended,
         premium, verified, status, payment_status,
         founded_year
       ) VALUES (
         ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?,
         ?, ?, ?,
         ?, ?, 'active', 'paid',
         ?
@@ -397,7 +438,7 @@ for (const vendor of vendors) {
     `).run(
       vendor.business_name, vendor.slug, vendor.category, vendor.city, vendor.country,
       vendor.description, vendor.website || '', vendor.email || '',
-      vendor.image_url || '', vendor.tags || '[]',
+      vendor.image_url || '', vendor.tags || '[]', vendor.photos || '[]',
       vendor.rating || 0, vendor.review_count || 0, vendor.events_attended || 0,
       vendor.premium || 0, vendor.verified || 0,
       vendor.founded_year || 2020
