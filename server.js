@@ -32,6 +32,34 @@ app.use((req, res, next) => {
 });
 
 // ─────────────────────────────────────
+// REDIRECT GHOST WORDPRESS URLS
+// ─────────────────────────────────────
+app.get('/', (req, res, next) => {
+  if (req.query.mep_events) {
+    return res.redirect(301, '/events/' + req.query.mep_events);
+  }
+  next();
+});
+
+// ─────────────────────────────────────
+// TEMP ROUTE — fix toto login
+// Remove after use
+// ─────────────────────────────────────
+app.get('/admin/fix-toto-login', (req, res) => {
+  const db = require('./db');
+  const bcrypt = require('bcryptjs');
+  try {
+    const hash = bcrypt.hashSync('toto9274', 10);
+    db.prepare('INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?,?,?,?)').run('info@totovinoecucina.nl', hash, 'Toto Vino e Cucina', 'vendor');
+    db.prepare('UPDATE users SET password=?, role=? WHERE email=?').run(hash, 'vendor', 'info@totovinoecucina.nl');
+    const user = db.prepare('SELECT id, email, role FROM users WHERE email=?').get('info@totovinoecucina.nl');
+    res.send('Done: ' + JSON.stringify(user));
+  } catch(err) {
+    res.send('Error: ' + err.message);
+  }
+});
+
+// ─────────────────────────────────────
 // ROUTES
 // ─────────────────────────────────────
 app.use('/',             require('./routes/home'));
@@ -43,47 +71,11 @@ app.use('/auth',         require('./routes/auth'));
 app.use('/dashboard',    require('./routes/dashboard'));
 app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
-
-app.get('/admin/fix-toto-login', (req, res) => {
-  const db = require('./db');
-  try {
-    const bcrypt = require('bcryptjs');
-    const hash = bcrypt.hashSync('toto9274', 10);
-    db.prepare(`INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?,?,?,'vendor')`)
-      .run('info@totovinoecucina.nl', hash, 'Toto Vino e Cucina');
-    db.prepare(`UPDATE users SET password=?, role='vendor' WHERE email='info@totovinoecucina.nl'`)
-      .run(hash);
-    const user = db.prepare(`SELECT id, email, role FROM users WHERE email='info@totovinoecucina.nl'`).get();
-    res.send('✅ Done! User: ' + JSON.stringify(user));
-  } catch(err) {
-    res.send('Error: ' + err.message);
-  }
-});
-```
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
-
-
-// app.use('/photos', require('./routes/photos'));
 app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
-
-
-// ─────────────────────────────────────
-// REDIRECT GHOST WORDPRESS URLS
-// ─────────────────────────────────────
-app.get('/', (req, res, next) => {
-  if (req.query.mep_events) {
-    return res.redirect(301, '/events/' + req.query.mep_events);
-  }
-  next();
-});
-
-// ─────────────────────────────────────
-// ROUTES
-// ─────────────────────────────────────
-app.use('/',             require('./routes/home'));
 
 // ─────────────────────────────────────
 // EMAIL TEST ROUTE
@@ -98,9 +90,9 @@ app.get('/test-email', async (req, res) => {
       subject: 'Festmore Email Test',
       text: 'Email is working! Sent via Resend.'
     });
-    res.send('✅ Email sent! Check inbox and spam.');
+    res.send('Email sent! Check inbox and spam.');
   } catch(err) {
-    res.send('❌ Error: ' + err.message);
+    res.send('Error: ' + err.message);
   }
 });
 
@@ -108,37 +100,20 @@ app.get('/test-email', async (req, res) => {
 // 404 PAGE
 // ─────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).send(`<!DOCTYPE html>
-<html><head><title>Page Not Found — Festmore</title>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet"/>
-<style>
-body{font-family:'DM Sans',sans-serif;background:#faf8f3;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;}
-.box{text-align:center;padding:48px;}
-h1{font-family:'DM Serif Display',serif;font-size:80px;color:#e8470a;margin:0;font-weight:400;}
-h2{font-size:24px;margin:8px 0 16px;color:#1a1612;}
-p{color:#7a6f68;margin-bottom:24px;}
-a{background:#e8470a;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;font-weight:700;}
-</style></head>
-<body><div class="box">
-<h1>404</h1>
-<h2>Page not found</h2>
-<p>The event might have ended, or this page doesn't exist.</p>
-<a href="/">Back to Festmore</a>
-</div></body></html>`);
+  res.status(404).send('<!DOCTYPE html><html><head><title>Page Not Found — Festmore</title><meta name="viewport" content="width=device-width,initial-scale=1"/><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet"/><style>body{font-family:"DM Sans",sans-serif;background:#faf8f3;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;}.box{text-align:center;padding:48px;}h1{font-family:"DM Serif Display",serif;font-size:80px;color:#e8470a;margin:0;font-weight:400;}h2{font-size:24px;margin:8px 0 16px;color:#1a1612;}p{color:#7a6f68;margin-bottom:24px;}a{background:#e8470a;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;font-weight:700;}</style></head><body><div class="box"><h1>404</h1><h2>Page not found</h2><p>The event might have ended, or this page does not exist.</p><a href="/">Back to Festmore</a></div></body></html>');
 });
 
 // ─────────────────────────────────────
 // AUTOMATED DAILY JOB — 2AM every night
 // ─────────────────────────────────────
 cron.schedule('0 2 * * *', async () => {
-  console.log('⏰ Daily automation starting...');
+  console.log('Daily automation starting...');
   try {
     const daily = require('./automation/daily');
     await daily.run();
-    console.log('✅ Daily automation complete!');
+    console.log('Daily automation complete!');
   } catch (err) {
-    console.error('❌ Automation error:', err.message);
+    console.error('Automation error:', err.message);
   }
 });
 
@@ -149,38 +124,28 @@ function runScript(file, label) {
   try {
     if (fs.existsSync('./' + file)) {
       require('./' + file);
-      console.log('✅ ' + label);
+      console.log('OK ' + label);
     } else {
-      console.log('⏭️  ' + label + ' — not found, skipping');
+      console.log('SKIP ' + label + ' not found');
     }
   } catch(err) {
-    console.log('⚠️  ' + label + ':', err.message);
+    console.log('WARN ' + label + ': ' + err.message);
   }
 }
 
 // ─────────────────────────────────────
 // STARTUP — SMART SEEDING
-//
-// THE KEY FIX FOR GOOGLE:
-// We check if the database already has data before seeding.
-// If it does — we skip ALL seed scripts so Railway never
-// wipes your events between deploys.
-// Google can now index your pages permanently.
 // ─────────────────────────────────────
 try {
   const db = require('./db');
   const eventCount = db.prepare('SELECT COUNT(*) as n FROM events').get().n;
 
-  console.log(`\n📊 Database: ${eventCount} events found`);
+  console.log('Database: ' + eventCount + ' events found');
 
   if (eventCount < 50) {
-    // ── FIRST BOOT or empty database — seed everything ──
-    console.log('🌱 Empty database detected — seeding now...\n');
+    console.log('Empty database detected — seeding now...');
 
-    // STEP 1 — columns
     runScript('add-photos-columns.js',           'Photos columns');
-
-    // STEP 2 — events & vendors
     runScript('add-us-city-events.js',           'US city events');
     runScript('add-sample-vendors.js',           'Sample vendors');
     runScript('add-bhatti-catering.js',          'Bhatti Catering');
@@ -191,35 +156,27 @@ try {
     runScript('add-new-country-content.js',      'New country content');
     runScript('add-high-traffic-events-2026.js', 'High traffic events 2026');
     runScript('add-kløften-festival.js',         'Kløften Festival');
-
-    // STEP 3 — articles
     runScript('add-trending-articles.js',        'Trending articles');
     runScript('add-seo-articles.js',             'SEO articles');
     runScript('add-seo-articles-2026.js',        'SEO articles 2026');
-
-    // STEP 4 — subscribers
     runScript('add-subscribers.js',              'Subscribers');
-
-    // STEP 5 — fix data after seeding
     runScript('update-dates-2026.js',            'Update dates to 2026');
     runScript('update-event-photos.js',          'Update event photos');
 
-    console.log('\n✅ Seeding complete!\n');
+    console.log('Seeding complete!');
 
- } else {
-    console.log('✅ Database populated — skipping ALL scripts');
-    console.log('🎉 Pages preserved!\n');
+  } else {
+    console.log('Database populated — skipping ALL scripts');
   }
 
 } catch(err) {
-  console.log('⚠️  Startup check error:', err.message);
-  // If table doesn't exist yet, run setup first
+  console.log('Startup check error: ' + err.message);
   try {
     console.log('Running database setup...');
     require('./db/setup');
-    console.log('✅ Database setup complete');
+    console.log('Database setup complete');
   } catch(e) {
-    console.log('Setup error:', e.message);
+    console.log('Setup error: ' + e.message);
   }
 }
 
@@ -227,12 +184,7 @@ try {
 // START SERVER
 // ─────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('');
-  console.log('🎪 ════════════════════════════════════');
-  console.log('   FESTMORE is running!');
-  console.log(`   Open: http://localhost:${PORT}`);
-  console.log('   ════════════════════════════════════');
-  console.log('');
+  console.log('FESTMORE is running on port ' + PORT);
 });
 
 module.exports = app;
