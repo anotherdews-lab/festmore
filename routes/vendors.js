@@ -585,10 +585,48 @@ ${renderNav(user)}
           ${photos.map((p, i) => `
           <div class="photo-item">
             <img src="${p}" alt="Photo ${i+1}"/>
-            <form method="POST" action="/vendors/dashboard/${vendor.id}/delete-photo" style="display:inline;">
-              <input type="hidden" name="photo_index" value="${i}"/>
-              <button type="submit" class="photo-delete" onclick="return confirm('Delete this photo?')">✕ Delete</button>
-            </form>
+            <script>
+async function uploadFiles(files, id, type) {
+  const prog = document.getElementById('upload-progress-' + id);
+  prog.style.display = 'block';
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    prog.innerHTML = '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:13px;">⏳ Uploading ' + file.name + ' (' + (i+1) + '/' + files.length + ')...</div>';
+    const formData = new FormData();
+    formData.append('photo', file);
+    try {
+      const res = await fetch('/upload/vendor/' + id, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        prog.innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:12px 16px;font-size:13px;color:#15803d;">✅ Uploaded! Refreshing...</div>';
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        prog.innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;font-size:13px;color:#dc2626;">❌ ' + (data.error || 'Upload failed') + '</div>';
+      }
+    } catch(err) {
+      prog.innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;font-size:13px;color:#dc2626;">❌ Upload failed. Please try again.</div>';
+    }
+  }
+}
+async function handleDrop(event, id, type) {
+  event.preventDefault();
+  const zone = document.getElementById('upload-zone-' + id);
+  if (zone) { zone.style.borderColor = 'var(--border2)'; zone.style.background = 'var(--ivory)'; }
+  if (event.dataTransfer.files.length) await uploadFiles(event.dataTransfer.files, id, type);
+}
+async function deletePhoto(index, id, type) {
+  if (!confirm('Delete this photo?')) return;
+  const res = await fetch('/upload/' + type + '/' + id + '/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ index })
+  });
+  const data = await res.json();
+  if (data.success) window.location.reload();
+  else alert('Failed to delete photo');
+}
+</script>
+           <button class="photo-delete" onclick="deletePhoto(${i},'${vendor.id}','vendor')">✕ Delete</button>
           </div>`).join('')}
         </div>` : `
         <div style="background:var(--ivory);border:1.5px dashed var(--border2);border-radius:12px;padding:32px;text-align:center;margin-bottom:20px;">
@@ -596,15 +634,16 @@ ${renderNav(user)}
           <p style="font-size:14px;color:var(--ink3);">No photos yet — add your first photo below</p>
         </div>`}
 
-        ${photos.length < 8 ? `
-        <form method="POST" action="/vendors/dashboard/${vendor.id}/add-photo" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-          <div style="flex:1;min-width:240px;">
-            <label style="${LS}">Add Photo by URL</label>
-            <input type="url" name="photo_url" required placeholder="https://your-image-url.com/photo.jpg" style="${IS}"/>
-            <div style="font-size:11px;color:var(--ink4);margin-top:4px;">Tip: Upload your image to Imgur.com or Cloudinary, then paste the URL here</div>
-          </div>
-          <button type="submit" class="btn btn-primary" style="padding:12px 24px;white-space:nowrap;">Add Photo →</button>
-        </form>` : `
+       ${photos.length < 8 ? `
+        <div id="upload-zone-${vendor.id}" style="border:2px dashed var(--border2);border-radius:14px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--ivory);" ondragover="event.preventDefault();this.style.borderColor='var(--flame)';this.style.background='rgba(232,71,10,.04)'" ondragleave="this.style.borderColor='var(--border2)';this.style.background='var(--ivory)'" ondrop="handleDrop(event,'${vendor.id}','vendor')">
+          <div style="font-size:40px;margin-bottom:12px;">📸</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">Drag & drop photos here</div>
+          <div style="font-size:13px;color:var(--ink3);margin-bottom:16px;">or click to select from your computer or phone</div>
+          <button type="button" onclick="document.getElementById('fileInput${vendor.id}').click()" class="btn btn-primary" style="padding:12px 28px;">Choose Photos →</button>
+          <input type="file" id="fileInput${vendor.id}" accept="image/jpeg,image/png,image/webp" multiple style="display:none;" onchange="uploadFiles(this.files,'${vendor.id}','vendor')"/>
+          <div style="font-size:11px;color:var(--ink4);margin-top:12px;">JPG, PNG or WebP · Max 10MB per photo · Up to 8 photos total</div>
+        </div>
+        <div id="upload-progress-${vendor.id}" style="display:none;margin-top:16px;"></div>` : `
         <div style="background:#fef9c3;border:1px solid #f59e0b;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;">
           Maximum 8 photos reached. Delete a photo to add a new one.
         </div>`}

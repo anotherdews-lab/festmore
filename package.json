@@ -6,13 +6,13 @@
   "version": "1.0.0",
   "description": "Festmore.com - World Festival & Event Discovery Platform",
   "main": "server.js",
- "scripts": {
-  "setup-pg": "node db/setup-postgres.js",
-  "start": "node server.js",
-  "dev": "nodemon server.js",
-  "setup": "node db/setup.js",
-  "automate": "node automation/daily.js"
-},
+  "scripts": {
+    "setup-pg": "node db/setup-postgres.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "setup": "node db/setup.js",
+    "automate": "node automation/daily.js"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^9.4.3",
