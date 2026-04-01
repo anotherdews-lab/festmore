@@ -54,45 +54,6 @@ app.use('/dashboard',    require('./routes/dashboard'));
 app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
 app.use('/upload',       require('./routes/upload'));
-app.get('/admin/full-setup', async (req, res) => {
-  const db = require('./db');
-  const bcrypt = require('bcryptjs');
-  const results = [];
-  try {
-    // Fix columns
-    try { db.prepare("ALTER TABLE vendors ADD COLUMN photos TEXT DEFAULT '[]'").run(); results.push('photos column added'); } catch(e) { results.push('photos column exists'); }
-    try { db.prepare("ALTER TABLE vendors ADD COLUMN image_url TEXT").run(); results.push('image_url column added'); } catch(e) { results.push('image_url exists'); }
-    try { db.prepare("ALTER TABLE vendors ADD COLUMN short_desc TEXT").run(); results.push('short_desc added'); } catch(e) { results.push('short_desc exists'); }
-    try { db.prepare("ALTER TABLE vendors ADD COLUMN updated_at TEXT").run(); results.push('vendor updated_at added'); } catch(e) { results.push('vendor updated_at exists'); }
-    try { db.prepare("ALTER TABLE events ADD COLUMN photos TEXT DEFAULT '[]'").run(); results.push('event photos added'); } catch(e) { results.push('event photos exists'); }
-    try { db.prepare("ALTER TABLE events ADD COLUMN updated_at TEXT").run(); results.push('event updated_at added'); } catch(e) { results.push('event updated_at exists'); }
-
-    // Create admin account
-    const adminHash = bcrypt.hashSync('Festmore2026!', 10);
-    db.prepare('INSERT OR IGNORE INTO users (email,password,name,role) VALUES (?,?,?,?)').run('gha44ar@aim.com', adminHash, 'Ghaffar', 'admin');
-    db.prepare('UPDATE users SET password=?,role=? WHERE email=?').run(adminHash, 'admin', 'gha44ar@aim.com');
-    results.push('admin account ready');
-
-    // Create Toto vendor
-    const photos = JSON.stringify(['https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=998,fit=crop/dJoBO4E41OcprO2x/italiaanse-wijnen-FsuBU7Td1EhC62jN.webp','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-13-ALpOD7zz9EIe6nqD.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-12-AVLzG144Ejh4a1XG.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-11-mjEQ0qOyZ2fl87aw.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=817,fit=crop/dJoBO4E41OcprO2x/pexels-alina-chernii-18771859-AoP6Z7eV59HGj7x8.jpg']);
-    const tags = JSON.stringify({tagline:'Authentic Italian food, wine & catering for unforgettable events',price_range:'€€€ Premium',travel_distance:'Anywhere in Europe',what_we_offer:'Totó Vino e Cucina offers authentic Italian catering, private dining, wine tastings and event catering.',looking_for:'Food festivals, cultural events, corporate events and private parties across the Netherlands and Europe.',event_types_wanted:['Festivals','Food Markets','Corporate Events','Private Parties','Outdoor Events','Indoor Events'],availability:['January','February','March','April','May','June','July','August','September','October','November','December'],languages:'Dutch, English, Italian',certifications:'Professional catering license, Food hygiene certified',needs_electricity:'yes',needs_water:'yes',space_required:'4×4m (large stall)'});
-    const existing = db.prepare('SELECT id FROM vendors WHERE email=?').get('info@totovinoecucina.nl');
-    if (existing) {
-      db.prepare("UPDATE vendors SET business_name=?,slug=?,category=?,city=?,country=?,description=?,website=?,phone=?,status=?,payment_status=?,verified=?,tags=?,photos=?,image_url=? WHERE email=?").run('Totó Vino e Cucina','toto-vino-e-cucina','Food & Drinks','Haarlem','NL','Totó is a premium Italian catering service based in Haarlem, Netherlands. We specialise in private dining, corporate and event catering, wine tastings and Italian food experiences.','https://totovinoecucina.nl','+31 6 16340363','active','paid',1,tags,photos,'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg','info@totovinoecucina.nl');
-    } else {
-      db.prepare("INSERT INTO vendors (business_name,slug,category,city,country,description,website,phone,email,status,payment_status,verified,premium,tags,photos,image_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run('Totó Vino e Cucina','toto-vino-e-cucina','Food & Drinks','Haarlem','NL','Totó is a premium Italian catering service based in Haarlem, Netherlands. We specialise in private dining, corporate and event catering, wine tastings and Italian food experiences.','https://totovinoecucina.nl','+31 6 16340363','info@totovinoecucina.nl','active','paid',1,0,tags,photos,'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg');
-    }
-    const totoHash = bcrypt.hashSync('toto9274', 10);
-    db.prepare('INSERT OR IGNORE INTO users (email,password,name,role) VALUES (?,?,?,?)').run('info@totovinoecucina.nl',totoHash,'Totó Vino e Cucina','vendor');
-    db.prepare('UPDATE users SET password=?,role=? WHERE email=?').run(totoHash,'vendor','info@totovinoecucina.nl');
-    const vendor = db.prepare('SELECT id,business_name,status FROM vendors WHERE email=?').get('info@totovinoecucina.nl');
-    results.push('Toto vendor: ' + JSON.stringify(vendor));
-
-    res.send('✅ ALL DONE!<br/>' + results.join('<br/>'));
-  } catch(err) {
-    res.send('Error: ' + err.message + '<br/>Done so far: ' + results.join('<br/>'));
-  }
-});
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
 app.use('/festival',     require('./routes/landing'));
@@ -164,7 +125,7 @@ try {
 
   console.log('Database: ' + eventCount + ' events found');
 
-  if (eventCount < 50) {
+  if (eventCount < 250) {
     console.log('Empty database detected — seeding now...');
 
     runScript('add-photos-columns.js',           'Photos columns');
