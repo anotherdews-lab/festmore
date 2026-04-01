@@ -219,7 +219,10 @@ router.get('/vendors', requireAdmin, (req, res) => {
   const vendors = db.prepare("SELECT * FROM vendors ORDER BY created_at DESC LIMIT 200").all();
   res.send(adminPage('Vendors', `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-      <h1 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;">Vendors (${vendors.length})</h1>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+  <h1 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;margin:0;">Vendors (${vendors.length})</h1>
+  <a href="/admin/vendors/create" class="btn btn-primary btn-sm">+ Create Vendor</a>
+</div>
     </div>
     <table class="admin-table">
       <thead><tr><th>Business</th><th>Email</th><th>Category</th><th>City</th><th>Status</th><th>Payment</th><th>Verified</th><th>Actions</th></tr></thead>
@@ -380,6 +383,50 @@ router.get('/applications/:id/approve', requireAdmin, (req,res) => {
 router.get('/applications/:id/reject', requireAdmin, (req,res) => {
   try { db.prepare("UPDATE vendor_applications SET status='rejected' WHERE id=?").run(parseInt(req.params.id)); } catch(e) {}
   res.redirect('/admin/applications');
+});
+
+// Admin create vendor manually (no payment)
+router.get('/vendors/create', requireAdmin, (req, res) => {
+  res.send(adminPage('Create Vendor', `
+    <h1 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;margin-bottom:24px;">Create Vendor Profile</h1>
+    <form method="POST" action="/admin/vendors/create" style="max-width:600px;">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:16px;">
+        <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Business Name *</label><input type="text" name="business_name" required style="width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;"/></div>
+        <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Email *</label><input type="email" name="email" required style="width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;"/></div>
+        <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Category</label><select name="category" style="width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;"><option>Food & Drinks</option><option>Artisan Crafts</option><option>Technology</option><option>Event Decor</option><option>Entertainment</option><option>Photography</option><option>Kids Activities</option><option>Fashion & Apparel</option><option>Art & Prints</option><option>Live Music</option><option>Retail</option><option>Services</option></select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">City</label><input type="text" name="city" placeholder="e.g. Amsterdam" style="width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;"/></div>
+          <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Country Code</label><input type="text" name="country" placeholder="e.g. NL" maxlength="2" style="width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;"/></div>
+        </div>
+        <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Description</label><textarea name="description" rows="4" style="width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea></div>
+        <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Website</label><input type="url" name="website" placeholder="https://..." style="width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;"/></div>
+        <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Password for vendor login</label><input type="text" name="password" placeholder="e.g. vendor1234" required style="width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;"/></div>
+        <button type="submit" class="btn btn-primary" style="padding:14px;font-size:15px;">Create Vendor Profile →</button>
+      </div>
+    </form>
+  `));
+});
+
+router.post('/vendors/create', requireAdmin, (req, res) => {
+  const { business_name, email, category, city, country, description, website, password } = req.body;
+  if (!business_name || !email) return res.redirect('/admin/vendors/create');
+  const bcrypt = require('bcryptjs');
+  const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  let slug = slugify(business_name + '-' + (city||''));
+  let i = 1;
+  while (db.prepare('SELECT id FROM vendors WHERE slug=?').get(slug)) { slug = slugify(business_name+'-'+(city||''))+'-'+i++; }
+  try {
+    const result = db.prepare(`
+      INSERT INTO vendors (business_name,slug,category,city,country,description,website,email,status,payment_status,verified,premium,tags,photos)
+      VALUES (?,?,?,?,?,?,?,?,'active','paid',1,0,'{}','[]')
+    `).run(business_name, slug, category||'Food & Drinks', city||'', (country||'').toUpperCase(), description||'', website||'', email);
+    const hash = bcrypt.hashSync(password||'festmore2026', 10);
+    db.prepare('INSERT OR IGNORE INTO users (email,password,name,role) VALUES (?,?,?,?)').run(email, hash, business_name, 'vendor');
+    db.prepare('UPDATE users SET password=?, role=? WHERE email=?').run(hash, 'vendor', email);
+    res.redirect('/admin/vendors?success=Vendor created! ID: ' + result.lastInsertRowid);
+  } catch(err) {
+    res.redirect('/admin/vendors/create?error=' + err.message);
+  }
 });
 
 module.exports = router;
