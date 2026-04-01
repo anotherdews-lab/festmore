@@ -43,39 +43,6 @@ app.use('/auth',         require('./routes/auth'));
 app.use('/dashboard',    require('./routes/dashboard'));
 app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
-// TEMP DEBUG ROUTE — remove after use
-app.get('/admin/activate-vendor', (req, res) => {
-  const db = require('./db');
-  const vendors = db.prepare("SELECT id, business_name, email, status, payment_status FROM vendors ORDER BY id DESC LIMIT 10").all();
-  res.send('<pre>' + JSON.stringify(vendors, null, 2) + '</pre>');
-});
-
-app.get('/admin/create-toto-vendor', (req, res) => {
-  const db = require('./db');
-  try {
-    const bcrypt = require('bcryptjs');
-    const tempPassword = 'toto' + Math.floor(1000 + Math.random() * 9000);
-    const hash = bcrypt.hashSync(tempPassword, 10);
-    // Create user account
-    db.prepare(`INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?,?,?,'vendor')`)
-      .run('info@totovinoecucina.nl', hash, 'Toto Vino e Cucina');
-    // Create vendor profile
-    const result = db.prepare(`
-      INSERT OR IGNORE INTO vendors (
-        business_name, slug, category, city, country,
-        description, email, status, payment_status, verified, premium, photos, tags
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-    `).run(
-      'Toto Vino e Cucina', 'toto-vino-e-cucina', 'Food & Drinks',
-      'Netherlands', 'NL',
-      'Authentic Italian wine and food vendor based in the Netherlands. Available for festivals, markets and events across Europe.',
-      'info@totovinoecucina.nl', 'active', 'paid', 1, 0, '[]', '{}'
-    );
-    res.send(`✅ Done! Vendor ID: ${result.lastInsertRowid} | Login: info@totovinoecucina.nl | Password: ${tempPassword} — SAVE THIS PASSWORD and remove the route!`);
-  } catch(err) {
-    res.send('Error: ' + err.message);
-  }
-});
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
 // app.use('/photos', require('./routes/photos'));
