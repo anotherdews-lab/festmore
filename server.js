@@ -1,9 +1,10 @@
 // server.js — FESTMORE v4
+// ✅ PostgreSQL production database
 // ✅ Smart seeding — never overwrites live data
 // ✅ Admin account always created on startup
+// ✅ Toto vendor account always created on startup
 // ✅ All seed scripts included
 // ✅ Cloudinary photo upload
-// ✅ Database permanently protected
 
 require('dotenv').config();
 const express = require('express');
@@ -213,7 +214,7 @@ try {
   try {
     const bcrypt = require('bcryptjs');
     const adminHash = bcrypt.hashSync('Festmore2026!', 10);
-    db.prepare('INSERT OR IGNORE INTO users (email, password, name, role) VALUES (?,?,?,?)').run('gha44ar@aim.com', adminHash, 'Ghaffar', 'admin');
+    db.prepare('INSERT INTO users (email, password, name, role) VALUES (?,?,?,?) ON CONFLICT (email) DO NOTHING').run('gha44ar@aim.com', adminHash, 'Ghaffar', 'admin');
     db.prepare('UPDATE users SET password=?, role=? WHERE email=?').run(adminHash, 'admin', 'gha44ar@aim.com');
     console.log('✅ Admin account ready — gha44ar@aim.com / Festmore2026!');
   } catch(e) {
@@ -222,9 +223,28 @@ try {
 
   // ALWAYS ensure Toto vendor account exists
   try {
-    const totoHash = require('bcryptjs').hashSync('toto9274', 10);
-    db.prepare('INSERT OR IGNORE INTO users (email,password,name,role) VALUES (?,?,?,?)').run('info@totovinoecucina.nl', totoHash, 'Totó Vino e Cucina', 'vendor');
-  } catch(e) {}
+    const bcrypt = require('bcryptjs');
+    const totoHash = bcrypt.hashSync('toto9274', 10);
+    db.prepare('INSERT INTO users (email, password, name, role) VALUES (?,?,?,?) ON CONFLICT (email) DO NOTHING').run('info@totovinoecucina.nl', totoHash, 'Totó Vino e Cucina', 'vendor');
+    console.log('✅ Toto account ready');
+  } catch(e) {
+    console.log('⚠️  Toto account error: ' + e.message);
+  }
+
+  // ALWAYS ensure Toto vendor profile exists
+  try {
+    const totoExists = db.prepare("SELECT id FROM vendors WHERE email='info@totovinoecucina.nl'").get();
+    if (!totoExists) {
+      const photos = JSON.stringify(['https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=998,fit=crop/dJoBO4E41OcprO2x/italiaanse-wijnen-FsuBU7Td1EhC62jN.webp','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-13-ALpOD7zz9EIe6nqD.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-12-AVLzG144Ejh4a1XG.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,h=354,fit=crop/dJoBO4E41OcprO2x/tekengebied-1-kopie-11-mjEQ0qOyZ2fl87aw.jpg','https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=817,fit=crop/dJoBO4E41OcprO2x/pexels-alina-chernii-18771859-AoP6Z7eV59HGj7x8.jpg']);
+      const tags = JSON.stringify({tagline:'Authentic Italian food, wine & catering for unforgettable events',price_range:'€€€ Premium',travel_distance:'Anywhere in Europe',what_we_offer:'Totó Vino e Cucina offers authentic Italian catering, private dining, wine tastings and event catering.',looking_for:'Food festivals, cultural events, corporate events and private parties across the Netherlands and Europe.',event_types_wanted:['Festivals','Food Markets','Corporate Events','Private Parties','Outdoor Events','Indoor Events'],availability:['January','February','March','April','May','June','July','August','September','October','November','December'],languages:'Dutch, English, Italian',certifications:'Professional catering license, Food hygiene certified',needs_electricity:'yes',needs_water:'yes',space_required:'4×4m (large stall)'});
+      db.prepare("INSERT INTO vendors (business_name,slug,category,city,country,description,website,phone,email,status,payment_status,verified,premium,tags,photos,image_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run('Totó Vino e Cucina','toto-vino-e-cucina','Food & Drinks','Haarlem','NL','Totó is a premium Italian catering service based in Haarlem, Netherlands. We specialise in private dining, corporate and event catering, wine tastings and Italian food experiences.','https://totovinoecucina.nl','+31 6 16340363','info@totovinoecucina.nl','active','paid',1,0,tags,photos,'https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=469,fit=crop/dJoBO4E41OcprO2x/toto_homepage_headerimage-mP47eOo3glSrnZPx.jpg');
+      console.log('✅ Toto vendor profile created');
+    } else {
+      console.log('✅ Toto vendor profile exists — ID: ' + totoExists.id);
+    }
+  } catch(e) {
+    console.log('⚠️  Toto vendor error: ' + e.message);
+  }
 
 } catch(err) {
   console.log('⚠️  Startup error: ' + err.message);

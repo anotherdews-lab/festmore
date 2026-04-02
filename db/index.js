@@ -34,12 +34,14 @@ if (DATABASE_URL && DATABASE_URL.startsWith('postgresql')) {
   });
 
   // Convert SQLite ? placeholders to PostgreSQL $1, $2 etc
-  function convertSQL(sql) {
+function convertSQL(sql) {
     let i = 0;
+    // Convert INSERT OR IGNORE to PostgreSQL syntax
+    sql = sql.replace(/INSERT OR IGNORE INTO/gi, 'INSERT INTO');
+    sql = sql.replace(/INSERT OR REPLACE INTO/gi, 'INSERT INTO');
     // Handle SQLite datetime() function
     sql = sql.replace(/datetime\('now'\)/gi, 'NOW()');
     sql = sql.replace(/datetime\('now',\s*'[^']*'\)/gi, 'NOW()');
-    // Handle INTEGER PRIMARY KEY (SQLite) -> SERIAL handled in table creation
     // Convert ? to $1, $2 etc
     sql = sql.replace(/\?/g, () => '$' + (++i));
     return sql;
