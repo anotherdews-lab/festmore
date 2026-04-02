@@ -50,59 +50,252 @@ function vendorImg(v) {
 }
 
 // ─── SEND WELCOME EMAIL ───────────────────────────────────────────
+// ─── SEND WELCOME EMAIL ───────────────────────────────────────────
 async function sendWelcomeEmail(vendor, loginPassword) {
   try {
     const { Resend } = require('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
+
+    const year = new Date().getFullYear();
+    const firstName = vendor.business_name.split(' ')[0];
+
     await resend.emails.send({
-      from: 'Festmore <contact@festmore.com>',
+      from: 'Carla Pont at Festmore <contact@festmore.com>',
       to: vendor.email,
-      subject: `Welcome to Festmore, ${vendor.business_name}! 🎉 Your profile is live`,
+      subject: `You're live on Festmore — here are your login details`,
       html: `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"/></head>
-<body style="font-family:'Helvetica Neue',Arial,sans-serif;background:#faf8f3;margin:0;padding:40px 20px;">
-<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);">
-  <div style="background:linear-gradient(135deg,#0d1f15,#1a3d28);padding:40px;text-align:center;">
-    <div style="font-size:48px;margin-bottom:12px;">🎉</div>
-    <h1 style="font-family:Georgia,serif;font-size:28px;font-weight:400;color:#fff;margin:0 0 8px;">Welcome to Festmore!</h1>
-    <p style="color:rgba(255,255,255,.6);font-size:15px;margin:0;">Your vendor profile is now live and visible worldwide</p>
-  </div>
-  <div style="padding:40px;">
-    <p style="font-size:16px;color:#1a1612;line-height:1.7;">Hi <strong>${vendor.business_name}</strong>,</p>
-    <p style="font-size:15px;color:#6b5f58;line-height:1.7;">Thank you for joining Festmore as a verified vendor! Your professional profile is now live and visible to event organisers across Europe and beyond.</p>
-    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:20px;margin:24px 0;">
-      <div style="font-size:14px;font-weight:700;color:#15803d;margin-bottom:12px;">✅ Your login details</div>
-      <div style="font-size:14px;color:#166534;line-height:2;">
-        <strong>Login URL:</strong> <a href="https://festmore.com/auth/login" style="color:#15803d;">festmore.com/auth/login</a><br/>
-        <strong>Email:</strong> ${vendor.email}<br/>
-        <strong>Password:</strong> <code style="background:#dcfce7;padding:2px 8px;border-radius:4px;">${loginPassword}</code><br/>
-        <span style="font-size:12px;color:#6b5f58;">You can change your password after first login in your dashboard settings.</span>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Welcome to Festmore</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f0e8;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+<!-- WRAPPER -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f0e8;padding:40px 20px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+
+  <!-- HEADER -->
+  <tr>
+    <td style="background:#0a1a0f;border-radius:20px 20px 0 0;padding:48px 48px 40px;text-align:center;">
+      <!-- Logo -->
+      <div style="margin-bottom:32px;">
+        <span style="font-size:28px;font-weight:800;letter-spacing:-1px;">
+          <span style="color:#ffffff;">Fest</span><span style="color:#e8470a;">more</span><span style="display:inline-block;width:6px;height:6px;background:#e8470a;border-radius:50%;margin-left:2px;vertical-align:middle;"></span>
+        </span>
       </div>
-    </div>
-    <h3 style="font-size:16px;font-weight:700;color:#1a1612;margin-bottom:12px;">What to do next:</h3>
-    ${[
-      ['📸','Add photos to your profile','Vendors with photos get 3× more enquiries from organisers'],
-      ['🎪','Browse events','Find festivals and markets looking for vendors like you'],
-      ['📝','Complete your profile','Add certifications, availability and social media links'],
-      ['🌍','Get discovered','Event organisers worldwide can now find and contact you directly'],
-    ].map(([icon,title,desc]) => `
-    <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f1ede8;">
-      <div style="font-size:20px;flex-shrink:0;">${icon}</div>
-      <div><div style="font-size:14px;font-weight:600;color:#1a1612;">${title}</div><div style="font-size:13px;color:#6b5f58;">${desc}</div></div>
-    </div>`).join('')}
-    <div style="margin-top:28px;text-align:center;">
-      <a href="https://festmore.com/auth/login" style="display:inline-block;background:#4a7c59;color:#fff;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;">Go to Your Dashboard →</a>
-    </div>
-    <div style="margin-top:32px;padding-top:24px;border-top:1px solid #f1ede8;">
-      <p style="font-size:13px;color:#6b5f58;line-height:1.7;">If you have any questions or need help with your profile, just reply to this email — I personally respond to every message.</p>
-      <p style="font-size:13px;color:#6b5f58;">Best regards,<br/><strong>Ghaffar</strong><br/>Founder, Festmore.com</p>
-    </div>
-  </div>
-  <div style="background:#f1ede8;padding:20px;text-align:center;">
-    <p style="font-size:12px;color:#9b8f88;margin:0;">© ${new Date().getFullYear()} Festmore.com · <a href="https://festmore.com" style="color:#9b8f88;">festmore.com</a></p>
-  </div>
-</div>
-</body></html>`,
+      <!-- Badge -->
+      <div style="display:inline-block;background:rgba(74,124,89,0.2);border:1px solid rgba(74,124,89,0.4);border-radius:99px;padding:6px 16px;margin-bottom:24px;">
+        <span style="color:#7ec99a;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">✓ Verified Vendor</span>
+      </div>
+      <!-- Headline -->
+      <h1 style="font-size:36px;font-weight:400;color:#ffffff;margin:0 0 12px;line-height:1.2;font-family:Georgia,'Times New Roman',serif;">
+        You're live on Festmore
+      </h1>
+      <p style="font-size:16px;color:rgba(255,255,255,0.55);margin:0;line-height:1.6;">
+        Your vendor profile is now visible to thousands of<br/>event organisers across Europe and worldwide.
+      </p>
+    </td>
+  </tr>
+
+  <!-- HERO IMAGE BAR -->
+  <tr>
+    <td style="background:linear-gradient(135deg,#1a3d28,#0d2518);padding:0;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center" style="padding:28px 48px;">
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="text-align:center;padding:0 16px;">
+                  <div style="font-size:28px;font-weight:800;color:#ffffff;">174+</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Events</div>
+                </td>
+                <td style="width:1px;background:rgba(255,255,255,0.1);"></td>
+                <td style="text-align:center;padding:0 16px;">
+                  <div style="font-size:28px;font-weight:800;color:#ffffff;">26</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Countries</div>
+                </td>
+                <td style="width:1px;background:rgba(255,255,255,0.1);"></td>
+                <td style="text-align:center;padding:0 16px;">
+                  <div style="font-size:28px;font-weight:800;color:#e8470a;">€49</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Per Year</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- MAIN CONTENT -->
+  <tr>
+    <td style="background:#ffffff;padding:48px;">
+
+      <!-- Greeting -->
+      <p style="font-size:17px;color:#1a1612;line-height:1.7;margin:0 0 16px;">
+        Hi <strong>${vendor.business_name}</strong>,
+      </p>
+      <p style="font-size:15px;color:#6b5f58;line-height:1.8;margin:0 0 32px;">
+        Welcome to Festmore — Europe's fastest-growing event vendor marketplace. Your verified profile is now live and searchable by event organisers across the world. We're thrilled to have you on board.
+      </p>
+
+      <!-- LOGIN BOX -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4;border:2px solid #86efac;border-radius:16px;margin-bottom:32px;">
+        <tr>
+          <td style="padding:24px 28px;">
+            <div style="font-size:13px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">🔐 Your Login Details</div>
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:6px 0;">
+                  <span style="font-size:13px;color:#6b7280;width:80px;display:inline-block;">Login:</span>
+                  <a href="https://festmore.com/auth/login" style="font-size:13px;color:#15803d;font-weight:600;text-decoration:none;">festmore.com/auth/login</a>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;">
+                  <span style="font-size:13px;color:#6b7280;width:80px;display:inline-block;">Email:</span>
+                  <span style="font-size:13px;color:#1a1612;font-weight:600;">${vendor.email}</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;">
+                  <span style="font-size:13px;color:#6b7280;width:80px;display:inline-block;">Password:</span>
+                  <span style="font-size:13px;color:#1a1612;font-weight:700;background:#dcfce7;padding:3px 10px;border-radius:6px;font-family:monospace;">${loginPassword}</span>
+                </td>
+              </tr>
+            </table>
+            <p style="font-size:12px;color:#6b7280;margin:14px 0 0;">We recommend changing your password after first login from your dashboard settings.</p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- WHAT TO DO NEXT -->
+      <h2 style="font-size:18px;font-weight:700;color:#1a1612;margin:0 0 20px;">Get the most out of Festmore</h2>
+
+      <!-- Step 1 -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+        <tr>
+          <td width="48" valign="top">
+            <div style="width:40px;height:40px;background:#fff7ed;border-radius:10px;text-align:center;line-height:40px;font-size:20px;">📸</div>
+          </td>
+          <td style="padding-left:16px;">
+            <div style="font-size:14px;font-weight:700;color:#1a1612;margin-bottom:4px;">Add photos to your profile</div>
+            <div style="font-size:13px;color:#6b5f58;line-height:1.6;">Vendors with photos receive 3× more enquiries. Upload directly from your phone or computer — no technical knowledge needed.</div>
+          </td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+        <tr>
+          <td width="48" valign="top">
+            <div style="width:40px;height:40px;background:#f0fdf4;border-radius:10px;text-align:center;line-height:40px;font-size:20px;">🎪</div>
+          </td>
+          <td style="padding-left:16px;">
+            <div style="font-size:14px;font-weight:700;color:#1a1612;margin-bottom:4px;">Browse events looking for vendors</div>
+            <div style="font-size:13px;color:#6b5f58;line-height:1.6;">174+ festivals, markets and events are listed on Festmore. Browse by country, category and date to find your ideal events.</div>
+          </td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+        <tr>
+          <td width="48" valign="top">
+            <div style="width:40px;height:40px;background:#fef3c7;border-radius:10px;text-align:center;line-height:40px;font-size:20px;">📝</div>
+          </td>
+          <td style="padding-left:16px;">
+            <div style="font-size:14px;font-weight:700;color:#1a1612;margin-bottom:4px;">Complete your profile</div>
+            <div style="font-size:13px;color:#6b5f58;line-height:1.6;">Add your availability, event types, setup requirements and social media links. A complete profile ranks higher in search results.</div>
+          </td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+        <tr>
+          <td width="48" valign="top">
+            <div style="width:40px;height:40px;background:#fdf2f8;border-radius:10px;text-align:center;line-height:40px;font-size:20px;">🌍</div>
+          </td>
+          <td style="padding-left:16px;">
+            <div style="font-size:14px;font-weight:700;color:#1a1612;margin-bottom:4px;">Get discovered worldwide</div>
+            <div style="font-size:13px;color:#6b5f58;line-height:1.6;">Event organisers from 26 countries can now find and contact you directly through your Festmore profile.</div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- CTA BUTTON -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+        <tr>
+          <td align="center">
+            <a href="https://festmore.com/auth/login" style="display:inline-block;background:#e8470a;color:#ffffff;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;letter-spacing:0.3px;">
+              Go to Your Dashboard →
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <!-- VIEW PROFILE -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf8f3;border-radius:12px;margin-bottom:32px;">
+        <tr>
+          <td style="padding:20px 24px;">
+            <div style="font-size:13px;color:#6b5f58;margin-bottom:8px;">Your public profile is live at:</div>
+            <a href="https://festmore.com/vendors" style="font-size:14px;color:#e8470a;font-weight:600;text-decoration:none;">festmore.com/vendors → ${vendor.business_name}</a>
+          </td>
+        </tr>
+      </table>
+
+      <!-- PERSONAL NOTE -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #f1ede8;padding-top:28px;margin-top:8px;">
+        <tr>
+          <td>
+            <p style="font-size:14px;color:#6b5f58;line-height:1.8;margin:0 0 16px;">
+              I personally review every vendor profile on Festmore and I'm always here to help. If you have any questions, want to update something or need assistance — just reply to this email and I'll get back to you personally within a few hours.
+            </p>
+            <p style="font-size:14px;color:#1a1612;margin:0;">
+              Wishing you many bookings and great events,<br/><br/>
+              <strong style="font-size:15px;">CarlaPont</strong><br/>
+              <span style="color:#6b5f58;font-size:13px;">Founder, Festmore.com</span>
+            </p>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="background:#1a1612;border-radius:0 0 20px 20px;padding:28px 48px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td>
+            <span style="font-size:18px;font-weight:800;letter-spacing:-0.5px;">
+              <span style="color:#ffffff;">Fest</span><span style="color:#e8470a;">more</span>
+            </span>
+          </td>
+          <td align="right">
+            <a href="https://festmore.com/events" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;margin-left:16px;">Events</a>
+            <a href="https://festmore.com/vendors" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;margin-left:16px;">Vendors</a>
+            <a href="https://festmore.com/contact" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;margin-left:16px;">Contact</a>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);margin-top:16px;">
+            <p style="font-size:11px;color:rgba(255,255,255,0.25);margin:0;line-height:1.6;">
+              © ${year} Festmore.com · Europe's Event Vendor Marketplace<br/>
+              You received this email because you registered as a vendor on Festmore.com.<br/>
+              Questions? Reply to this email or contact <a href="mailto:contact@festmore.com" style="color:rgba(255,255,255,0.4);text-decoration:none;">contact@festmore.com</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+
+</body>
+</html>`,
     });
     console.log('✅ Welcome email sent to:', vendor.email);
   } catch(err) {
