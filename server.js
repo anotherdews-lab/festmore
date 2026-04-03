@@ -63,6 +63,7 @@ app.use('/api',          require('./routes/api'));
 app.use('/upload',       require('./routes/upload'));
 app.use('/admin',        require('./routes/admin'));
 app.use('/applications', require('./routes/applications'));
+app.use('/messages',     require('./routes/messages'));
 app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
