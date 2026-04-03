@@ -185,7 +185,13 @@ ${foot()}
 // ─────────────────────────────────────
 function renderArticleDetail(a, related, user) {
   const img  = a.image_url || IMGS[a.category] || IMGS.festival;
-  const tags = JSON.parse(a.tags || '[]');
+  let tags = [];
+try {
+  tags = JSON.parse(a.tags || '[]');
+  if (typeof tags === 'string') tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+} catch(e) {
+  tags = (a.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+}
   const dateStr = new Date(a.created_at).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
 
   return `<!DOCTYPE html>
