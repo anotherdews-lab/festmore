@@ -820,19 +820,47 @@ ${renderNavSimple(user)}
       <button onclick="shareEvent()" class="btn btn-ghost" style="width:100%;margin-top:8px;">Share This Event 🔗</button>
     </div>
     ${isFree ? `
-    <div style="margin-top:16px;background:var(--ivory);border:1px solid var(--border);border-radius:16px;padding:22px;text-align:center;">
-      <div style="font-size:13px;color:var(--ink3);margin-bottom:12px;">Are you the organiser of this event?</div>
-      <a href="/events/pricing" class="btn btn-primary btn-sm" style="display:block;">Upgrade for More Visibility →</a>
-    </div>` : ''}
-    <ins class="adsbygoogle" style="display:block;margin-top:16px;" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    <div style="margin-top:16px;background:var(--ink);border-radius:16px;padding:24px;color:#fff;">
-      <h4 style="font-family:'DM Serif Display',serif;font-size:18px;font-weight:400;margin-bottom:8px;">Are you a vendor?</h4>
-      <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;">Create your vendor profile and apply for spots at events like this one.</p>
-      <a href="/vendors/register" class="btn btn-primary" style="display:block;text-align:center;">Join as Vendor — €49/yr</a>
+  <div style="margin-top:16px;background:var(--ink);border-radius:16px;padding:24px;color:#fff;">
+      <h4 style="font-family:'DM Serif Display',serif;font-size:18px;font-weight:400;margin-bottom:8px;">🏪 Are you a vendor?</h4>
+      <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;">Apply to participate at this event with your vendor profile.</p>
+      ${user ? `
+      <div id="apply-section">
+        <button onclick="document.getElementById('apply-form').style.display=document.getElementById('apply-form').style.display==='none'?'block':'none'" class="btn btn-primary" style="width:100%;margin-bottom:8px;">Apply to This Event →</button>
+        <div id="apply-form" style="display:none;margin-top:12px;">
+          <textarea id="apply-message" placeholder="Tell the organiser about your business and why you'd be a great fit..." rows="4" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 14px;font-size:13px;color:#fff;outline:none;resize:vertical;font-family:inherit;box-sizing:border-box;margin-bottom:10px;"></textarea>
+          <div id="apply-result" style="display:none;margin-bottom:10px;"></div>
+          <button onclick="submitApplication(${e.id})" class="btn btn-primary" style="width:100%;background:#4a7c59;">Submit Application →</button>
+        </div>
+      </div>` : `
+      <a href="/auth/login?redirect=/events/${e.slug}" class="btn btn-primary" style="display:block;text-align:center;margin-bottom:8px;">Login to Apply →</a>
+      <a href="/vendors/register" style="display:block;text-align:center;font-size:13px;color:rgba(255,255,255,.5);margin-top:8px;">Not a vendor yet? Register here →</a>`}
     </div>
   </aside>
 </div>
+
+<script>
+async function submitApplication(eventId) {
+  const message = document.getElementById('apply-message').value;
+  const result = document.getElementById('apply-result');
+  result.style.display = 'block';
+  result.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.6);">Submitting...</div>';
+  const vendorRes = await fetch('/api/my-vendor');
+  const vendorData = await vendorRes.json();
+  if (!vendorData.vendor_id) {
+    result.innerHTML = '<div style="background:rgba(220,38,38,.2);border-radius:8px;padding:10px;font-size:13px;color:#fca5a5;">You need a paid vendor profile to apply. <a href="/vendors/register" style="color:#fff;font-weight:700;">Register here →</a></div>';
+    return;
+  }
+  const r = await fetch('/applications/apply', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ vendor_id: vendorData.vendor_id, event_id: eventId, message })
+  });
+  const d = await r.json();
+  result.innerHTML = d.ok
+    ? '<div style="background:rgba(74,124,89,.3);border-radius:8px;padding:10px;font-size:13px;color:#86efac;">✅ ' + d.msg + '</div>'
+    : '<div style="background:rgba(220,38,38,.2);border-radius:8px;padding:10px;font-size:13px;color:#fca5a5;">❌ ' + d.msg + '</div>';
+}
+</script>
 ${renderFooterSimple()}
 <script>
 function shareEvent() {

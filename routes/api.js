@@ -17,5 +17,10 @@ router.get('/stats', (req, res) => {
     articles: db.prepare("SELECT COUNT(*) as n FROM articles WHERE status='published'").get().n,
   });
 });
+router.get('/my-vendor', (req, res) => {
+  if (!req.session.user) return res.json({ vendor_id: null });
+  const vendor = db.prepare("SELECT id FROM vendors WHERE email=? AND status='active' AND payment_status='paid'").get(req.session.user.email);
+  res.json({ vendor_id: vendor ? vendor.id : null });
+});
 
 module.exports = router;
