@@ -1,144 +1,191 @@
-// routes/sitemap.js — ENHANCED SITEMAP
-// Includes all events, articles, vendors, city pages with proper priorities
+// routes/sitemap.js — COMPLETE SEO SITEMAP v2
+// ✅ Proper XML sitemap index
+// ✅ Separate sitemaps for events, articles, vendors
+// ✅ robots.txt
+// ✅ 301 redirects for bad 404 URLs
+// ✅ Never deletes any data
 
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
 
-const SITE_URL = process.env.SITE_URL || 'https://festmore.com';
-
-const CITY_SLUGS = [
-  'berlin','munich','hamburg','cologne','frankfurt','nuremberg','dusseldorf',
-  'stuttgart','dresden','leipzig','copenhagen','aarhus','roskilde','odense',
-  'aalborg','amsterdam','rotterdam','the-hague','utrecht','eindhoven','london',
-  'manchester','edinburgh','bristol','glasgow','liverpool','paris','lyon',
-  'marseille','bordeaux','nice','barcelona','madrid','seville','valencia',
-  'bilbao','rome','milan','venice','florence','naples','stockholm','gothenburg',
-  'malmo','oslo','bergen','helsinki','tampere','vienna','salzburg','innsbruck',
-  'zurich','geneva','montreux','basel','brussels','ghent','bruges','antwerp',
-  'lisbon','porto','dublin','galway','prague','brno','budapest','warsaw',
-  'krakow','wroclaw','gdansk','poznan','kostrzyn','athens','thessaloniki',
-  'zagreb','split','dubrovnik','dubai','abu-dhabi','new-york','los-angeles',
-  'chicago','mumbai','delhi','jaipur','goa','varanasi','bangkok','chiang-mai',
-  'phuket','tokyo','kyoto','osaka','sapporo'
-];
-
-router.get('/sitemap.xml', (req, res) => {
-  const events   = db.prepare("SELECT slug, updated_at, created_at FROM events WHERE status='active' ORDER BY created_at DESC").all();
-  const articles = db.prepare("SELECT slug, created_at FROM articles WHERE status='published' ORDER BY created_at DESC").all();
-  const vendors  = db.prepare("SELECT slug, created_at FROM vendors WHERE status='active' ORDER BY created_at DESC").all();
-
-  const today = new Date().toISOString().substring(0, 10);
-
-  const staticPages = [
-    { url: '/',                    priority: '1.0', changefreq: 'daily' },
-    { url: '/events',              priority: '0.9', changefreq: 'daily' },
-    { url: '/events/pricing',      priority: '0.8', changefreq: 'weekly' },
-    { url: '/events/submit',       priority: '0.8', changefreq: 'monthly' },
-    { url: '/vendors',             priority: '0.9', changefreq: 'daily' },
-    { url: '/vendors/register',    priority: '0.8', changefreq: 'monthly' },
-    { url: '/articles',            priority: '0.8', changefreq: 'daily' },
-    { url: '/events/in',           priority: '0.8', changefreq: 'weekly' },
-    { url: '/about',               priority: '0.5', changefreq: 'monthly' },
-    { url: '/contact',             priority: '0.5', changefreq: 'monthly' },
-    { url: '/privacy',             priority: '0.3', changefreq: 'yearly' },
-    { url: '/events?category=festival',   priority: '0.8', changefreq: 'daily' },
-    { url: '/events?category=christmas',  priority: '0.8', changefreq: 'daily' },
-    { url: '/events?category=market',     priority: '0.8', changefreq: 'daily' },
-    { url: '/events?category=concert',    priority: '0.7', changefreq: 'daily' },
-    { url: '/events?category=flea',       priority: '0.7', changefreq: 'daily' },
-    { url: '/events?category=city',       priority: '0.7', changefreq: 'daily' },
-    { url: '/events?category=business',   priority: '0.7', changefreq: 'daily' },
-    { url: '/events?category=kids',       priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=DE', priority: '0.8', changefreq: 'daily' },
-    { url: '/events?country=DK', priority: '0.8', changefreq: 'daily' },
-    { url: '/events?country=NL', priority: '0.8', changefreq: 'daily' },
-    { url: '/events?country=GB', priority: '0.7', changefreq: 'daily' },
-    { url: '/events?country=FR', priority: '0.7', changefreq: 'daily' },
-    { url: '/events?country=SE', priority: '0.7', changefreq: 'daily' },
-    { url: '/events?country=BE', priority: '0.7', changefreq: 'daily' },
-    { url: '/events?country=US', priority: '0.7', changefreq: 'daily' },
-    { url: '/events?country=AE', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=PL', priority: '0.8', changefreq: 'daily' },
-    { url: '/events?country=IT', priority: '0.7', changefreq: 'daily' },
-    { url: '/events?country=ES', priority: '0.7', changefreq: 'daily' },
-    { url: '/events?country=PT', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=IE', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=AT', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=CH', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=NO', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=FI', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=JP', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=TH', priority: '0.6', changefreq: 'daily' },
-    { url: '/events?country=IN', priority: '0.6', changefreq: 'daily' },
-  ];
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-
-${staticPages.map(p => `  <url>
-    <loc>${SITE_URL}${p.url}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>${p.changefreq}</changefreq>
-    <priority>${p.priority}</priority>
-  </url>`).join('\n')}
-
-${CITY_SLUGS.map(slug => `  <url>
-    <loc>${SITE_URL}/events/in/${slug}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`).join('\n')}
-
-${events.map(e => `  <url>
-    <loc>${SITE_URL}/events/${e.slug}</loc>
-    <lastmod>${(e.updated_at || e.created_at || today).substring(0, 10)}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`).join('\n')}
-
-${articles.map(a => `  <url>
-    <loc>${SITE_URL}/articles/${a.slug}</loc>
-    <lastmod>${(a.created_at || today).substring(0, 10)}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>`).join('\n')}
-
-${vendors.map(v => `  <url>
-    <loc>${SITE_URL}/vendors/${v.slug}</loc>
-    <lastmod>${(v.created_at || today).substring(0, 10)}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>`).join('\n')}
-
-</urlset>`;
-
-  res.header('Content-Type', 'application/xml');
-  res.header('Cache-Control', 'public, max-age=3600');
-  res.send(xml);
+// ─────────────────────────────────────
+// REDIRECT MIDDLEWARE
+// Catches old bad URLs and 301 redirects them
+// ─────────────────────────────────────
+router.use((req, res, next) => {
+  try {
+    const redirect = db.prepare('SELECT to_path, status_code FROM redirects WHERE from_path=?').get(req.path);
+    if (redirect) {
+      return res.redirect(redirect.status_code || 301, redirect.to_path);
+    }
+  } catch(e) {}
+  next();
 });
 
-// robots.txt
+// ─────────────────────────────────────
+// ROBOTS.TXT
+// ─────────────────────────────────────
 router.get('/robots.txt', (req, res) => {
-  res.header('Content-Type', 'text/plain');
-  res.send(`# Festmore.com robots.txt
-User-agent: *
+  res.type('text/plain');
+  res.send(`User-agent: *
 Allow: /
+Sitemap: https://festmore.com/sitemap.xml
+
 Disallow: /admin/
-Disallow: /dashboard/
 Disallow: /auth/
+Disallow: /dashboard/
 Disallow: /api/
 Disallow: /payments/
-
-# Sitemaps
-Sitemap: ${SITE_URL}/sitemap.xml
-
-# Crawl-delay
-Crawl-delay: 1
+Disallow: /messages/
+Disallow: /applications/
 `);
+});
+
+// ─────────────────────────────────────
+// SITEMAP INDEX
+// ─────────────────────────────────────
+router.get('/sitemap.xml', (req, res) => {
+  const now = new Date().toISOString().split('T')[0];
+  res.type('application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>https://festmore.com/sitemap-pages.xml</loc><lastmod>${now}</lastmod></sitemap>
+  <sitemap><loc>https://festmore.com/sitemap-events.xml</loc><lastmod>${now}</lastmod></sitemap>
+  <sitemap><loc>https://festmore.com/sitemap-articles.xml</loc><lastmod>${now}</lastmod></sitemap>
+  <sitemap><loc>https://festmore.com/sitemap-vendors.xml</loc><lastmod>${now}</lastmod></sitemap>
+</sitemapindex>`);
+});
+
+// ─────────────────────────────────────
+// STATIC PAGES SITEMAP
+// ─────────────────────────────────────
+router.get('/sitemap-pages.xml', (req, res) => {
+  const now = new Date().toISOString().split('T')[0];
+  const pages = [
+    ['/', '1.0', 'daily'],
+    ['/events', '0.9', 'daily'],
+    ['/vendors', '0.9', 'daily'],
+    ['/articles', '0.8', 'daily'],
+    ['/events/submit', '0.8', 'weekly'],
+    ['/events/pricing', '0.8', 'weekly'],
+    ['/vendors/register', '0.8', 'weekly'],
+    ['/about', '0.5', 'monthly'],
+    ['/contact', '0.5', 'monthly'],
+    ['/privacy', '0.3', 'monthly'],
+    ['/events?category=festival', '0.8', 'daily'],
+    ['/events?category=market', '0.8', 'daily'],
+    ['/events?category=christmas', '0.7', 'daily'],
+    ['/events?category=concert', '0.7', 'daily'],
+    ['/events?category=flea', '0.7', 'daily'],
+    ['/events?category=exhibition', '0.7', 'daily'],
+    ['/events?country=DE', '0.8', 'daily'],
+    ['/events?country=DK', '0.8', 'daily'],
+    ['/events?country=NL', '0.8', 'daily'],
+    ['/events?country=GB', '0.8', 'daily'],
+    ['/events?country=FR', '0.7', 'daily'],
+    ['/events?country=SE', '0.7', 'daily'],
+    ['/events?country=BE', '0.7', 'daily'],
+    ['/events?country=US', '0.7', 'daily'],
+    ['/events?country=IT', '0.7', 'daily'],
+    ['/events?country=ES', '0.7', 'daily'],
+    ['/events?country=IN', '0.6', 'daily'],
+    ['/events?country=JP', '0.6', 'daily'],
+    ['/events?country=TH', '0.6', 'daily'],
+    ['/events?country=PL', '0.6', 'daily'],
+    ['/events?country=NO', '0.6', 'daily'],
+    ['/events?country=FI', '0.6', 'daily'],
+  ];
+  res.type('application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages.map(([url, priority, freq]) => `  <url>
+    <loc>https://festmore.com${url}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>${freq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`).join('\n')}
+</urlset>`);
+});
+
+// ─────────────────────────────────────
+// EVENTS SITEMAP
+// ─────────────────────────────────────
+router.get('/sitemap-events.xml', (req, res) => {
+  const events = db.prepare(`
+    SELECT slug, updated_at, created_at, featured
+    FROM events WHERE status='active'
+    ORDER BY featured DESC, created_at DESC
+    LIMIT 5000
+  `).all();
+
+  res.type('application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${events.map(e => {
+  const d = e.updated_at || e.created_at || new Date().toISOString();
+  const lastmod = typeof d === 'string' ? d.substring(0,10) : new Date(d).toISOString().split('T')[0];
+  return `  <url>
+    <loc>https://festmore.com/events/${e.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>${e.featured ? '0.9' : '0.7'}</priority>
+  </url>`;
+}).join('\n')}
+</urlset>`);
+});
+
+// ─────────────────────────────────────
+// ARTICLES SITEMAP
+// ─────────────────────────────────────
+router.get('/sitemap-articles.xml', (req, res) => {
+  const articles = db.prepare(`
+    SELECT slug, updated_at, created_at
+    FROM articles WHERE status='published'
+    ORDER BY created_at DESC
+    LIMIT 5000
+  `).all();
+
+  res.type('application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${articles.map(a => {
+  const d = a.updated_at || a.created_at || new Date().toISOString();
+  const lastmod = typeof d === 'string' ? d.substring(0,10) : new Date(d).toISOString().split('T')[0];
+  return `  <url>
+    <loc>https://festmore.com/articles/${a.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+}).join('\n')}
+</urlset>`);
+});
+
+// ─────────────────────────────────────
+// VENDORS SITEMAP
+// ─────────────────────────────────────
+router.get('/sitemap-vendors.xml', (req, res) => {
+  const vendors = db.prepare(`
+    SELECT id, updated_at, created_at
+    FROM vendors WHERE status='active' AND payment_status='paid'
+    ORDER BY created_at DESC LIMIT 5000
+  `).all();
+
+  res.type('application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${vendors.map(v => {
+  const d = v.updated_at || v.created_at || new Date().toISOString();
+  const lastmod = typeof d === 'string' ? d.substring(0,10) : new Date(d).toISOString().split('T')[0];
+  return `  <url>
+    <loc>https://festmore.com/vendors/profile/${v.id}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+}).join('\n')}
+</urlset>`);
 });
 
 module.exports = router;
