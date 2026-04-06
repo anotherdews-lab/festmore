@@ -450,18 +450,44 @@ function renderEventDetail(e, related, user) {
 <meta property="og:title" content="${e.title} — Festmore"/>
 <meta property="og:image" content="${img}"/>
 <script type="application/ld+json">${JSON.stringify({
-  "@context":"https://schema.org","@type":"Event",
-  "name":e.title,
-  "startDate":e.start_date+"T00:00:00",
-  "endDate":(e.end_date||e.start_date)+"T23:59:00",
-  "eventStatus":"https://schema.org/EventScheduled",
-  "eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode",
-  "location":{"@type":"Place","name":e.address||e.city||"TBC","address":{"@type":"PostalAddress","addressLocality":e.city||"","addressCountry":e.country||""}},
-  "image":[img],
-  "description":(e.description||"").substring(0,500),
-  "organizer":{"@type":"Organization","name":"Festmore","url":"https://festmore.com"},
-  "offers":{"@type":"Offer","price":e.price_display==="Free"?"0":"0","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":e.ticket_url||e.website||"https://festmore.com/events/"+e.slug},
-  "isAccessibleForFree":e.price_display==="Free"||e.price_display==="Free Entry"
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": e.title,
+  "description": (e.description || "").substring(0, 500),
+  "image": [img],
+  "startDate": e.start_date ? e.start_date + "T00:00:00" : null,
+  "endDate": e.end_date ? e.end_date + "T23:59:00" : e.start_date + "T23:59:00",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "location": {
+    "@type": "Place",
+    "name": e.address || e.city || "TBC",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": e.address || "",
+      "addressLocality": e.city || "",
+      "addressCountry": e.country || ""
+    }
+  },
+  "organizer": {
+    "@type": "Organization",
+    "name": e.organiser_name || "Festmore",
+    "url": e.website || "https://festmore.com"
+  },
+  "offers": {
+    "@type": "Offer",
+    "name": e.price_display || "See website",
+    "price": e.price_display === "Free" ? "0" : "",
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/InStock",
+    "validFrom": e.created_at ? e.created_at.toString().substring(0,10) : e.start_date,
+    "url": e.ticket_url || e.website || "https://festmore.com/events/" + e.slug
+  },
+  "performer": {
+    "@type": "PerformingGroup",
+    "name": e.title
+  },
+  "isAccessibleForFree": e.price_display === "Free" || e.price_display === "Free Entry"
 })}</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/main.css"/>
