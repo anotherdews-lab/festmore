@@ -217,6 +217,7 @@ function renderEventsPage({ events, total, totalPages, page, q, country, categor
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>${category!=='ALL'?CAT_NAMES[category]+' — ':''}${country!=='ALL'?COUNTRY_NAMES[country]+' ':''}Events ${new Date().getFullYear()} | Festmore</title>
 <meta name="description" content="Browse ${total}+ ${category!=='ALL'?CAT_NAMES[category]:''} events${country!=='ALL'?' in '+COUNTRY_NAMES[country]:'worldwide'}. Free and paid events, festivals, markets and more."/>
+<link rel="canonical" href="https://festmore.com/events${country!=='ALL'?'?country='+country:category!=='ALL'?'?category='+category:''}"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222" crossorigin="anonymous"></script>
@@ -449,6 +450,7 @@ function renderEventDetail(e, related, user) {
 <meta name="description" content="${(e.description||'').substring(0,155)}"/>
 <meta property="og:title" content="${e.title} — Festmore"/>
 <meta property="og:image" content="${img}"/>
+<link rel="canonical" href="https://festmore.com/events/${e.slug}"/>
 <script type="application/ld+json">${JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Event",
