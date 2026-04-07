@@ -62,6 +62,7 @@ app.use('/payments',     require('./routes/payments'));
 app.use('/api',          require('./routes/api'));
 app.use('/upload',       require('./routes/upload'));
 app.use('/admin',        require('./routes/admin'));
+app.use('/admin', require('./routes/admin-social'));
 app.use('/applications', require('./routes/applications'));
 app.use('/messages',     require('./routes/messages'));
 app.use('/festival',     require('./routes/landing'));
