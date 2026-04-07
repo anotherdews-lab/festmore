@@ -31,7 +31,7 @@ router.get('/random-event', (req, res) => {
            image_url, description
     FROM events
     WHERE status='active'
-    AND start_date >= CURRENT_DATE
+    AND start_date >= NOW()::date
     ORDER BY RANDOM()
     LIMIT 1
   `).get();
@@ -84,7 +84,7 @@ router.get('/random-vendor-event', (req, res) => {
            start_date, price_display, vendor_spots, image_url
     FROM events
     WHERE status='active'
-    AND start_date >= CURRENT_DATE
+    AND start_date >= NOW()::date
     AND vendor_spots > 0
     ORDER BY RANDOM()
     LIMIT 1
