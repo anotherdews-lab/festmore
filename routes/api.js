@@ -25,18 +25,15 @@ router.get('/my-vendor', (req, res) => {
 
 // Random event for Make.com/social media automation
 router.get('/random-event', (req, res) => {
-  const events = db.prepare(`
-    SELECT id, title, slug, city, country, category, date_display,
-           start_date, price_display, attendees, vendor_spots,
-           image_url, description
-    FROM events
-    WHERE status='active'
-    WHERE status='active'
-ORDER BY RANDOM()
-LIMIT 1
-    ORDER BY RANDOM()
-    LIMIT 1
-  `).get();
+ const events = db.prepare(`
+  SELECT id, title, slug, city, country, category, date_display,
+         start_date, price_display, attendees, vendor_spots,
+         image_url, description
+  FROM events
+  WHERE status='active'
+  ORDER BY RANDOM()
+  LIMIT 1
+`).get();
 
   if (!events) return res.json({ ok: false, msg: 'No events found' });
 
@@ -82,17 +79,14 @@ LIMIT 1
 // Vendor callout post for Make.com
 router.get('/random-vendor-event', (req, res) => {
   const events = db.prepare(`
-    SELECT id, title, slug, city, country, category, date_display,
-           start_date, price_display, vendor_spots, image_url
-    FROM events
-    WHERE status='active'
-    WHERE status='active'
-ORDER BY RANDOM()
-LIMIT 1
-    AND vendor_spots > 0
-    ORDER BY RANDOM()
-    LIMIT 1
-  `).get();
+  SELECT id, title, slug, city, country, category, date_display,
+         start_date, price_display, vendor_spots, image_url
+  FROM events
+  WHERE status='active'
+  AND vendor_spots > 0
+  ORDER BY RANDOM()
+  LIMIT 1
+`).get();
 
   if (!events) return res.json({ ok: false, msg: 'No events with vendor spots found' });
 
