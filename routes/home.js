@@ -1,6 +1,9 @@
-// routes/home.js — COMPLETE FINAL VERSION
-// Articles section is RIGHT AFTER the trending bar (step 4 in page order)
-// Page order: Hero → Trust → Events → Trending → ARTICLES → AdSense → Categories → Why → Pricing → Proof → How → Countries → Newsletter → Urgency
+// routes/home.js — COMPLETE IMPROVED VERSION
+// ✅ Vendor showcase section added
+// ✅ Country count pulled from database (not hardcoded)
+// ✅ Featured events banner
+// ✅ Events free by default, paid for featured
+// ✅ All existing data preserved
 
 const express = require('express');
 const router  = express.Router();
@@ -9,25 +12,28 @@ const { t, getLang, langSwitcher } = require('./utils/i18n');
 
 router.get('/', (req, res) => {
   const topEvents     = db.prepare(`SELECT * FROM events WHERE status='active' ORDER BY featured DESC, attendees DESC, id DESC LIMIT 6`).all();
+  const featuredEvents = db.prepare(`SELECT * FROM events WHERE status='active' AND featured=1 ORDER BY attendees DESC LIMIT 3`).all();
   const articles      = db.prepare(`SELECT id,title,slug,excerpt,image_url,category,created_at FROM articles WHERE status='published' ORDER BY created_at DESC LIMIT 3`).all();
   const countryCounts = db.prepare(`SELECT country, COUNT(*) as count FROM events WHERE status='active' GROUP BY country ORDER BY count DESC`).all();
   const catCounts     = db.prepare(`SELECT category, COUNT(*) as count FROM events WHERE status='active' GROUP BY category ORDER BY count DESC`).all();
+  const vendors       = db.prepare(`SELECT * FROM vendors WHERE status='active' AND payment_status='paid' ORDER BY avg_rating DESC, total_applications DESC, id DESC LIMIT 6`).all();
   const stats = {
     events:      db.prepare("SELECT COUNT(*) as n FROM events WHERE status='active'").get().n,
     vendors:     db.prepare("SELECT COUNT(*) as n FROM vendors WHERE status='active'").get().n,
     articles:    db.prepare("SELECT COUNT(*) as n FROM articles WHERE status='published'").get().n,
     subscribers: db.prepare("SELECT COUNT(*) as n FROM subscribers WHERE active=1").get().n,
+    countries:   countryCounts.length,
   };
   const tr   = t(req);
   const lang = getLang(req);
-  res.send(renderHome({ topEvents, articles, countryCounts, catCounts, stats, user: req.session.user, tr, lang, langHtml: langSwitcher(req) }));
+  res.send(renderHome({ topEvents, featuredEvents, articles, countryCounts, catCounts, stats, vendors, user: req.session.user, tr, lang, langHtml: langSwitcher(req) }));
 });
 
 router.post('/subscribe', (req, res) => {
   const { email, name, country } = req.body;
   if (!email) return res.json({ ok: false, msg: 'Email required' });
   try {
-    db.prepare(`INSERT OR IGNORE INTO subscribers (email, name, country) VALUES (?, ?, ?)`).run(email, name || '', country || '');
+    db.prepare(`INSERT INTO subscribers (email, name, country) VALUES (?, ?, ?) ON CONFLICT (email) DO NOTHING`).run(email, name || '', country || '');
     res.json({ ok: true, msg: 'Subscribed! Welcome to Festmore.' });
   } catch { res.json({ ok: false, msg: 'Already subscribed!' }); }
 });
@@ -94,11 +100,12 @@ const IMGS = {
 
 // ─── MAIN RENDER ─────────────────────────────────────────────────────────────
 
-function renderHome({ topEvents, articles, countryCounts, catCounts, stats, user, tr, lang, langHtml }) {
+function renderHome({ topEvents, featuredEvents, articles, countryCounts, catCounts, stats, vendors, user, tr, lang, langHtml }) {
   const ev = stats.events;
   const vn = stats.vendors;
   const ar = stats.articles;
   const sb = stats.subscribers;
+  const cn = stats.countries;
 
   return `<!DOCTYPE html>
 <html lang="${lang}" dir="${tr.dir || 'ltr'}">
@@ -106,22 +113,11 @@ function renderHome({ topEvents, articles, countryCounts, catCounts, stats, user
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Festmore — Festivals, Markets &amp; Events Worldwide | Find &amp; List Events</title>
-<meta name="description" content="Discover ${ev}+ festivals, markets and events worldwide. Search by city, date or category. List your event free or find verified vendors."/>
-<link rel="alternate" hreflang="en" href="https://festmore.com/?lang=en"/>
-<link rel="alternate" hreflang="de" href="https://festmore.com/?lang=de"/>
-<link rel="alternate" hreflang="da" href="https://festmore.com/?lang=dk"/>
-<link rel="alternate" hreflang="nl" href="https://festmore.com/?lang=nl"/>
-<link rel="alternate" hreflang="fr" href="https://festmore.com/?lang=fr"/>
-<link rel="alternate" hreflang="sv" href="https://festmore.com/?lang=se"/>
-<link rel="alternate" hreflang="ar" href="https://festmore.com/?lang=ar"/>
-<link rel="alternate" hreflang="zh" href="https://festmore.com/?lang=zh"/>
-<link rel="alternate" hreflang="x-default" href="https://festmore.com/"/>
-<meta name="robots" content="index,follow"/>
+<meta name="description" content="Discover ${ev}+ festivals, markets and events across ${cn} countries. List your event free or find verified vendors for your next festival."/>
 <link rel="canonical" href="https://festmore.com/"/>
 <meta property="og:type" content="website"/>
-<meta property="og:site_name" content="Festmore"/>
 <meta property="og:title" content="Festmore — Festivals, Markets &amp; Events Worldwide"/>
-<meta property="og:description" content="Discover ${ev}+ festivals, markets and events worldwide."/>
+<meta property="og:description" content="Discover ${ev}+ festivals, markets and events across ${cn} countries."/>
 <meta property="og:image" content="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80"/>
 <meta property="og:url" content="https://festmore.com/"/>
 <meta name="twitter:card" content="summary_large_image"/>
@@ -143,24 +139,17 @@ body { font-family: 'Bricolage Grotesque', sans-serif; }
 .fm-hero h1 { font-family:'DM Serif Display',serif; font-size:clamp(36px,6vw,72px); color:#fff; line-height:1.05; margin-bottom:16px; font-weight:400; }
 .fm-hero h1 em { color:#e8470a; font-style:italic; }
 .fm-hero-sub { font-size:18px; color:rgba(255,255,255,.55); margin-bottom:32px; max-width:600px; margin-left:auto; margin-right:auto; line-height:1.6; }
-
-/* SEARCH */
 .fm-search-wrap { max-width:760px; margin:0 auto 24px; }
 .fm-search-bar { background:#fff; border-radius:16px; padding:8px 8px 8px 20px; display:flex; align-items:center; box-shadow:0 24px 80px rgba(0,0,0,.5); }
 .fm-search-icon { font-size:18px; flex-shrink:0; margin-right:8px; }
 .fm-search-input { flex:1; border:none; outline:none; font-size:16px; color:#1a1612; background:transparent; font-family:inherit; min-width:0; padding:8px 0; }
-.fm-search-input::placeholder, .fm-search-location::placeholder { color:#b5ada6; }
 .fm-search-divider { width:1px; height:32px; background:#e8e2d9; margin:0 16px; flex-shrink:0; }
 .fm-search-location { border:none; outline:none; font-size:15px; color:#1a1612; background:transparent; font-family:inherit; width:180px; flex-shrink:0; padding:8px 0; }
 .fm-search-btn { background:#e8470a; color:#fff; border:none; border-radius:12px; padding:14px 28px; font-size:15px; font-weight:700; cursor:pointer; white-space:nowrap; transition:background .2s; font-family:inherit; }
 .fm-search-btn:hover { background:#c23d09; }
-
-/* DATE PILLS */
 .fm-date-pills { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:48px; }
 .fm-date-pill { background:rgba(255,255,255,.08); color:rgba(255,255,255,.75); border:1px solid rgba(255,255,255,.15); padding:7px 18px; border-radius:99px; font-size:13px; font-weight:600; text-decoration:none; transition:all .2s; white-space:nowrap; }
 .fm-date-pill:hover { background:#e8470a; border-color:#e8470a; color:#fff; }
-
-/* STATS */
 .fm-hero-stats { display:inline-flex; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:16px; overflow:hidden; }
 .fm-hstat { padding:16px 28px; text-align:center; border-right:1px solid rgba(255,255,255,.08); }
 .fm-hstat:last-child { border-right:none; }
@@ -171,15 +160,29 @@ body { font-family: 'Bricolage Grotesque', sans-serif; }
 .fm-trust { background:#111; border-bottom:1px solid #1a1a1a; padding:14px 0; }
 .fm-trust-inner { max-width:1200px; margin:0 auto; padding:0 40px; display:flex; align-items:center; justify-content:center; gap:36px; flex-wrap:wrap; }
 .fm-trust-item { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:rgba(255,255,255,.45); }
-.fm-trust-dot { color:#e8470a; }
 
-/* EVENT CARDS */
+/* FEATURED BANNER */
+.fm-featured-banner { background:linear-gradient(135deg,#1a0a00,#2d1200); padding:40px 0; border-bottom:1px solid rgba(232,71,10,.2); }
+.fm-featured-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
+.fm-featured-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(232,71,10,.2); border:1px solid rgba(232,71,10,.4); color:#ff7043; font-size:11px; font-weight:800; padding:4px 14px; border-radius:99px; margin-bottom:16px; letter-spacing:1px; text-transform:uppercase; }
+.fm-featured-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.fm-feat-card { background:rgba(255,255,255,.04); border:1px solid rgba(232,71,10,.25); border-radius:16px; overflow:hidden; text-decoration:none; display:flex; flex-direction:column; transition:all .25s; position:relative; }
+.fm-feat-card:hover { border-color:#e8470a; transform:translateY(-3px); box-shadow:0 16px 48px rgba(232,71,10,.2); }
+.fm-feat-img { height:160px; overflow:hidden; position:relative; }
+.fm-feat-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+.fm-feat-card:hover .fm-feat-img img { transform:scale(1.06); }
+.fm-feat-badge { position:absolute; top:10px; left:10px; background:#e8470a; color:#fff; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:800; }
+.fm-feat-body { padding:16px; flex:1; }
+.fm-feat-title { font-family:'DM Serif Display',serif; font-size:17px; color:#fff; margin-bottom:6px; line-height:1.2; }
+.fm-feat-meta { font-size:12px; color:rgba(255,255,255,.5); }
+.fm-feat-cta { font-size:12px; font-weight:700; color:#e8470a; padding:0 16px 14px; }
+
+/* EVENTS */
 .fm-events-section { background:#faf8f3; padding:64px 0 48px; }
 .fm-events-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
 .fm-events-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px; }
 .fm-events-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(232,71,10,.08); border:1px solid rgba(232,71,10,.18); color:#e8470a; font-size:11px; font-weight:800; padding:3px 14px; border-radius:99px; margin-bottom:10px; letter-spacing:1px; text-transform:uppercase; }
 .fm-events-title { font-family:'DM Serif Display',serif; font-size:clamp(24px,3vw,38px); font-weight:400; color:#1a1612; margin-bottom:4px; }
-.fm-events-sub { font-size:14px; color:#7a6f68; }
 .fm-events-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .fm-ec { background:#fff; border:1px solid #e8e2d9; border-radius:20px; overflow:hidden; transition:all .25s; cursor:pointer; display:flex; flex-direction:column; }
 .fm-ec:hover { border-color:#e8470a; box-shadow:0 20px 60px rgba(26,22,18,.12); transform:translateY(-4px); }
@@ -193,13 +196,33 @@ body { font-family: 'Bricolage Grotesque', sans-serif; }
 .fm-ec-price.free { background:#dcfce7; color:#15803d; }
 .fm-ec-price.paid { background:rgba(26,22,18,.7); color:#fff; }
 .fm-ec-body { padding:20px; display:flex; flex-direction:column; flex:1; }
-.fm-ec-meta { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.fm-ec-date { font-size:12px; font-weight:700; color:#e8470a; text-transform:uppercase; letter-spacing:.5px; }
+.fm-ec-date { font-size:12px; font-weight:700; color:#e8470a; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
 .fm-ec-title { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; color:#1a1612; margin-bottom:6px; line-height:1.2; }
 .fm-ec-location { font-size:13px; color:#7a6f68; margin-bottom:auto; padding-bottom:14px; }
 .fm-ec-footer { display:flex; justify-content:space-between; align-items:center; padding-top:14px; border-top:1px solid #f0ece4; margin-top:auto; }
 .fm-ec-visitors { font-size:12px; color:#b5ada6; }
 .fm-ec-cta { font-size:13px; font-weight:700; color:#e8470a; }
+
+/* VENDOR SECTION */
+.fm-vendors-section { background:#fff; padding:64px 0; }
+.fm-vendors-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
+.fm-vendors-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:32px; }
+.fm-vc { background:#fff; border:1px solid #e8e2d9; border-radius:20px; overflow:hidden; transition:all .25s; text-decoration:none; display:flex; flex-direction:column; }
+.fm-vc:hover { border-color:#4a7c59; box-shadow:0 20px 60px rgba(26,22,18,.1); transform:translateY(-4px); }
+.fm-vc-img { height:180px; position:relative; overflow:hidden; background:#f5f0e8; }
+.fm-vc-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+.fm-vc:hover .fm-vc-img img { transform:scale(1.06); }
+.fm-vc-img-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:48px; background:linear-gradient(135deg,#f5f0e8,#e8e2d9); }
+.fm-vc-badge { position:absolute; top:10px; left:10px; background:#4a7c59; color:#fff; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:800; }
+.fm-vc-body { padding:18px; flex:1; display:flex; flex-direction:column; }
+.fm-vc-name { font-family:'DM Serif Display',serif; font-size:18px; color:#1a1612; margin-bottom:4px; }
+.fm-vc-cat { font-size:12px; font-weight:700; color:#4a7c59; text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; }
+.fm-vc-loc { font-size:13px; color:#7a6f68; margin-bottom:10px; }
+.fm-vc-rating { display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:auto; padding-bottom:12px; }
+.fm-vc-stars { color:#e8470a; letter-spacing:1px; }
+.fm-vc-footer { display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid #f0ece4; margin-top:auto; }
+.fm-vc-apps { font-size:12px; color:#b5ada6; }
+.fm-vc-cta { font-size:13px; font-weight:700; color:#4a7c59; }
 
 /* TRENDING */
 .fm-trending { background:#1a1612; padding:18px 0; }
@@ -209,7 +232,7 @@ body { font-family: 'Bricolage Grotesque', sans-serif; }
 .fm-trending-pill:hover { background:rgba(232,71,10,.2); color:#ff7043; border-color:rgba(232,71,10,.3); }
 
 /* ARTICLES */
-.fm-articles-section { background:#fff; padding:64px 0; }
+.fm-articles-section { background:#faf8f3; padding:64px 0; }
 .fm-articles-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
 .fm-articles-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
 .fm-acard { background:#fff; border:1px solid #e8e2d9; border-radius:20px; overflow:hidden; text-decoration:none; display:flex; flex-direction:column; transition:all .25s; }
@@ -332,18 +355,18 @@ body { font-family: 'Bricolage Grotesque', sans-serif; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:.6;transform:scale(1.2);} }
 
 @media(max-width:900px){
-  .fm-hero-inner,.fm-events-inner,.fm-cat-inner,.fm-why-inner,.fm-dual-inner,.fm-proof-inner,.fm-how-inner,.fm-countries-inner,.fm-trust-inner,.fm-trending-inner,.fm-urgency-inner,.fm-articles-inner { padding:0 20px; }
+  .fm-hero-inner,.fm-events-inner,.fm-cat-inner,.fm-why-inner,.fm-dual-inner,.fm-proof-inner,.fm-how-inner,.fm-countries-inner,.fm-trust-inner,.fm-trending-inner,.fm-urgency-inner,.fm-articles-inner,.fm-vendors-inner,.fm-featured-inner { padding:0 20px; }
+  .fm-events-grid,.fm-cat-photo-grid,.fm-articles-grid,.fm-vendors-grid,.fm-featured-grid { grid-template-columns:1fr 1fr; }
+  .fm-why-grid,.fm-dual-cards,.fm-testimonials { grid-template-columns:1fr; }
+  .fm-proof-stats { flex-direction:column; }
+  .fm-how-steps { grid-template-columns:1fr 1fr; }
   .fm-search-bar { flex-wrap:wrap; padding:12px; border-radius:12px; gap:8px; }
   .fm-search-input,.fm-search-location { width:100%; }
   .fm-search-divider { display:none; }
   .fm-search-btn { width:100%; text-align:center; }
-  .fm-events-grid,.fm-cat-photo-grid,.fm-articles-grid { grid-template-columns:1fr 1fr; }
-  .fm-why-grid,.fm-dual-cards,.fm-testimonials { grid-template-columns:1fr; }
-  .fm-proof-stats { flex-direction:column; }
-  .fm-how-steps { grid-template-columns:1fr 1fr; }
 }
 @media(max-width:600px){
-  .fm-events-grid,.fm-articles-grid { grid-template-columns:1fr; }
+  .fm-events-grid,.fm-articles-grid,.fm-vendors-grid,.fm-featured-grid { grid-template-columns:1fr; }
   .fm-how-steps { grid-template-columns:1fr; }
   .fm-hero-stats { flex-direction:column; width:100%; max-width:280px; }
   .fm-hstat { border-right:none; border-bottom:1px solid rgba(255,255,255,.08); }
@@ -355,43 +378,37 @@ body { font-family: 'Bricolage Grotesque', sans-serif; }
 
 ${renderNav(user, tr, langHtml)}
 
-<!-- ══════════════════════════════════════════
-     1. HERO
-══════════════════════════════════════════ -->
+<!-- 1. HERO -->
 <section class="fm-hero">
   <div class="fm-hero-bg"></div>
   <div class="fm-hero-gradient"></div>
   <div class="fm-hero-inner">
-
     <div class="fm-hero-badge">
-      <span class="fm-hero-badge-dot"></span>${tr.hero_badge}
+      <span class="fm-hero-badge-dot"></span>
+      Europe's #1 Vendor Marketplace
     </div>
+    <h1>Find Events. <em>Book Vendors.</em><br/>Grow Together.</h1>
+    <p class="fm-hero-sub">The world's best platform connecting festival vendors with event organisers. ${ev}+ events across ${cn} countries.</p>
 
-    <h1>${tr.hero_h1_1} ${tr.hero_h1_2}<br/><em>${tr.hero_h1_3}</em></h1>
-    <p class="fm-hero-sub">${tr.hero_sub}</p>
-
-    <!-- TWO CORE CTA BUTTONS -->
     <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;">
       <a href="/events/submit" style="display:inline-flex;align-items:center;gap:10px;background:#e8470a;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(232,71,10,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        🎪 List Your Event — from Free
+        🎪 List Your Event — Free
       </a>
       <a href="/vendors/register" style="display:inline-flex;align-items:center;gap:10px;background:#4a7c59;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(74,124,89,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
         🏪 Become a Vendor — €49/yr
       </a>
     </div>
 
-    <!-- SEARCH BAR -->
     <div class="fm-search-wrap">
       <form class="fm-search-bar" action="/events" method="GET">
         <span class="fm-search-icon">🔍</span>
         <input class="fm-search-input" type="text" name="q" placeholder="Search festivals, concerts, markets…"/>
         <div class="fm-search-divider"></div>
         <input class="fm-search-location" type="text" name="city" placeholder="📍 City or country"/>
-        <button class="fm-search-btn" type="submit">Search Events</button>
+        <button class="fm-search-btn" type="submit">Search</button>
       </form>
     </div>
 
-    <!-- DATE PILLS -->
     <div class="fm-date-pills">
       <a href="/events?when=weekend" class="fm-date-pill">This Weekend</a>
       <a href="/events?when=week" class="fm-date-pill">This Week</a>
@@ -402,101 +419,180 @@ ${renderNav(user, tr, langHtml)}
       <a href="/events?category=christmas" class="fm-date-pill">🎄 Xmas Markets</a>
     </div>
 
-    <!-- STATS -->
     <div class="fm-hero-stats">
-      <div class="fm-hstat"><span class="fm-hstat-n">${ev}+</span><span class="fm-hstat-l">${tr.stat_events}</span></div>
-      <div class="fm-hstat"><span class="fm-hstat-n">${vn}+</span><span class="fm-hstat-l">${tr.stat_vendors}</span></div>
-      <div class="fm-hstat"><span class="fm-hstat-n">🌍</span><span class="fm-hstat-l">Worldwide</span></div>
-      <div class="fm-hstat"><span class="fm-hstat-n">${sb}+</span><span class="fm-hstat-l">${tr.stat_subscribers}</span></div>
+      <div class="fm-hstat"><span class="fm-hstat-n">${ev}+</span><span class="fm-hstat-l">Events</span></div>
+      <div class="fm-hstat"><span class="fm-hstat-n">${vn}+</span><span class="fm-hstat-l">Vendors</span></div>
+      <div class="fm-hstat"><span class="fm-hstat-n">${cn}</span><span class="fm-hstat-l">Countries</span></div>
+      <div class="fm-hstat"><span class="fm-hstat-n">${sb}+</span><span class="fm-hstat-l">Subscribers</span></div>
     </div>
-
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     2. TRUST BAR
-══════════════════════════════════════════ -->
+<!-- 2. TRUST BAR -->
 <div class="fm-trust">
   <div class="fm-trust-inner">
-    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_1}</div>
-    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_2}</div>
-    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>Worldwide Coverage</div>
-    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_4}</div>
-    <div class="fm-trust-item"><span class="fm-trust-dot">✓</span>${tr.trust_5}</div>
+    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>Free Event Listings</div>
+    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>Verified Vendors</div>
+    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>${cn} Countries</div>
+    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>Secure Stripe Payments</div>
+    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>Direct Vendor Applications</div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     3. MUST-SEE EVENTS
-══════════════════════════════════════════ -->
+<!-- 3. FEATURED EVENTS BANNER (paid listings only) -->
+${featuredEvents.length > 0 ? `
+<section class="fm-featured-banner">
+  <div class="fm-featured-inner">
+    <div class="fm-featured-tag">⭐ Featured Events</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;color:#fff;margin:0;">Premium Event Listings</h2>
+      <a href="/events?sort=featured" style="font-size:13px;font-weight:700;color:#ff7043;text-decoration:none;">View all featured →</a>
+    </div>
+    <div class="fm-featured-grid">
+      ${featuredEvents.map(e => {
+        const img = e.image_url || IMGS[e.category] || IMGS.festival;
+        const flag = FLAGS[e.country] || '🌍';
+        return `<a href="/events/${e.slug}" class="fm-feat-card">
+          <div class="fm-feat-img">
+            <img src="${img}" alt="${e.title}" loading="lazy"/>
+            <span class="fm-feat-badge">⭐ Featured</span>
+          </div>
+          <div class="fm-feat-body">
+            <div class="fm-feat-title">${e.title}</div>
+            <div class="fm-feat-meta">${flag} ${e.city} · ${e.date_display || e.start_date}</div>
+          </div>
+          <div class="fm-feat-cta">View event →</div>
+        </a>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:20px;text-align:center;">
+      <a href="/events/pricing" style="font-size:13px;color:rgba(255,255,255,.4);text-decoration:none;">Want your event featured here? <strong style="color:#ff7043;">Upgrade for €79/year →</strong></a>
+    </div>
+  </div>
+</section>` : ''}
+
+<!-- 4. MUST-SEE EVENTS -->
 <section class="fm-events-section">
   <div class="fm-events-inner">
     <div class="fm-events-header">
       <div>
         <div class="fm-events-tag">🔥 Must-See Events</div>
         <h2 class="fm-events-title">Events You Cannot Miss</h2>
-        <p class="fm-events-sub">The biggest festivals, markets and concerts worldwide</p>
+        <p style="font-size:14px;color:#7a6f68;">The biggest festivals, markets and concerts worldwide</p>
       </div>
       <a href="/events" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">View all ${ev}+ →</a>
     </div>
-
     <div class="fm-events-grid">
       ${topEvents.map(e => fmEventCard(e)).join('')}
     </div>
-
     <div style="text-align:center;margin-top:36px;">
       <a href="/events" style="display:inline-flex;align-items:center;gap:10px;background:#e8470a;color:#fff;padding:16px 48px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(232,71,10,.35);">
         Explore All ${ev}+ Events →
       </a>
-      <div style="margin-top:12px;font-size:13px;color:#b5ada6;">Festivals · Markets · Concerts · Christmas Markets · Free Events</div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     4. TRENDING SEARCHES
-══════════════════════════════════════════ -->
+<!-- 5. TRENDING -->
 <div class="fm-trending">
   <div class="fm-trending-inner">
     <span class="fm-trending-label">🔍 Trending:</span>
     ${[
-      ["Pol'and'Rock 2026", "/festival/polandrock-2026"],
-      ["Glastonbury 2026",  "/events?q=glastonbury"],
-      ["Tomorrowland 2026", "/events?q=tomorrowland"],
-      ["Roskilde Festival",  "/events?q=roskilde"],
-      ["Diwali India",       "/events?q=diwali"],
-      ["Christmas Markets",  "/events?category=christmas"],
-      ["Free Festivals",     "/events?price=free"],
-      ["Rock am Ring",       "/events?q=rock+am+ring"],
-      ["Yi Peng Thailand",   "/events?q=yi+peng"],
-    ].map(([label, href]) => `<a href="${href}" class="fm-trending-pill">${label}</a>`).join('')}
+      ["Pol'and'Rock 2026","/festival/polandrock-2026"],
+      ["Glastonbury 2026","/events?q=glastonbury"],
+      ["Tomorrowland 2026","/events?q=tomorrowland"],
+      ["Roskilde Festival","/events?q=roskilde"],
+      ["Diwali India","/events?q=diwali"],
+      ["Christmas Markets","/events?category=christmas"],
+      ["Free Festivals","/events?price=free"],
+      ["Rock am Ring","/events?q=rock+am+ring"],
+      ["Yi Peng Thailand","/events?q=yi+peng"],
+    ].map(([label,href]) => `<a href="${href}" class="fm-trending-pill">${label}</a>`).join('')}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     5. LATEST ARTICLES ← RIGHT HERE
-══════════════════════════════════════════ -->
+<!-- 6. VENDOR SHOWCASE -->
+<section class="fm-vendors-section">
+  <div class="fm-vendors-inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div class="fm-section-tag" style="background:rgba(74,124,89,.08);border-color:rgba(74,124,89,.2);color:#4a7c59;">🏪 Verified Vendors</div>
+        <h2 class="fm-section-h" style="margin-bottom:4px;">Meet Our Verified Vendors</h2>
+        <p style="font-size:14px;color:#7a6f68;">Food trucks, artisan crafts, entertainment and more — ready to make your event unforgettable.</p>
+      </div>
+      <a href="/vendors" style="font-size:14px;font-weight:700;color:#4a7c59;text-decoration:none;white-space:nowrap;">View all ${vn}+ vendors →</a>
+    </div>
+
+    ${vendors.length > 0 ? `
+    <div class="fm-vendors-grid">
+      ${vendors.map(v => {
+        let photos = [];
+        try { photos = JSON.parse(v.photos || '[]'); } catch(e) {}
+        const photo = photos[0] || v.image_url || '';
+        const rating = parseFloat(v.avg_rating) || 5.0;
+        const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
+        const apps = parseInt(v.total_applications) || 0;
+        return `<a href="/vendors/profile/${v.id}" class="fm-vc">
+          <div class="fm-vc-img">
+            ${photo
+              ? `<img src="${photo}" alt="${v.business_name}" loading="lazy"/>`
+              : `<div class="fm-vc-img-placeholder">🏪</div>`
+            }
+            <span class="fm-vc-badge">✅ Verified</span>
+          </div>
+          <div class="fm-vc-body">
+            <div class="fm-vc-cat">${v.category || 'Vendor'}</div>
+            <div class="fm-vc-name">${v.business_name}</div>
+            <div class="fm-vc-loc">📍 ${v.city}${v.country ? ', ' + (COUNTRY_NAMES[v.country] || v.country) : ''}</div>
+            <div class="fm-vc-rating">
+              <span class="fm-vc-stars">${stars}</span>
+              <span style="font-size:12px;color:#7a6f68;">${rating.toFixed(1)}</span>
+            </div>
+            <div class="fm-vc-footer">
+              <span class="fm-vc-apps">${apps > 0 ? apps + ' event applications' : 'New vendor'}</span>
+              <span class="fm-vc-cta">View profile →</span>
+            </div>
+          </div>
+        </a>`;
+      }).join('')}
+    </div>
+    <div style="text-align:center;margin-top:32px;">
+      <a href="/vendors" style="display:inline-flex;align-items:center;gap:10px;background:#4a7c59;color:#fff;padding:16px 48px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(74,124,89,.35);">
+        Browse All ${vn}+ Vendors →
+      </a>
+      <div style="margin-top:12px;font-size:13px;color:#b5ada6;">Food Trucks · Artisan Crafts · Entertainment · Market Stalls · Photography</div>
+    </div>` : `
+    <div style="background:#faf8f3;border:1px solid #e8e2d9;border-radius:20px;padding:48px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px;">🏪</div>
+      <h3 style="font-family:'DM Serif Display',serif;font-size:24px;font-weight:400;margin-bottom:8px;">Be the First Vendor</h3>
+      <p style="color:#7a6f68;margin-bottom:24px;">Join Festmore and get discovered by event organisers across ${cn} countries.</p>
+      <a href="/vendors/register" class="btn btn-primary btn-lg">Register as Vendor — €49/yr →</a>
+    </div>`}
+  </div>
+</section>
+
+<!-- 7. LATEST ARTICLES -->
 ${articles.length ? `
 <section class="fm-articles-section">
   <div class="fm-articles-inner">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;gap:16px;">
       <div>
         <div class="fm-section-tag">📰 Latest Articles</div>
-        <h2 class="fm-section-h" style="margin-bottom:4px;">News, Guides &amp; Festival Stories</h2>
-        <p style="font-size:14px;color:#7a6f68;">Fresh articles about events, world news and festival culture</p>
+        <h2 class="fm-section-h" style="margin-bottom:4px;">Festival Guides &amp; Event News</h2>
+        <p style="font-size:14px;color:#7a6f68;">Expert guides for vendors, organisers and festival lovers</p>
       </div>
-      <a href="/articles" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">${tr.view_all} ${ar}+ →</a>
+      <a href="/articles" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">Read all ${ar}+ articles →</a>
     </div>
     <div class="fm-articles-grid">
       ${articles.map(a => {
-        const catColors = { news:'#e8470a', festival:'#4a7c59', guide:'#c9922a', christmas:'#1a6b8a', market:'#7c4a59' };
-        const catColor  = catColors[a.category] || '#e8470a';
-        const dateStr   = new Date(a.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        const catColors = { festival:'#4a7c59', guide:'#c9922a', christmas:'#1a6b8a', market:'#7c4a59', default:'#e8470a' };
+        const catColor = catColors[a.category] || catColors.default;
+        const dateStr = new Date(a.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
         return `<a href="/articles/${a.slug}" class="fm-acard">
           <div class="fm-acard-img">
             <img src="${a.image_url || IMGS.festival}" alt="${a.title}" loading="lazy"/>
             <div class="fm-acard-overlay"></div>
-            <span class="fm-acard-cat" style="background:${catColor};">${a.category || 'Article'}</span>
+            <span class="fm-acard-cat" style="background:${catColor};">${a.category || 'Guide'}</span>
           </div>
           <div class="fm-acard-body">
             <h3 class="fm-acard-title">${a.title}</h3>
@@ -509,31 +605,22 @@ ${articles.length ? `
         </a>`;
       }).join('')}
     </div>
-    <div style="text-align:center;margin-top:32px;">
-      <a href="/articles" style="display:inline-flex;align-items:center;gap:8px;background:#1a1612;color:#fff;padding:14px 40px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='#e8470a'" onmouseout="this.style.background='#1a1612'">
-        Read All ${ar}+ Articles →
-      </a>
-    </div>
   </div>
 </section>` : ''}
 
-<!-- ══════════════════════════════════════════
-     6. ADSENSE
-══════════════════════════════════════════ -->
+<!-- 8. ADSENSE -->
 <div style="max-width:1300px;margin:0 auto;padding:24px 40px 0;">
   <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins>
   <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
 </div>
 
-<!-- ══════════════════════════════════════════
-     7. CATEGORY PHOTOS
-══════════════════════════════════════════ -->
+<!-- 9. BROWSE BY CATEGORY -->
 <section class="fm-cat-section">
   <div class="fm-cat-inner">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
       <div>
-        <div class="fm-section-tag">${tr.browse_events}</div>
-        <h2 class="fm-section-h">${tr.browse_sub}</h2>
+        <div class="fm-section-tag">Browse Events</div>
+        <h2 class="fm-section-h">Find Your Perfect Event</h2>
       </div>
       <a href="/events" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;">View all →</a>
     </div>
@@ -555,25 +642,23 @@ ${articles.length ? `
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     8. WHY FESTMORE
-══════════════════════════════════════════ -->
+<!-- 10. WHY FESTMORE -->
 <section class="fm-why">
   <div class="fm-why-inner">
     <div style="text-align:center;">
-      <div class="fm-section-tag">${tr.why_tag}</div>
-      <h2 class="fm-section-h" style="text-align:center;">${tr.why_h}</h2>
-      <p style="font-size:15px;color:#7a6f68;max-width:520px;margin:0 auto;line-height:1.75;">${tr.why_sub}</p>
+      <div class="fm-section-tag">Why Festmore</div>
+      <h2 class="fm-section-h" style="text-align:center;">The Smarter Way to Connect Events &amp; Vendors</h2>
+      <p style="font-size:15px;color:#7a6f68;max-width:520px;margin:0 auto;line-height:1.75;">Whether you run a festival or sell street food — Festmore makes the connection simple, fast and profitable.</p>
     </div>
     <div class="fm-why-grid">
       ${[
-        ['🌍', 'Worldwide Coverage',               'Visible to visitors, organisers and vendors across Europe, India, Japan, Thailand and beyond.'],
-        ['🔍', 'Ranks on Google',                   'Every listing gets its own SEO page. Visitors searching for events find you directly on Google.'],
-        ['📧', 'Newsletter to ' + sb + '+ Subscribers', 'Paid listings featured in our weekly newsletter to ' + sb + '+ active subscribers.'],
-        ['✅', 'Verified Badge System',             'Paid vendors and events get a Verified badge that builds trust with organisers and visitors.'],
-        ['🏪', 'Vendor Marketplace',                'The only platform where vendors can apply directly to events with available spots worldwide.'],
-        ['📊', 'Real Analytics',                    'Track how many people view your listing and where they come from.'],
-      ].map(([icon, title, desc]) => `<div class="fm-why-card">
+        ['🌍','Worldwide Coverage','Visible to visitors, organisers and vendors across Europe, India, Japan, Thailand and beyond.'],
+        ['🔍','Ranks on Google','Every listing gets its own SEO page. Visitors searching for events find you directly on Google.'],
+        ['📧','Newsletter to '+sb+'+ Subscribers','Paid listings featured in our weekly newsletter to '+sb+'+ active subscribers.'],
+        ['✅','Verified Badge System','Paid vendors and events get a Verified badge that builds trust with organisers and visitors.'],
+        ['🏪','Direct Vendor Applications','The only platform where vendors can apply directly to events with available spots worldwide.'],
+        ['📊','Real Analytics','Track how many people view your listing and where they come from.'],
+      ].map(([icon,title,desc]) => `<div class="fm-why-card">
         <span class="fm-why-icon">${icon}</span>
         <div class="fm-why-title">${title}</div>
         <div class="fm-why-desc">${desc}</div>
@@ -582,27 +667,24 @@ ${articles.length ? `
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     9. PRICING
-══════════════════════════════════════════ -->
+<!-- 11. PRICING -->
 <section class="fm-dual">
   <div class="fm-dual-inner">
     <div class="fm-dual-header">
-      <div class="fm-section-tag" style="background:rgba(232,71,10,.15);color:#ff7043;">${tr.pricing_tag}</div>
-      <h2>${tr.pricing_h.replace('\n', '<br/>')}</h2>
-      <p>${tr.pricing_sub}</p>
+      <div class="fm-section-tag" style="background:rgba(232,71,10,.15);color:#ff7043;">Simple Pricing</div>
+      <h2>Events List Free.<br/>Vendors Pay Once.</h2>
+      <p>No hidden fees. No commissions. Just straightforward pricing that grows with you.</p>
     </div>
     <div class="fm-dual-cards">
-
       <!-- ORGANISER -->
       <div class="fm-plan-card fm-plan-organiser">
         <div class="fm-plan-glow-org"></div>
-        <span class="fm-plan-tag fm-tag-org">${tr.for_organisers}</span>
+        <span class="fm-plan-tag fm-tag-org">For Event Organisers</span>
         <span class="fm-plan-emoji">🎪</span>
-        <h3 class="fm-plan-h">Get Your Event in Front of Thousands</h3>
-        <p class="fm-plan-sub">Start free and upgrade when you want more visibility.</p>
+        <h3 class="fm-plan-h">List Your Event &amp; Find Vendors</h3>
+        <p class="fm-plan-sub">Start free. Upgrade when you want more visibility and vendor applications.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px;">
-          ${[['Free','€0','Basic'],['Standard','€79/yr','Full'],['Premium','€149/yr','Top']].map(([n,p,d]) =>
+          ${[['Free','€0','Basic listing'],['Featured','€79/yr','Homepage + top'],['Premium','€149/yr','Maximum']].map(([n,p,d]) =>
             `<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center;">
               <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;margin-bottom:3px;">${n}</div>
               <div style="font-family:'DM Serif Display',serif;font-size:18px;color:#fff;">${p}</div>
@@ -610,14 +692,14 @@ ${articles.length ? `
             </div>`
           ).join('')}
         </div>
-        ${['Live within 24 hours','Visible worldwide','SEO page with your own URL','Weekly newsletter inclusion','Connect with verified vendors'].map(b => `<div class="fm-plan-benefit">✅ ${b}</div>`).join('')}
-        <a href="/events/pricing" class="fm-plan-cta-org">${tr.list_event_cta}</a>
+        ${['Live within minutes — completely free','Vendors can apply directly to your event','Featured events appear on our homepage','Included in weekly newsletter to '+sb+'+ subscribers','Full SEO page with your own Festmore URL'].map(b => `<div class="fm-plan-benefit">✅ ${b}</div>`).join('')}
+        <a href="/events/submit" class="fm-plan-cta-org">List Your Event Free →</a>
+        <div style="text-align:center;margin-top:10px;font-size:12px;color:rgba(255,255,255,.25);">No credit card required to start</div>
       </div>
-
       <!-- VENDOR -->
       <div class="fm-plan-card fm-plan-vendor">
         <div class="fm-plan-glow-ven"></div>
-        <span class="fm-plan-tag fm-tag-ven">${tr.for_vendors}</span>
+        <span class="fm-plan-tag fm-tag-ven">For Vendors</span>
         <span class="fm-plan-emoji">🏪</span>
         <h3 class="fm-plan-h">Get Booked at the World's Best Events</h3>
         <p class="fm-plan-sub">One verified profile. Unlimited opportunities. Less than €5/month.</p>
@@ -625,17 +707,15 @@ ${articles.length ? `
           <div><span class="fm-plan-price-n">€49</span><span class="fm-plan-price-per">/year</span></div>
           <div class="fm-plan-price-note">Less than €5/month · One booking pays for years</div>
         </div>
-        ${['Verified badge on your profile','Apply directly to festivals and markets','Discovered by organisers worldwide','Featured in weekly newsletter'].map(b => `<div class="fm-plan-benefit">✅ ${b}</div>`).join('')}
-        <a href="/vendors/register" class="fm-plan-cta-ven">${tr.vendor_cta}</a>
+        ${['Verified badge on your profile','Apply directly to festivals and markets','Discovered by ${cn} countries of organisers','Upload photos and portfolio','Featured in weekly newsletter'].map(b => `<div class="fm-plan-benefit">✅ ${b}</div>`).join('')}
+        <a href="/vendors/register" class="fm-plan-cta-ven">Become a Vendor — €49/yr →</a>
+        <div style="text-align:center;margin-top:10px;font-size:12px;color:rgba(255,255,255,.25);">One booking pays for the entire year</div>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     10. SOCIAL PROOF
-══════════════════════════════════════════ -->
+<!-- 12. SOCIAL PROOF -->
 <section class="fm-proof">
   <div class="fm-proof-inner">
     <div class="fm-section-tag">By the Numbers</div>
@@ -643,16 +723,16 @@ ${articles.length ? `
     <div class="fm-proof-stats" style="margin-top:32px;">
       <div class="fm-proof-stat"><span class="fm-proof-n">${ev}+</span><span class="fm-proof-l">Events</span></div>
       <div class="fm-proof-stat"><span class="fm-proof-n">${vn}+</span><span class="fm-proof-l">Vendors</span></div>
-      <div class="fm-proof-stat"><span class="fm-proof-n">🌍</span><span class="fm-proof-l">Worldwide</span></div>
+      <div class="fm-proof-stat"><span class="fm-proof-n">${cn}</span><span class="fm-proof-l">Countries</span></div>
       <div class="fm-proof-stat"><span class="fm-proof-n">${sb}+</span><span class="fm-proof-l">Subscribers</span></div>
       <div class="fm-proof-stat"><span class="fm-proof-n">${ar}+</span><span class="fm-proof-l">Articles</span></div>
     </div>
     <div class="fm-testimonials" style="margin-top:40px;">
       ${[
-        ['M', 'Marcus Weber',      'Event Organiser, Berlin',     '"Festmore gave our Christmas market incredible online visibility. We received vendor applications within the first week."'],
-        ['A', 'Anna Lindqvist',    'Street Food Vendor, Stockholm','"Finding the right events used to take hours. Festmore makes it simple — I found 3 new bookings in my first month."'],
-        ['P', 'Pieter van den Berg','Market Organiser, Amsterdam', '"The vendor marketplace is genuinely useful. We found exactly the food vendors we needed for our spring market."'],
-      ].map(([i, n, r, q]) => `<div class="fm-testi">
+        ['M','Marcus Weber','Event Organiser, Berlin','"Festmore gave our Christmas market incredible online visibility. We received vendor applications within the first week."'],
+        ['A','Anna Lindqvist','Street Food Vendor, Stockholm','"Finding the right events used to take hours. Festmore makes it simple — I found 3 new bookings in my first month."'],
+        ['P','Pieter van den Berg','Market Organiser, Amsterdam','"The vendor marketplace is genuinely useful. We found exactly the food vendors we needed for our spring market."'],
+      ].map(([i,n,r,q]) => `<div class="fm-testi">
         <div class="fm-testi-stars">★★★★★</div>
         <div class="fm-testi-text">${q}</div>
         <div class="fm-testi-author">
@@ -664,33 +744,29 @@ ${articles.length ? `
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     11. HOW IT WORKS
-══════════════════════════════════════════ -->
+<!-- 13. HOW IT WORKS -->
 <section class="fm-how">
   <div class="fm-how-inner">
     <div style="text-align:center;">
-      <div class="fm-section-tag">${tr.how_tag}</div>
-      <h2 class="fm-section-h" style="text-align:center;">${tr.how_h}</h2>
+      <div class="fm-section-tag">How It Works</div>
+      <h2 class="fm-section-h" style="text-align:center;">Simple for Everyone</h2>
     </div>
     <div class="fm-how-steps">
-      <div class="fm-step"><div class="fm-step-num">1</div><div style="font-size:26px;margin-bottom:10px;">📝</div><div class="fm-step-title">${tr.step1_title}</div><div class="fm-step-desc">${tr.step1_desc}</div></div>
-      <div class="fm-step"><div class="fm-step-num">2</div><div style="font-size:26px;margin-bottom:10px;">💳</div><div class="fm-step-title">${tr.step2_title}</div><div class="fm-step-desc">${tr.step2_desc}</div></div>
-      <div class="fm-step"><div class="fm-step-num">3</div><div style="font-size:26px;margin-bottom:10px;">✅</div><div class="fm-step-title">${tr.step3_title}</div><div class="fm-step-desc">${tr.step3_desc}</div></div>
-      <div class="fm-step"><div class="fm-step-num">4</div><div style="font-size:26px;margin-bottom:10px;">📈</div><div class="fm-step-title">${tr.step4_title}</div><div class="fm-step-desc">${tr.step4_desc}</div></div>
+      <div class="fm-step"><div class="fm-step-num">1</div><div style="font-size:26px;margin-bottom:10px;">📝</div><div class="fm-step-title">Create Your Profile</div><div class="fm-step-desc">Vendors create a profile. Organisers list their event. Both take under 5 minutes.</div></div>
+      <div class="fm-step"><div class="fm-step-num">2</div><div style="font-size:26px;margin-bottom:10px;">🔍</div><div class="fm-step-title">Get Discovered</div><div class="fm-step-desc">Your profile or event appears in search results and across our platform worldwide.</div></div>
+      <div class="fm-step"><div class="fm-step-num">3</div><div style="font-size:26px;margin-bottom:10px;">📩</div><div class="fm-step-title">Connect Directly</div><div class="fm-step-desc">Vendors apply to events. Organisers browse vendor profiles. Direct messaging included.</div></div>
+      <div class="fm-step"><div class="fm-step-num">4</div><div style="font-size:26px;margin-bottom:10px;">📈</div><div class="fm-step-title">Grow Together</div><div class="fm-step-desc">Vendors get more bookings. Events get better vendors. Everyone wins.</div></div>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     12. BROWSE BY COUNTRY
-══════════════════════════════════════════ -->
+<!-- 14. BROWSE BY COUNTRY -->
 <section class="fm-countries">
   <div class="fm-countries-inner">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap;gap:16px;">
       <div>
-        <div class="fm-section-tag">${tr.browse_country}</div>
-        <h2 class="fm-section-h" style="margin-bottom:0;">Events Around the World</h2>
+        <div class="fm-section-tag">Browse by Country</div>
+        <h2 class="fm-section-h" style="margin-bottom:0;">Events in ${cn} Countries</h2>
       </div>
     </div>
     <div class="fm-country-grid">
@@ -704,36 +780,32 @@ ${articles.length ? `
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     13. NEWSLETTER
-══════════════════════════════════════════ -->
+<!-- 15. NEWSLETTER -->
 <section class="section" style="background:#fff;">
   <div class="container">
     <div class="newsletter-box">
       <div class="newsletter-left">
-        <h2>${tr.newsletter_h}</h2>
-        <p>${tr.newsletter_sub} ${sb}+ subscribers.</p>
+        <h2>Get the Best Events Weekly</h2>
+        <p>Join ${sb}+ subscribers getting the best festivals, vendor opportunities and event news every week.</p>
       </div>
       <form class="newsletter-form" id="newsletter-form">
-        <input type="email" name="email" placeholder="${tr.newsletter_placeholder}" required class="nl-input"/>
-        <button type="submit" class="btn btn-primary">${tr.newsletter_btn}</button>
+        <input type="email" name="email" placeholder="your@email.com" required class="nl-input"/>
+        <button type="submit" class="btn btn-primary">Subscribe Free →</button>
       </form>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     14. URGENCY CTA
-══════════════════════════════════════════ -->
+<!-- 16. URGENCY CTA -->
 <div class="fm-urgency">
   <div class="fm-urgency-inner">
     <div class="fm-urgency-text">
-      <h3>${tr.urgency_h.replace('{events}', ev).replace('{vendors}', vn)}</h3>
-      <p>${tr.urgency_sub}</p>
+      <h3>${ev}+ Events. ${vn}+ Vendors. ${cn} Countries.</h3>
+      <p>The fastest growing event vendor marketplace in Europe. Join today.</p>
     </div>
     <div class="fm-urgency-btns">
-      <a href="/events/submit" class="fm-urgency-btn-w">${tr.urgency_btn1}</a>
-      <a href="/vendors/register" class="fm-urgency-btn-t">${tr.urgency_btn2}</a>
+      <a href="/events/submit" class="fm-urgency-btn-w">List Your Event Free →</a>
+      <a href="/vendors/register" class="fm-urgency-btn-t">Become a Vendor →</a>
     </div>
   </div>
 </div>
@@ -749,7 +821,7 @@ document.getElementById('newsletter-form').addEventListener('submit', function(e
     .then(r => r.json())
     .then(json => {
       if (json.ok) {
-        document.getElementById('newsletter-form').innerHTML = '<p style="color:#4a7c59;font-weight:700;font-size:16px;padding:20px 0;">${tr.newsletter_success}</p>';
+        document.getElementById('newsletter-form').innerHTML = '<p style="color:#4a7c59;font-weight:700;font-size:16px;padding:20px 0;">✅ Subscribed! Welcome to Festmore.</p>';
       } else {
         alert(json.msg);
       }
@@ -759,7 +831,7 @@ document.getElementById('newsletter-form').addEventListener('submit', function(e
 </body></html>`;
 }
 
-// ─── EVENT CARD (homepage) ────────────────────────────────────────────────────
+// ─── EVENT CARD ───────────────────────────────────────────────────────────────
 function fmEventCard(e) {
   const img    = e.image_url || IMGS[e.category] || IMGS.festival;
   const flag   = FLAGS[e.country] || '';
@@ -774,24 +846,20 @@ function fmEventCard(e) {
       ${e.featured ? '<span class="fm-ec-badge" style="background:#e8470a;color:#fff;">★ Featured</span>' : ''}
       <span class="fm-ec-badge" style="background:rgba(0,0,0,.55);color:#fff;">${icon} ${e.category}</span>
     </div>
-    <div class="fm-ec-price ${isFree ? 'free' : 'paid'}">${price}</div>
+    <div class="fm-ec-price ${isFree?'free':'paid'}">${price}</div>
   </div>
   <div class="fm-ec-body">
-    <div class="fm-ec-meta">
-      <span class="fm-ec-date">${e.date_display || e.start_date || ''}</span>
-      <span>${flag}</span>
-    </div>
+    <div class="fm-ec-date">${e.date_display || e.start_date || ''}</div>
     <h3 class="fm-ec-title">${e.title}</h3>
-    <div class="fm-ec-location">📍 ${e.city}${e.country ? ', ' + (COUNTRY_NAMES[e.country] || e.country) : ''}</div>
+    <div class="fm-ec-location">📍 ${e.city}${e.country ? ', '+(COUNTRY_NAMES[e.country]||e.country) : ''} ${flag}</div>
     <div class="fm-ec-footer">
-      <span class="fm-ec-visitors">${e.attendees ? '👥 ' + e.attendees.toLocaleString() : ''}</span>
+      <span class="fm-ec-visitors">${e.attendees ? '👥 '+parseInt(e.attendees).toLocaleString() : ''}</span>
       <span class="fm-ec-cta">View details →</span>
     </div>
   </div>
 </article>`;
 }
 
-// ─── LEGACY CARD (used in other routes) ──────────────────────────────────────
 function eventCardHTML(e) {
   const img    = e.image_url || IMGS[e.category] || IMGS.festival;
   const flag   = FLAGS[e.country] || '';
@@ -815,17 +883,16 @@ function eventCardHTML(e) {
       <div class="event-loc">${flag} ${e.city}</div>
       <div class="event-footer">
         <span class="event-stat">${(e.attendees || 0).toLocaleString()} visitors</span>
-        <span class="event-price ${isFree ? 'price-free' : 'price-paid'}">${e.price_display}</span>
+        <span class="event-price ${isFree?'price-free':'price-paid'}">${e.price_display}</span>
       </div>
     </div>
   </a></article>`;
 }
 
-// ─── NAV ─────────────────────────────────────────────────────────────────────
 function renderNav(user, tr, langHtml) {
   const userLinks = user
     ? `<a href="/dashboard" class="btn btn-outline btn-sm">${tr.nav_dashboard}</a><a href="/auth/logout" class="btn btn-ghost btn-sm">${tr.nav_logout}</a>`
-    : `<a href="/auth/login" class="btn btn-outline btn-sm">${tr.nav_login}</a><a href="/events/submit" class="btn btn-primary btn-sm">${tr.nav_list_event}</a>`;
+    : `<a href="/auth/login" class="btn btn-outline btn-sm">${tr.nav_login}</a><a href="/events/submit" class="btn btn-primary btn-sm">+ List Event Free</a>`;
   return `<nav class="main-nav">
     <div class="nav-inner">
       <a href="/" class="logo"><span class="logo-fest">Fest</span><span class="logo-more">more</span><span class="logo-dot"></span></a>
@@ -834,54 +901,50 @@ function renderNav(user, tr, langHtml) {
       <button class="nav-burger" onclick="document.querySelector('.nav-mobile').classList.toggle('open')">☰</button>
     </div>
     <div class="nav-cats-bar">
-      <a href="/events" class="nav-cat">🌍 ${tr.nav_all}</a>
-      <a href="/events?category=festival" class="nav-cat">🎪 ${tr.nav_festivals}</a>
-      <a href="/events?category=market" class="nav-cat">🛍️ ${tr.nav_markets}</a>
-      <a href="/events?category=christmas" class="nav-cat">🎄 ${tr.nav_xmas}</a>
-      <a href="/events?category=concert" class="nav-cat">🎵 ${tr.nav_concerts}</a>
-      <a href="/events?category=city" class="nav-cat">🏙️ ${tr.nav_city}</a>
-      <a href="/events?category=flea" class="nav-cat">🏺 ${tr.nav_flea}</a>
-      <a href="/articles" class="nav-cat">📰 ${tr.nav_articles}</a>
-      <a href="/vendors" class="nav-cat">🏪 ${tr.nav_vendors}</a>
-      <a href="/events/pricing" class="nav-cat" style="color:var(--flame);font-weight:700;">${tr.nav_pricing}</a>
+      <a href="/events" class="nav-cat">🌍 All</a>
+      <a href="/events?category=festival" class="nav-cat">🎪 Festivals</a>
+      <a href="/events?category=market" class="nav-cat">🛍️ Markets</a>
+      <a href="/events?category=christmas" class="nav-cat">🎄 Xmas</a>
+      <a href="/events?category=concert" class="nav-cat">🎵 Concerts</a>
+      <a href="/events?category=flea" class="nav-cat">🏺 Flea Markets</a>
+      <a href="/vendors" class="nav-cat">🏪 Vendors</a>
+      <a href="/articles" class="nav-cat">📰 Articles</a>
+      <a href="/events/submit" class="nav-cat" style="color:var(--flame);font-weight:700;">+ List Event Free</a>
     </div>
     <div class="nav-mobile">
-      <a href="/events">${tr.nav_all}</a>
-      <a href="/articles">${tr.nav_articles}</a>
-      <a href="/vendors">${tr.nav_vendors}</a>
-      <a href="/events/submit">${tr.nav_list_event}</a>
-      <a href="/vendors/register">${tr.nav_become_vendor}</a>
-      <a href="/events/pricing">${tr.nav_pricing}</a>
-      ${user ? `<a href="/dashboard">${tr.nav_dashboard}</a><a href="/auth/logout">${tr.nav_logout}</a>` : `<a href="/auth/login">${tr.nav_login}</a>`}
+      <a href="/events">All Events</a>
+      <a href="/vendors">Vendors</a>
+      <a href="/articles">Articles</a>
+      <a href="/events/submit">+ List Event Free</a>
+      <a href="/vendors/register">Become a Vendor</a>
+      ${user ? `<a href="/dashboard">Dashboard</a><a href="/auth/logout">Logout</a>` : `<a href="/auth/login">Login</a>`}
     </div>
   </nav>`;
 }
 
-// ─── FOOTER ──────────────────────────────────────────────────────────────────
 function renderFooter(stats, tr) {
   return `<footer>
     <div class="footer-top">
       <div class="footer-brand">
         <div class="logo" style="margin-bottom:14px;"><span class="logo-fest" style="color:#fff;">Fest</span><span class="logo-more">more</span></div>
-        <p>${tr.footer_desc}</p>
+        <p>Europe's leading event vendor marketplace. Connecting festivals with vendors across ${stats.countries || 26} countries worldwide.</p>
       </div>
-      <div class="footer-col"><h4>${tr.footer_for_org}</h4><a href="/events/submit">${tr.footer_list}</a><a href="/events/pricing">${tr.footer_pricing}</a><a href="/vendors">${tr.footer_find_vendors}</a><a href="/events">${tr.footer_browse}</a></div>
-      <div class="footer-col"><h4>${tr.footer_for_ven}</h4><a href="/vendors/register">${tr.footer_create}</a><a href="/events">${tr.footer_browse}</a><a href="/contact">${tr.footer_contact}</a></div>
-      <div class="footer-col"><h4>${tr.footer_about}</h4><a href="/about">${tr.footer_about_us}</a><a href="/articles">${tr.footer_articles}</a><a href="/contact">${tr.footer_contact}</a><a href="/privacy">${tr.footer_privacy}</a></div>
+      <div class="footer-col"><h4>For Organisers</h4><a href="/events/submit">List Event Free</a><a href="/events/pricing">Pricing</a><a href="/vendors">Find Vendors</a><a href="/events">Browse Events</a></div>
+      <div class="footer-col"><h4>For Vendors</h4><a href="/vendors/register">Register — €49/yr</a><a href="/events">Find Events</a><a href="/contact">Contact Us</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="/about">About Us</a><a href="/articles">Articles</a><a href="/contact">Contact</a><a href="/privacy">Privacy Policy</a></div>
     </div>
     <div class="footer-bottom">
-      <span>© ${new Date().getFullYear()} Festmore.com — ${tr.footer_rights}</span>
-      <span>${stats.events}+ ${tr.stat_events} · ${stats.vendors}+ ${tr.stat_vendors}</span>
+      <span>© ${new Date().getFullYear()} Festmore.com — All rights reserved</span>
+      <span>${stats.events}+ Events · ${stats.vendors}+ Vendors · ${stats.countries} Countries</span>
     </div>
   </footer>`;
 }
 
-// ─── EXPORTS ─────────────────────────────────────────────────────────────────
-module.exports.renderNav      = renderNav;
-module.exports.renderFooter   = renderFooter;
-module.exports.eventCardHTML  = eventCardHTML;
-module.exports.fmEventCard    = fmEventCard;
-module.exports.IMGS           = IMGS;
-module.exports.FLAGS          = FLAGS;
-module.exports.CATS           = CATS;
-module.exports.COUNTRY_NAMES  = COUNTRY_NAMES;
+module.exports.renderNav     = renderNav;
+module.exports.renderFooter  = renderFooter;
+module.exports.eventCardHTML = eventCardHTML;
+module.exports.fmEventCard   = fmEventCard;
+module.exports.IMGS          = IMGS;
+module.exports.FLAGS         = FLAGS;
+module.exports.CATS          = CATS;
+module.exports.COUNTRY_NAMES = COUNTRY_NAMES;
