@@ -145,7 +145,11 @@ router.get('/payment-success', (req, res) => {
   const { event_id, plan } = req.query;
   if (event_id) {
     const isPremium = plan === 'premium';
-    db.prepare("UPDATE events SET payment_status='paid', status='active', featured=? WHERE id=?").run(isPremium ? 1 : 0, parseInt(event_id));
+    if (isPremium) {
+  db.prepare("UPDATE events SET payment_status='premium', status='active', featured=1, verified=1 WHERE id=?").run(parseInt(event_id));
+} else {
+  db.prepare("UPDATE events SET payment_status='paid', status='active', featured=0, verified=1 WHERE id=?").run(parseInt(event_id));
+}
     db.prepare("UPDATE payments SET status='completed' WHERE reference_id=?").run(parseInt(event_id));
   }
   const event = event_id ? db.prepare("SELECT * FROM events WHERE id=?").get(parseInt(event_id)) : null;
