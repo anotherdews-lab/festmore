@@ -59,6 +59,7 @@ app.use('/reviews', require('./routes/reviews'));
 app.use('/organiser', require('./routes/organiser'));
 app.use('/newsletter', require('./routes/newsletter'));
 app.use('/articles',     require('./routes/articles'));
+app.use('/admin/articles', require('./routes/admin-articles'));
 app.use('/auth',         require('./routes/auth'));
 app.use('/dashboard',    require('./routes/dashboard'));
 app.use('/payments',     require('./routes/payments'));
