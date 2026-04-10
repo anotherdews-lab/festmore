@@ -1377,18 +1377,44 @@ ${renderNav(user)}
 <div class="container" style="max-width:1100px;padding-bottom:60px;">
   <div style="background:#fff;border:1px solid var(--border);border-radius:20px;padding:32px;">
     <h2 style="font-family:'DM Serif Display',serif;font-size:26px;font-weight:400;margin-bottom:24px;">⭐ Reviews</h2>
+
+    ${(() => {
+      let reviews = [];
+      try { reviews = db.prepare("SELECT * FROM reviews WHERE vendor_id=? AND status='approved' ORDER BY created_at DESC").all(v.id); } catch(e) {}
+      if (reviews.length === 0) return `<div style="text-align:center;padding:24px 0 32px;color:var(--ink3);"><div style="font-size:36px;margin-bottom:12px;">⭐</div><div style="font-size:15px;">No reviews yet — be the first!</div></div>`;
+      const avg = (reviews.reduce((s,r) => s + r.rating, 0) / reviews.length).toFixed(1);
+      return `
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border);">
+        <div style="font-family:'DM Serif Display',serif;font-size:52px;color:var(--ink);line-height:1;">${avg}</div>
+        <div>
+          <div style="color:#e8470a;font-size:22px;">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</div>
+          <div style="font-size:14px;color:var(--ink3);">${reviews.length} review${reviews.length!==1?'s':''}</div>
+        </div>
+      </div>
+      <div style="display:grid;gap:16px;margin-bottom:32px;">
+        ${reviews.map(r => `
+        <div style="background:var(--ivory);border-radius:14px;padding:20px 24px;">
+          <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <div>
+              <div style="color:#e8470a;font-size:15px;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+              ${r.title ? `<div style="font-weight:700;font-size:15px;color:var(--ink);margin-top:4px;">${r.title}</div>` : ''}
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:700;font-size:14px;">${r.reviewer_name}</div>
+              <div style="font-size:12px;color:var(--ink4);">${r.reviewer_role || 'Event Organiser'} · ${new Date(r.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+            </div>
+          </div>
+          <div style="font-size:14px;color:var(--ink2);line-height:1.7;">${r.body}</div>
+        </div>`).join('')}
+      </div>`;
+    })()}
+
     <div style="background:var(--ivory);border-radius:16px;padding:24px;">
       <h3 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;margin-bottom:16px;">Leave a Review</h3>
       <form method="POST" action="/reviews/vendor/${v.id}/add">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-          <div>
-            <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Name *</label>
-            <input type="text" name="reviewer_name" required placeholder="e.g. Jan de Vries" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/>
-          </div>
-          <div>
-            <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Role</label>
-            <input type="text" name="reviewer_role" placeholder="e.g. Event Organiser" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/>
-          </div>
+          <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Name *</label><input type="text" name="reviewer_name" required placeholder="e.g. Jan de Vries" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/></div>
+          <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Role</label><input type="text" name="reviewer_role" placeholder="e.g. Event Organiser" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/></div>
         </div>
         <div style="margin-bottom:14px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:8px;">Rating *</label>
@@ -1400,14 +1426,8 @@ ${renderNav(user)}
             <label style="cursor:pointer;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;"><input type="radio" name="rating" value="1" style="margin-right:4px;"/> ★☆☆☆☆ 1</label>
           </div>
         </div>
-        <div style="margin-bottom:14px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Review Title</label>
-          <input type="text" name="title" placeholder="e.g. Excellent vendor, highly recommend!" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/>
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Review *</label>
-          <textarea name="body" required placeholder="Share your experience working with this vendor..." style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;resize:vertical;" rows="4"></textarea>
-        </div>
+        <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Review Title</label><input type="text" name="title" placeholder="e.g. Excellent vendor, highly recommend!" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/></div>
+        <div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Review *</label><textarea name="body" required placeholder="Share your experience working with this vendor..." style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;resize:vertical;" rows="4"></textarea></div>
         <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;">Submit Review →</button>
       </form>
     </div>
@@ -1416,8 +1436,8 @@ ${renderNav(user)}
 
 ${renderFooterSimple()}
 <script>
-function shareVendor() { {
-  if (navigator.share) { navigator.share({ title: '${v.business_name}', url: window.location.href }); }
+function shareVendor() {
+  if (navigator.share) { navigator.share({ title: '${v.business_name.replace(/'/g,"\\'")}', url: window.location.href }); }
   else { navigator.clipboard.writeText(window.location.href); alert('Link copied!'); }
 }
 function openPhoto(src) {
