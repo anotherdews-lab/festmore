@@ -1373,9 +1373,50 @@ ${renderNav(user)}
   <img id="lightbox-img" style="max-width:90vw;max-height:90vh;border-radius:12px;"/>
 </div>
 
+<!-- REVIEWS SECTION -->
+<div class="container" style="max-width:1100px;padding-bottom:60px;">
+  <div style="background:#fff;border:1px solid var(--border);border-radius:20px;padding:32px;">
+    <h2 style="font-family:'DM Serif Display',serif;font-size:26px;font-weight:400;margin-bottom:24px;">⭐ Reviews</h2>
+    <div style="background:var(--ivory);border-radius:16px;padding:24px;">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;margin-bottom:16px;">Leave a Review</h3>
+      <form method="POST" action="/reviews/vendor/${v.id}/add">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Name *</label>
+            <input type="text" name="reviewer_name" required placeholder="e.g. Jan de Vries" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Role</label>
+            <input type="text" name="reviewer_role" placeholder="e.g. Event Organiser" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:8px;">Rating *</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <label style="cursor:pointer;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;"><input type="radio" name="rating" value="5" required style="margin-right:4px;"/> ★★★★★ 5</label>
+            <label style="cursor:pointer;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;"><input type="radio" name="rating" value="4" style="margin-right:4px;"/> ★★★★☆ 4</label>
+            <label style="cursor:pointer;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;"><input type="radio" name="rating" value="3" style="margin-right:4px;"/> ★★★☆☆ 3</label>
+            <label style="cursor:pointer;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;"><input type="radio" name="rating" value="2" style="margin-right:4px;"/> ★★☆☆☆ 2</label>
+            <label style="cursor:pointer;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;"><input type="radio" name="rating" value="1" style="margin-right:4px;"/> ★☆☆☆☆ 1</label>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Review Title</label>
+          <input type="text" name="title" placeholder="e.g. Excellent vendor, highly recommend!" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Review *</label>
+          <textarea name="body" required placeholder="Share your experience working with this vendor..." style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;resize:vertical;" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;">Submit Review →</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 ${renderFooterSimple()}
 <script>
-function shareVendor() {
+function shareVendor() { {
   if (navigator.share) { navigator.share({ title: '${v.business_name}', url: window.location.href }); }
   else { navigator.clipboard.writeText(window.location.href); alert('Link copied!'); }
 }
