@@ -471,46 +471,6 @@ ${featuredEvents.length > 0 ? `
   </div>
 </section>` : ''}
 
-<!-- 4. MUST-SEE EVENTS -->
-<section class="fm-events-section">
-  <div class="fm-events-inner">
-    <div class="fm-events-header">
-      <div>
-        <div class="fm-events-tag">🔥 Must-See Events</div>
-        <h2 class="fm-events-title">Events You Cannot Miss</h2>
-        <p style="font-size:14px;color:#7a6f68;">The biggest festivals, markets and concerts worldwide</p>
-      </div>
-      <a href="/events" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">View all ${ev}+ →</a>
-    </div>
-    <div class="fm-events-grid">
-      ${topEvents.map(e => fmEventCard(e)).join('')}
-    </div>
-    <div style="text-align:center;margin-top:36px;">
-      <a href="/events" style="display:inline-flex;align-items:center;gap:10px;background:#e8470a;color:#fff;padding:16px 48px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(232,71,10,.35);">
-        Explore All ${ev}+ Events →
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- 5. TRENDING -->
-<div class="fm-trending">
-  <div class="fm-trending-inner">
-    <span class="fm-trending-label">🔍 Trending:</span>
-    ${[
-      ["Pol'and'Rock 2026","/festival/polandrock-2026"],
-      ["Glastonbury 2026","/events?q=glastonbury"],
-      ["Tomorrowland 2026","/events?q=tomorrowland"],
-      ["Roskilde Festival","/events?q=roskilde"],
-      ["Diwali India","/events?q=diwali"],
-      ["Christmas Markets","/events?category=christmas"],
-      ["Free Festivals","/events?price=free"],
-      ["Rock am Ring","/events?q=rock+am+ring"],
-      ["Yi Peng Thailand","/events?q=yi+peng"],
-    ].map(([label,href]) => `<a href="${href}" class="fm-trending-pill">${label}</a>`).join('')}
-  </div>
-</div>
-
 <!-- 6. VENDOR SHOWCASE -->
 <section class="fm-vendors-section">
   <div class="fm-vendors-inner">
@@ -570,6 +530,46 @@ ${featuredEvents.length > 0 ? `
     </div>`}
   </div>
 </section>
+
+<!-- 4. MUST-SEE EVENTS -->
+<section class="fm-events-section">
+  <div class="fm-events-inner">
+    <div class="fm-events-header">
+      <div>
+        <div class="fm-events-tag">🔥 Must-See Events</div>
+        <h2 class="fm-events-title">Events You Cannot Miss</h2>
+        <p style="font-size:14px;color:#7a6f68;">The biggest festivals, markets and concerts worldwide</p>
+      </div>
+      <a href="/events" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">View all ${ev}+ →</a>
+    </div>
+    <div class="fm-events-grid">
+      ${topEvents.map(e => fmEventCard(e)).join('')}
+    </div>
+    <div style="text-align:center;margin-top:36px;">
+      <a href="/events" style="display:inline-flex;align-items:center;gap:10px;background:#e8470a;color:#fff;padding:16px 48px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(232,71,10,.35);">
+        Explore All ${ev}+ Events →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 5. TRENDING -->
+<div class="fm-trending">
+  <div class="fm-trending-inner">
+    <span class="fm-trending-label">🔍 Trending:</span>
+    ${[
+      ["Pol'and'Rock 2026","/festival/polandrock-2026"],
+      ["Glastonbury 2026","/events?q=glastonbury"],
+      ["Tomorrowland 2026","/events?q=tomorrowland"],
+      ["Roskilde Festival","/events?q=roskilde"],
+      ["Diwali India","/events?q=diwali"],
+      ["Christmas Markets","/events?category=christmas"],
+      ["Free Festivals","/events?price=free"],
+      ["Rock am Ring","/events?q=rock+am+ring"],
+      ["Yi Peng Thailand","/events?q=yi+peng"],
+    ].map(([label,href]) => `<a href="${href}" class="fm-trending-pill">${label}</a>`).join('')}
+  </div>
+</div>
 
 <!-- 7. LATEST ARTICLES -->
 ${articles.length ? `
