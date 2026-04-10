@@ -43,7 +43,7 @@ router.get('/', (req, res) => {
   else if (when==='summer'){where.push("e.start_date>=? AND e.start_date<=?");params.push('2026-06-01','2026-08-31');}
   if (q) { where.push("(e.title LIKE ? OR e.city LIKE ? OR e.description LIKE ? OR e.tags LIKE ?)"); params.push(`%${q}%`,`%${q}%`,`%${q}%`,`%${q}%`); }
   const whereStr = where.join(' AND ');
-  let orderBy = 'e.featured DESC, e.views DESC';
+  let orderBy = 'e.featured DESC, e.verified DESC, e.views DESC';
   if (sort === 'date') orderBy = 'e.start_date ASC';
   if (sort === 'visitors') orderBy = 'e.attendees DESC';
   const total = db.prepare(`SELECT COUNT(*) as n FROM events e WHERE ${whereStr}`).get(...params).n;
