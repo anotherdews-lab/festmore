@@ -483,7 +483,7 @@ function renderEventDetail(e, related, user) {
   "offers": {
     "@type": "Offer",
     "name": e.price_display || "See website",
-    "price": e.price_display === "Free" ? "0" : "",
+    "price": e.price_display === "Free" || e.price_display === "Free Entry" ? "0" : "0",
     "priceCurrency": "EUR",
     "availability": "https://schema.org/InStock",
     "validFrom": e.created_at ? e.created_at.toString().substring(0,10) : e.start_date,
