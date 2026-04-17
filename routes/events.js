@@ -480,15 +480,12 @@ function renderEventDetail(e, related, user) {
     "name": e.organiser_name || "Festmore",
     "url": e.website || "https://festmore.com"
   },
-  "offers": {
-    "@type": "Offer",
-    "name": e.price_display || "See website",
-    "price": e.price_display === "Free" || e.price_display === "Free Entry" ? "0" : "0",
-    "priceCurrency": "EUR",
-    "availability": "https://schema.org/InStock",
-    "validFrom": e.created_at ? e.created_at.toString().substring(0,10) : e.start_date,
-    "url": e.ticket_url || e.website || "https://festmore.com/events/" + e.slug
-  },
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "EUR",
+  "url": e.ticket_url || e.website || `https://festmore.com/events/${e.slug}`
+},
   "performer": {
     "@type": "PerformingGroup",
     "name": e.title
