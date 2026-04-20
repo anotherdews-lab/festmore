@@ -17,12 +17,15 @@ const FLAGS = {
   BE:'🇧🇪',CN:'🇨🇳',DK:'🇩🇰',FR:'🇫🇷',DE:'🇩🇪',NL:'🇳🇱',PL:'🇵🇱',SE:'🇸🇪',AE:'🇦🇪',GB:'🇬🇧',US:'🇺🇸',
   NO:'🇳🇴',FI:'🇫🇮',AT:'🇦🇹',CH:'🇨🇭',IT:'🇮🇹',ES:'🇪🇸',PT:'🇵🇹',IE:'🇮🇪',CZ:'🇨🇿',HU:'🇭🇺',
   GR:'🇬🇷',HR:'🇭🇷',IN:'🇮🇳',TH:'🇹🇭',JP:'🇯🇵',
+  AU:'🇦🇺',CA:'🇨🇦',BR:'🇧🇷',MX:'🇲🇽',KR:'🇰🇷',ZA:'🇿🇦',AR:'🇦🇷',MA:'🇲🇦',SG:'🇸🇬',RO:'🇷🇴',
 };
 const COUNTRY_NAMES = {
   BE:'Belgium',CN:'China',DK:'Denmark',FR:'France',DE:'Germany',NL:'Netherlands',PL:'Poland',SE:'Sweden',
   AE:'UAE',GB:'United Kingdom',US:'USA',NO:'Norway',FI:'Finland',AT:'Austria',CH:'Switzerland',IT:'Italy',
   ES:'Spain',PT:'Portugal',IE:'Ireland',CZ:'Czech Republic',HU:'Hungary',GR:'Greece',HR:'Croatia',
   IN:'India',TH:'Thailand',JP:'Japan',
+  AU:'Australia',CA:'Canada',BR:'Brazil',MX:'Mexico',KR:'South Korea',ZA:'South Africa',
+  AR:'Argentina',MA:'Morocco',SG:'Singapore',RO:'Romania',
 };
 const CATS = ['Food & Drinks','Artisan Crafts','Technology','Event Decor','Entertainment','Photography',
   'Kids Activities','Fashion & Apparel','Art & Prints','Live Music','Retail','Services'];
