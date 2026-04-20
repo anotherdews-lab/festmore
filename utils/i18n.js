@@ -1,4 +1,4 @@
-mkdir -p utils && cat > utils/i18n.js << 'ENDOFFILE'
+
 // utils/i18n.js
 const translations = {
   en: {
