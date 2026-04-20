@@ -138,4 +138,3 @@ document.addEventListener('click',function(e){if(!e.target.closest('#lang-switch
 
 module.exports = { t, getLang, langSwitcher, translations };
 ENDOFFILE
-echo "✅ Created utils/i18n.js"
