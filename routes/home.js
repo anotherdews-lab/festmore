@@ -8,7 +8,7 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
-const { t, getLang, langSwitcher } = require('../utils/i18n');
+const { t, getLang, langSwitcher } = require('./utils/i18n');
 
 router.get('/', (req, res) => {
   const topEvents     = db.prepare(`SELECT * FROM events WHERE status='active' ORDER BY featured DESC, attendees DESC, id DESC LIMIT 6`).all();
@@ -447,10 +447,10 @@ ${renderNav(user, tr, langHtml)}
 ${featuredEvents.length > 0 ? `
 <section class="fm-featured-banner">
   <div class="fm-featured-inner">
-    <div class="fm-featured-tag">⭐ Featured Events</div>
+    <div class="fm-featured-tag">⭐ ${tr.featured_events}</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <h2 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;color:#fff;margin:0;">Premium Event Listings</h2>
-      <a href="/events?sort=featured" style="font-size:13px;font-weight:700;color:#ff7043;text-decoration:none;">View all featured →</a>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;color:#fff;margin:0;">${tr.featured_events}</h2>
+      <a href="/events?sort=featured" style="font-size:13px;font-weight:700;color:#ff7043;text-decoration:none;">${tr.view_all} →</a>
     </div>
     <div class="fm-featured-grid">
       ${featuredEvents.map(e => {
@@ -582,7 +582,7 @@ ${articles.length ? `
     <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;gap:16px;">
       <div>
         <div class="fm-section-tag">📰 Latest Articles</div>
-        <h2 class="fm-section-h" style="margin-bottom:4px;">Festival Guides &amp; Event News</h2>
+        <h2 class="fm-section-h" style="margin-bottom:4px;">${tr.festival_guides}</h2>
         <p style="font-size:14px;color:#7a6f68;">Expert guides for vendors, organisers and festival lovers</p>
       </div>
       <a href="/articles" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">Read all ${ar}+ articles →</a>
@@ -623,8 +623,8 @@ ${articles.length ? `
   <div class="fm-cat-inner">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
       <div>
-        <div class="fm-section-tag">Browse Events</div>
-        <h2 class="fm-section-h">Find Your Perfect Event</h2>
+        <div class="fm-section-tag">${tr.browse_events}</div>
+        <h2 class="fm-section-h">${tr.browse_sub}</h2>
       </div>
       <a href="/events" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;">View all →</a>
     </div>
@@ -650,9 +650,9 @@ ${articles.length ? `
 <section class="fm-why">
   <div class="fm-why-inner">
     <div style="text-align:center;">
-      <div class="fm-section-tag">Why Festmore</div>
-      <h2 class="fm-section-h" style="text-align:center;">The Smarter Way to Connect Events &amp; Vendors</h2>
-      <p style="font-size:15px;color:#7a6f68;max-width:520px;margin:0 auto;line-height:1.75;">Whether you run a festival or sell street food — Festmore makes the connection simple, fast and profitable.</p>
+      <div class="fm-section-tag">${tr.why_tag}</div>
+      <h2 class="fm-section-h" style="text-align:center;">${tr.why_h}</h2>
+      <p style="font-size:15px;color:#7a6f68;max-width:520px;margin:0 auto;line-height:1.75;">${tr.why_sub}</p>
     </div>
     <div class="fm-why-grid">
       ${[
@@ -675,15 +675,15 @@ ${articles.length ? `
 <section class="fm-dual">
   <div class="fm-dual-inner">
     <div class="fm-dual-header">
-      <div class="fm-section-tag" style="background:rgba(232,71,10,.15);color:#ff7043;">Simple Pricing</div>
-      <h2>Events List Free.<br/>Vendors Pay Once.</h2>
-      <p>No hidden fees. No commissions. Just straightforward pricing that grows with you.</p>
+      <div class="fm-section-tag" style="background:rgba(232,71,10,.15);color:#ff7043;">${tr.pricing_tag}</div>
+      <h2>${tr.pricing_h}</h2>
+      <p>${tr.pricing_sub}</p>
     </div>
     <div class="fm-dual-cards">
       <!-- ORGANISER -->
       <div class="fm-plan-card fm-plan-organiser">
         <div class="fm-plan-glow-org"></div>
-        <span class="fm-plan-tag fm-tag-org">For Event Organisers</span>
+        <span class="fm-plan-tag fm-tag-org">${tr.for_organisers}</span>
         <span class="fm-plan-emoji">🎪</span>
         <h3 class="fm-plan-h">List Your Event &amp; Find Vendors</h3>
         <p class="fm-plan-sub">Start free. Upgrade when you want more visibility and vendor applications.</p>
@@ -703,7 +703,7 @@ ${articles.length ? `
       <!-- VENDOR -->
       <div class="fm-plan-card fm-plan-vendor">
         <div class="fm-plan-glow-ven"></div>
-        <span class="fm-plan-tag fm-tag-ven">For Vendors</span>
+        <span class="fm-plan-tag fm-tag-ven">${tr.for_vendors}</span>
         <span class="fm-plan-emoji">🏪</span>
         <h3 class="fm-plan-h">Get Booked at the World's Best Events</h3>
         <p class="fm-plan-sub">One verified profile. Unlimited opportunities. Less than €5/month.</p>
@@ -769,8 +769,8 @@ ${articles.length ? `
   <div class="fm-countries-inner">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap;gap:16px;">
       <div>
-        <div class="fm-section-tag">Browse by Country</div>
-        <h2 class="fm-section-h" style="margin-bottom:0;">Events in ${cn} Countries</h2>
+        <div class="fm-section-tag">${tr.browse_country}</div>
+        <h2 class="fm-section-h" style="margin-bottom:0;">${tr.browse_country} — ${cn} Countries</h2>
       </div>
     </div>
     <div class="fm-country-grid">
@@ -789,12 +789,12 @@ ${articles.length ? `
   <div class="container">
     <div class="newsletter-box">
       <div class="newsletter-left">
-        <h2>Get the Best Events Weekly</h2>
-        <p>Join ${sb}+ subscribers getting the best festivals, vendor opportunities and event news every week.</p>
+        <h2>${tr.newsletter_h}</h2>
+        <p>${tr.newsletter_sub}</p>
       </div>
       <form class="newsletter-form" id="newsletter-form">
-        <input type="email" name="email" placeholder="your@email.com" required class="nl-input"/>
-        <button type="submit" class="btn btn-primary">Subscribe Free →</button>
+        <input type="email" name="email" placeholder="${tr.newsletter_placeholder}" required class="nl-input"/>
+        <button type="submit" class="btn btn-primary">${tr.newsletter_btn}</button>
       </form>
     </div>
   </div>
@@ -804,12 +804,12 @@ ${articles.length ? `
 <div class="fm-urgency">
   <div class="fm-urgency-inner">
     <div class="fm-urgency-text">
-      <h3>${ev}+ Events. ${vn}+ Vendors. ${cn} Countries.</h3>
-      <p>The fastest growing event vendor marketplace in Europe. Join today.</p>
+      <h3>${tr.urgency_h.replace('{events}', ev).replace('{vendors}', vn)}</h3>
+      <p>${tr.urgency_sub}</p>
     </div>
     <div class="fm-urgency-btns">
-      <a href="/events/submit" class="fm-urgency-btn-w">List Your Event Free →</a>
-      <a href="/vendors/register" class="fm-urgency-btn-t">Become a Vendor →</a>
+      <a href="/events/submit" class="fm-urgency-btn-w">${tr.urgency_btn1}</a>
+      <a href="/vendors/register" class="fm-urgency-btn-t">${tr.urgency_btn2}</a>
     </div>
   </div>
 </div>
@@ -825,7 +825,7 @@ document.getElementById('newsletter-form').addEventListener('submit', function(e
     .then(r => r.json())
     .then(json => {
       if (json.ok) {
-        document.getElementById('newsletter-form').innerHTML = '<p style="color:#4a7c59;font-weight:700;font-size:16px;padding:20px 0;">✅ Subscribed! Welcome to Festmore.</p>';
+        document.getElementById('newsletter-form').innerHTML = '<p style="color:#4a7c59;font-weight:700;font-size:16px;padding:20px 0;">✅ ${tr.newsletter_success}</p>';
       } else {
         alert(json.msg);
       }
@@ -933,8 +933,8 @@ function renderFooter(stats, tr) {
         <div class="logo" style="margin-bottom:14px;"><span class="logo-fest" style="color:#fff;">Fest</span><span class="logo-more">more</span></div>
         <p>Europe's leading event vendor marketplace. Connecting festivals with vendors across ${stats.countries || 26} countries worldwide.</p>
       </div>
-      <div class="footer-col"><h4>For Organisers</h4><a href="/events/submit">List Event Free</a><a href="/events/pricing">Pricing</a><a href="/vendors">Find Vendors</a><a href="/events">Browse Events</a></div>
-      <div class="footer-col"><h4>For Vendors</h4><a href="/vendors/register">Register — €49/yr</a><a href="/events">Find Events</a><a href="/contact">Contact Us</a></div>
+      <div class="footer-col"><h4>${tr.footer_for_org}</h4><a href="/events/submit">${tr.footer_list}</a><a href="/events/pricing">${tr.footer_pricing}</a><a href="/vendors">${tr.footer_find_vendors}</a><a href="/events">${tr.footer_browse}</a></div>
+      <div class="footer-col"><h4>${tr.footer_for_ven}</h4><a href="/vendors/register">${tr.footer_create} — €49/yr</a><a href="/events">${tr.footer_find_vendors}</a><a href="/contact">${tr.footer_contact}</a></div>
       <div class="footer-col"><h4>Company</h4><a href="/about">About Us</a><a href="/articles">Articles</a><a href="/contact">Contact</a><a href="/privacy">Privacy Policy</a></div>
     </div>
     <div class="footer-bottom">
