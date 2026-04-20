@@ -72,7 +72,6 @@ app.use('/messages',     require('./routes/messages'));
 app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
-app.use('/notifications', require('./routes/notifications'));
 
 // ─────────────────────────────────────
 // EMAIL TEST ROUTE

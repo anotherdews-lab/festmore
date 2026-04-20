@@ -1365,6 +1365,20 @@ ${renderNav(user)}
 
       <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins>
       <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+
+      <!-- CONTACT THIS VENDOR -->
+      <div style="margin-top:16px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;">
+        <h4 style="font-family:'DM Serif Display',serif;font-size:18px;font-weight:400;margin-bottom:8px;">📩 Contact This Vendor</h4>
+        <p style="font-size:13px;color:var(--ink3);margin-bottom:16px;">Send a message directly to ${v.business_name}.</p>
+        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Name *</label><input type="text" id="cv-name" required placeholder="Your full name" style="width:100%;background:#f9f7f4;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/></div>
+        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Email *</label><input type="email" id="cv-email" required placeholder="your@email.com" style="width:100%;background:#f9f7f4;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/></div>
+        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Event (optional)</label><input type="text" id="cv-event" placeholder="Which event is this about?" style="width:100%;background:#f9f7f4;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/></div>
+        <div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Message *</label><textarea id="cv-message" required rows="4" placeholder="Introduce yourself and your event. What dates? What type of vendor spots?" style="width:100%;background:#f9f7f4;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;resize:vertical;"></textarea></div>
+        <div id="cv-result" style="display:none;margin-bottom:12px;"></div>
+        <button type="button" onclick="sendContactMessage(${v.id})" class="btn btn-primary" style="width:100%;padding:13px;font-size:14px;">Send Message →</button>
+        <p style="font-size:11px;color:var(--ink4);text-align:center;margin-top:8px;">The vendor will be notified by email</p>
+      </div>
+
     </aside>
   </div>
 </div>
@@ -1439,6 +1453,30 @@ ${renderFooterSimple()}
 function shareVendor() {
   if (navigator.share) { navigator.share({ title: '${v.business_name.replace(/'/g,"\\'")}', url: window.location.href }); }
   else { navigator.clipboard.writeText(window.location.href); alert('Link copied!'); }
+}
+  async function sendContactMessage(vendorId) {
+  const name = document.getElementById('cv-name').value;
+  const email = document.getElementById('cv-email').value;
+  const eventName = document.getElementById('cv-event').value;
+  const message = document.getElementById('cv-message').value;
+  const result = document.getElementById('cv-result');
+  if (!name || !email || !message) {
+    result.style.display='block';
+    result.innerHTML='<div style="background:#fee2e2;border-radius:8px;padding:10px;font-size:13px;color:#dc2626;">Please fill in your name, email and message.</div>';
+    return;
+  }
+  result.style.display='block';
+  result.innerHTML='<div style="background:#f5f0e8;border-radius:8px;padding:10px;font-size:13px;color:var(--ink3);">⏳ Sending...</div>';
+  try {
+    const r = await fetch('/notifications/contact-vendor', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vendor_id:vendorId,organiser_name:name,organiser_email:email,event_name:eventName,message})});
+    const d = await r.json();
+    result.innerHTML = d.ok
+      ? '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:12px;font-size:13px;color:#15803d;font-weight:600;">✅ Message sent! The vendor will reply to your email.</div>'
+      : '<div style="background:#fee2e2;border-radius:8px;padding:10px;font-size:13px;color:#dc2626;">❌ '+d.msg+'</div>';
+    if(d.ok){document.getElementById('cv-name').value='';document.getElementById('cv-email').value='';document.getElementById('cv-event').value='';document.getElementById('cv-message').value='';}
+  } catch(err) {
+    result.innerHTML='<div style="background:#fee2e2;border-radius:8px;padding:10px;font-size:13px;color:#dc2626;">❌ Failed to send. Please try again.</div>';
+  }
 }
 function openPhoto(src) {
   document.getElementById('lightbox-img').src = src;
