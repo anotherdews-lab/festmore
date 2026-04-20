@@ -8,7 +8,7 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
-const { t, getLang, langSwitcher } = require('./utils/i18n');
+const { t, getLang, langSwitcher } = require('../utils/i18n');
 
 router.get('/', (req, res) => {
   const topEvents     = db.prepare(`SELECT * FROM events WHERE status='active' ORDER BY featured DESC, attendees DESC, id DESC LIMIT 6`).all();
