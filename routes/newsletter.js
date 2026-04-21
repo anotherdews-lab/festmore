@@ -287,7 +287,7 @@ router.post('/subscribe', async (req, res) => {
     try { db.prepare("ALTER TABLE subscribers ADD COLUMN name TEXT DEFAULT ''").run(); } catch(e){}
     db.prepare("INSERT INTO subscribers (email, name, country, active) VALUES (?, ?, ?, 1) ON CONFLICT (email) DO UPDATE SET active=1")
       .run(email.trim().toLowerCase(), name || '', country || '');
-    await require('./cron').sendWelcomeEmail(email, name || '');
+    await require('../cron').sendWelcomeEmail(email, name || '');
     res.json({ ok: true, msg: 'Subscribed! Check your email for a welcome message.' });
   } catch(err) {
     console.error('Subscribe error:', err.message);
