@@ -19,7 +19,7 @@ async function sendEmail(to, subject, html) {
   try {
     const { Resend } = require('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({ from: 'Festmore Newsletter <contact@festmore.com>', to, subject, html });
+    await resend.emails.send({ from: 'Festmore <onboarding@resend.dev>', to, subject, html });
     return true;
   } catch(err) {
     console.error('Email error to', to, ':', err.message);
