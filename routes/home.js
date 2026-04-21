@@ -29,14 +29,6 @@ router.get('/', (req, res) => {
   res.send(renderHome({ topEvents, featuredEvents, articles, countryCounts, catCounts, stats, vendors, user: req.session.user, tr, lang, langHtml: langSwitcher(req) }));
 });
 
-router.post('/subscribe', (req, res) => {
-  const { email, name, country } = req.body;
-  if (!email) return res.json({ ok: false, msg: 'Email required' });
-  try {
-    db.prepare(`INSERT INTO subscribers (email, name, country) VALUES (?, ?, ?) ON CONFLICT (email) DO NOTHING`).run(email, name || '', country || '');
-    res.json({ ok: true, msg: 'Subscribed! Welcome to Festmore.' });
-  } catch { res.json({ ok: false, msg: 'Already subscribed!' }); }
-});
 
 router.get('/set-lang/:lang', (req, res) => {
   if (req.session) req.session.lang = req.params.lang;
@@ -821,7 +813,7 @@ document.getElementById('newsletter-form').addEventListener('submit', function(e
   e.preventDefault();
   var data = {};
   new FormData(e.target).forEach(function(v, k) { data[k] = v; });
-  fetch('/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
+  fetch('/newsletter/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
     .then(r => r.json())
     .then(json => {
       if (json.ok) {
