@@ -44,7 +44,7 @@ async function notifyAdmin(type, title, city, country, email, plan, slug) {
     const planBadge = plan === 'premium' ? '⭐ PREMIUM €149' : plan === 'standard' ? '💰 STANDARD €79' : '🆓 FREE';
     await resend.emails.send({
       from: 'Festmore <onboarding@resend.dev>',
-      to: 'gha44ar@aim.com',
+      to: 'anotherdews@gmail.com',
       subject: '🎪 New Event: ' + title,
       html: '<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">'
         + '<div style="background:#0a1a0f;padding:20px 28px;"><span style="font-size:18px;font-weight:800;color:#fff;">Fest<span style="color:#e8470a;">more</span></span><div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:4px;">New Event Notification</div></div>'
