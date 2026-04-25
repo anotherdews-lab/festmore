@@ -120,7 +120,8 @@ router.post('/submit', async (req, res) => {
     db.prepare(`INSERT INTO events (title,slug,category,city,country,start_date,end_date,date_display,description,price_display,website,ticket_url,attendees,vendor_spots,address,tags,status,payment_status,source,featured,organiser_email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'active','free','manual',0,?)`)
       .run(title,slug,category,city,country,start_date,end_date||'',date_display||'',description||'',price_display||'Free',website||'',ticket_url||'',parseInt(attendees)||0,parseInt(vendor_spots)||0,address||'',tags||'[]',email||'');
     await notifyAdmin('Free event listed', title, city, country, email, 'free', slug);
-    return res.redirect('/events/submit-success?plan=free&slug=' + slug);
+await sendWelcomeToOrganiser(email, title, slug, 'free');
+return res.redirect('/events/submit-success?plan=free&slug=' + slug);
   }
 
   const isPremium = plan === 'premium';
@@ -183,10 +184,63 @@ router.get('/payment-success', async (req, res) => {
     db.prepare("UPDATE payments SET status='completed' WHERE reference_id=?").run(parseInt(event_id));
     const event = db.prepare("SELECT * FROM events WHERE id=?").get(parseInt(event_id));
     if (event) await notifyAdmin('Paid event confirmed', event.title, event.city, event.country, event.organiser_email||'', plan, event.slug);
+    if (event) await sendWelcomeToOrganiser(event.organiser_email, event.title, event.slug, plan);
   }
   const event = event_id ? db.prepare("SELECT * FROM events WHERE id=?").get(parseInt(event_id)) : null;
   res.redirect('/events/submit-success?plan=' + (plan||'standard') + '&slug=' + (event ? event.slug : ''));
 });
+
+async function sendWelcomeToOrganiser(email, title, slug, plan) {
+  if (!email) return;
+  try {
+    const { Resend } = require('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const isPaid = plan !== 'free';
+    await resend.emails.send({
+      from: 'Festmore <onboarding@resend.dev>',
+      to: email,
+      subject: isPaid ? '🎉 Your event is live on Festmore!' : '✅ Your event is listed on Festmore!',
+      html: '<!DOCTYPE html><html><head><meta charset="UTF-8"/></head>'
+        + '<body style="margin:0;padding:0;background:#f5f0e8;font-family:Helvetica Neue,Arial,sans-serif;">'
+        + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;padding:32px 16px;"><tr><td align="center">'
+        + '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">'
+        + '<tr><td style="background:#0a1a0f;border-radius:20px 20px 0 0;padding:40px 48px;text-align:center;">'
+        + '<span style="font-size:26px;font-weight:800;color:#fff;">Fest<span style="color:#e8470a;">more</span></span>'
+        + '<div style="font-size:52px;margin:20px 0;">' + (isPaid ? '🎉' : '✅') + '</div>'
+        + '<h1 style="font-size:26px;font-weight:400;color:#fff;margin:0;font-family:Georgia,serif;">'
+        + (isPaid ? 'Your event is live!' : 'Your event is listed!') + '</h1>'
+        + '</td></tr>'
+        + '<tr><td style="background:#fff;padding:40px 48px;">'
+        + '<p style="font-size:16px;color:#1a1612;margin-bottom:16px;">Hi there,</p>'
+        + '<p style="font-size:15px;color:#6b5f58;line-height:1.8;margin-bottom:24px;">'
+        + 'Your event <strong>' + title + '</strong> is now ' + (isPaid ? 'featured' : 'listed') + ' on Festmore and visible to thousands of visitors and vendors across Europe and worldwide.'
+        + '</p>'
+        + '<div style="background:#f5f0e8;border-radius:14px;padding:24px;margin-bottom:28px;">'
+        + '<div style="font-size:14px;font-weight:700;color:#1a1612;margin-bottom:12px;">What happens next:</div>'
+        + '<div style="font-size:14px;color:#6b5f58;line-height:2.0;">'
+        + '🎪 Your event is searchable by visitors worldwide<br/>'
+        + '🏪 Vendors can find and apply to your event<br/>'
+        + '📧 ' + (isPaid ? 'Your event is included in our weekly newsletter' : 'Upgrade to Standard to be included in our newsletter') + '<br/>'
+        + '📊 Track your event views from your dashboard'
+        + '</div></div>'
+        + '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr>'
+        + '<td width="48%" style="padding-right:8px;"><a href="https://festmore.com/events/' + slug + '" style="display:block;background:#e8470a;color:#fff;padding:13px 20px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;">View Your Event →</a></td>'
+        + '<td width="48%" style="padding-left:8px;"><a href="https://festmore.com/vendors" style="display:block;background:#4a7c59;color:#fff;padding:13px 20px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;">Find Vendors →</a></td>'
+        + '</tr></table>'
+        + (plan === 'free' ? '<div style="background:#fff7ed;border:1px solid rgba(232,71,10,.2);border-radius:12px;padding:20px;margin-bottom:24px;text-align:center;"><div style="font-size:14px;font-weight:700;color:#1a1612;margin-bottom:8px;">Want more visibility?</div><div style="font-size:13px;color:#6b5f58;margin-bottom:14px;">Upgrade to Standard (€79/yr) for featured placement, newsletter inclusion and SEO boost.</div><a href="https://festmore.com/events/pricing" style="display:inline-block;background:#e8470a;color:#fff;padding:11px 24px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">Upgrade Now →</a></div>' : '')
+        + '<p style="font-size:13px;color:#7a6f68;line-height:1.7;">Questions? Reply to this email and we will get back to you personally.</p>'
+        + '</td></tr>'
+        + '<tr><td style="background:#1a1612;border-radius:0 0 20px 20px;padding:24px 48px;text-align:center;">'
+        + '<span style="font-size:16px;font-weight:800;color:#fff;">Fest<span style="color:#e8470a;">more</span></span>'
+        + '<p style="font-size:11px;color:rgba(255,255,255,.3);margin:10px 0 0;">© ' + new Date().getFullYear() + ' Festmore.com</p>'
+        + '</td></tr></table></td></tr></table></body></html>'
+    });
+    console.log('✅ Welcome email sent to organiser:', email);
+  } catch(e) { console.error('Organiser welcome email error:', e.message); }
+}
+
+
+
 
 // ─── EVENT DETAIL PAGE ────────────────────────────────────────────
 router.get('/:slug', (req, res) => {
