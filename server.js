@@ -12,6 +12,7 @@ const session = require('express-session');
 const path    = require('path');
 const cron    = require('node-cron');
 const fs      = require('fs');
+require('./cron'); 
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -73,6 +74,7 @@ app.use('/festival',     require('./routes/landing'));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
 app.use('/notifications', require('./routes/notifications'));
+app.use('/artists', require('./routes/artists'));
 
 // ─────────────────────────────────────
 // EMAIL TEST ROUTE
