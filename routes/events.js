@@ -24,7 +24,8 @@ const FLAGS = {
   BE:'🇧🇪',CN:'🇨🇳',DK:'🇩🇰',FR:'🇫🇷',DE:'🇩🇪',NL:'🇳🇱',PL:'🇵🇱',SE:'🇸🇪',AE:'🇦🇪',GB:'🇬🇧',US:'🇺🇸',
   NO:'🇳🇴',FI:'🇫🇮',AT:'🇦🇹',CH:'🇨🇭',IT:'🇮🇹',ES:'🇪🇸',PT:'🇵🇹',IE:'🇮🇪',CZ:'🇨🇿',HU:'🇭🇺',
   GR:'🇬🇷',HR:'🇭🇷',IN:'🇮🇳',TH:'🇹🇭',JP:'🇯🇵',
-  AU:'🇦🇺',CA:'🇨🇦',BR:'🇧🇷',MX:'🇲🇽',KR:'🇰🇷',ZA:'🇿🇦',AR:'🇦🇷',MA:'🇲🇦',SG:'🇸🇬',RO:'🇷🇴',
+ AU:'🇦🇺',CA:'🇨🇦',BR:'🇧🇷',MX:'🇲🇽',KR:'🇰🇷',ZA:'🇿🇦',AR:'🇦🇷',MA:'🇲🇦',SG:'🇸🇬',RO:'🇷🇴',
+  EE:'🇪🇪',RS:'🇷🇸',AL:'🇦🇱',
 };
 const COUNTRY_NAMES = {
   BE:'Belgium',CN:'China',DK:'Denmark',FR:'France',DE:'Germany',NL:'Netherlands',PL:'Poland',SE:'Sweden',
@@ -33,6 +34,7 @@ const COUNTRY_NAMES = {
   IN:'India',TH:'Thailand',JP:'Japan',
   AU:'Australia',CA:'Canada',BR:'Brazil',MX:'Mexico',KR:'South Korea',ZA:'South Africa',
   AR:'Argentina',MA:'Morocco',SG:'Singapore',RO:'Romania',
+  EE:'Estonia',RS:'Serbia',AL:'Albania',
 };
 
 // ─── ADMIN EMAIL NOTIFICATION ─────────────────────────────────────
