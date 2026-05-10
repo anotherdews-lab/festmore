@@ -68,7 +68,8 @@ const FLAGS = {
   ES:'🇪🇸', PT:'🇵🇹', IE:'🇮🇪', CZ:'🇨🇿', HU:'🇭🇺', GR:'🇬🇷', HR:'🇭🇷',
   IN:'🇮🇳', TH:'🇹🇭', JP:'🇯🇵',
   AU:'🇦🇺', CA:'🇨🇦', BR:'🇧🇷', MX:'🇲🇽', KR:'🇰🇷', ZA:'🇿🇦', AR:'🇦🇷',
-  MA:'🇲🇦', SG:'🇸🇬', RO:'🇷🇴',
+ MA:'🇲🇦', SG:'🇸🇬', RO:'🇷🇴', EE:'🇪🇪',
+  RS:'🇷🇸', AL:'🇦🇱',
 };
 const COUNTRY_NAMES = {
   BE:'Belgium', CN:'China', DK:'Denmark', FR:'France', DE:'Germany', NL:'Netherlands',
@@ -78,6 +79,7 @@ const COUNTRY_NAMES = {
   IN:'India', TH:'Thailand', JP:'Japan',
   AU:'Australia', CA:'Canada', BR:'Brazil', MX:'Mexico', KR:'South Korea',
   ZA:'South Africa', AR:'Argentina', MA:'Morocco', SG:'Singapore', RO:'Romania',
+  EE:'Estonia', RS:'Serbia', AL:'Albania',
 };
 const IMGS = {
   festival:   'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=75',
