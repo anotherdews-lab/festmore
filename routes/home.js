@@ -395,6 +395,9 @@ ${renderNav(user, tr, langHtml)}
       <a href="/vendors/register" style="display:inline-flex;align-items:center;gap:10px;background:#4a7c59;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(74,124,89,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
         🏪 Become a Vendor — €49/yr
       </a>
+      <a href="/artists/register" style="display:inline-flex;align-items:center;gap:10px;background:#7c3aed;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(124,58,237,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        🎤 List Your Act — Free
+      </a>
     </div>
 
     <div class="fm-search-wrap">
@@ -763,6 +766,42 @@ ${articles.length ? `
   <div class="fm-countries-inner">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap;gap:16px;">
       <div>
+      <!-- ARTISTS BANNER -->
+<section style="background:linear-gradient(135deg,#1e1048 0%,#7c3aed 100%);padding:64px 40px;text-align:center;">
+  <div style="max-width:900px;margin:0 auto;">
+    <div style="display:inline-block;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:1px;margin-bottom:16px;">🎤 NEW — ARTISTS</div>
+    <h2 style="font-size:36px;font-weight:900;color:#fff;margin-bottom:12px;line-height:1.2;">Find & Book Artists<br/>for Your Event</h2>
+    <p style="color:rgba(255,255,255,.8);font-size:17px;max-width:560px;margin:0 auto 32px;">DJs, bands, solo artists and performers from 39 countries. Browse profiles, listen to music, book directly — no agency fees.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:40px;">
+      <a href="/artists" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#7c3aed;padding:16px 32px;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        🔍 Browse Artists
+      </a>
+      <a href="/artists/register" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.4);padding:16px 32px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        🎤 List Your Act Free
+      </a>
+    </div>
+    <div style="display:flex;gap:40px;justify-content:center;flex-wrap:wrap;">
+      <div style="text-align:center;color:rgba(255,255,255,.9);">
+        <div style="font-size:28px;font-weight:900;color:#fff;">Free</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px;">Basic Profile</div>
+      </div>
+      <div style="text-align:center;color:rgba(255,255,255,.9);">
+        <div style="font-size:28px;font-weight:900;color:#fff;">€29</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px;">Verified / Year</div>
+      </div>
+      <div style="text-align:center;color:rgba(255,255,255,.9);">
+        <div style="font-size:28px;font-weight:900;color:#fff;">39</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px;">Countries</div>
+      </div>
+      <div style="text-align:center;color:rgba(255,255,255,.9);">
+        <div style="font-size:28px;font-weight:900;color:#fff;">Direct</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px;">No Agency Fees</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+      <div class="fm-section-tag">${tr.browse_country}</div>
         <div class="fm-section-tag">${tr.browse_country}</div>
         <h2 class="fm-section-h" style="margin-bottom:0;">${tr.browse_country} — ${cn} Countries</h2>
       </div>
@@ -906,12 +945,14 @@ function renderNav(user, tr, langHtml) {
       <a href="/events?category=concert" class="nav-cat">🎵 Concerts</a>
       <a href="/events?category=flea" class="nav-cat">🏺 Flea Markets</a>
       <a href="/vendors" class="nav-cat">🏪 Vendors</a>
+      <a href="/artists" class="nav-cat">🎤 Artists</a>
       <a href="/articles" class="nav-cat">📰 Articles</a>
       <a href="/events/submit" class="nav-cat" style="color:var(--flame);font-weight:700;">+ List Event Free</a>
     </div>
     <div class="nav-mobile">
       <a href="/events">All Events</a>
       <a href="/vendors">Vendors</a>
+      <a href="/artists">Artists</a>
       <a href="/articles">Articles</a>
       <a href="/events/submit">+ List Event Free</a>
       <a href="/vendors/register">Become a Vendor</a>
@@ -928,7 +969,7 @@ function renderFooter(stats, tr) {
         <p>Europe's leading event vendor marketplace. Connecting festivals with vendors across ${stats.countries || 26} countries worldwide.</p>
       </div>
       <div class="footer-col"><h4>${tr.footer_for_org}</h4><a href="/events/submit">${tr.footer_list}</a><a href="/events/pricing">${tr.footer_pricing}</a><a href="/vendors">${tr.footer_find_vendors}</a><a href="/events">${tr.footer_browse}</a></div>
-      <div class="footer-col"><h4>${tr.footer_for_ven}</h4><a href="/vendors/register">${tr.footer_create} — €49/yr</a><a href="/events">${tr.footer_find_vendors}</a><a href="/contact">${tr.footer_contact}</a></div>
+      <div class="footer-col"><h4>${tr.footer_for_ven}</h4><a href="/vendors/register">${tr.footer_create} — €49/yr</a><a href="/artists">Browse Artists</a><a href="/artists/register">List Your Act — Free</a><a href="/contact">${tr.footer_contact}</a></div>
       <div class="footer-col"><h4>Company</h4><a href="/about">About Us</a><a href="/articles">Articles</a><a href="/contact">Contact</a><a href="/privacy">Privacy Policy</a></div>
     </div>
     <div class="footer-bottom">
