@@ -388,16 +388,31 @@ ${renderNav(user, tr, langHtml)}
     <h1>Find Events. <em>Book Vendors.</em><br/>Grow Together.</h1>
     <p class="fm-hero-sub">The world's best platform connecting festival vendors with event organisers. ${ev}+ events across ${cn} countries.</p>
 
-    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;">
-      <a href="/events/submit" style="display:inline-flex;align-items:center;gap:10px;background:#e8470a;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(232,71,10,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        🎪 List Your Event — Free
-      </a>
-      <a href="/vendors/register" style="display:inline-flex;align-items:center;gap:10px;background:#4a7c59;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(74,124,89,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        🏪 Become a Vendor — €49/yr
-      </a>
-      <a href="/artists/register" style="display:inline-flex;align-items:center;gap:10px;background:#7c3aed;color:#fff;padding:18px 36px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(124,58,237,.45);transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        🎤 List Your Act — Free
-      </a>
+    <div style="margin-bottom:36px;">
+      <p style="color:rgba(255,255,255,.5);font-size:11px;font-weight:700;letter-spacing:2px;text-align:center;margin-bottom:12px;text-transform:uppercase;">Discover</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;">
+        <a href="/events" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#0a1a0f;padding:16px 28px;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          🌍 Browse Events
+        </a>
+        <a href="/vendors" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#0a1a0f;padding:16px 28px;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          🏪 Browse Vendors
+        </a>
+        <a href="/artists" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#7c3aed;padding:16px 28px;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          🎤 Browse Artists
+        </a>
+      </div>
+      <p style="color:rgba(255,255,255,.5);font-size:11px;font-weight:700;letter-spacing:2px;text-align:center;margin-bottom:12px;text-transform:uppercase;">List Your Business</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <a href="/events/submit" style="display:inline-flex;align-items:center;gap:8px;background:#e8470a;color:#fff;padding:13px 22px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          🎪 List Event — Free
+        </a>
+        <a href="/vendors/register" style="display:inline-flex;align-items:center;gap:8px;background:#4a7c59;color:#fff;padding:13px 22px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          🏪 Become Vendor — €49/yr
+        </a>
+        <a href="/artists/register" style="display:inline-flex;align-items:center;gap:8px;background:#7c3aed;color:#fff;padding:13px 22px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          🎤 List Your Act — Free
+        </a>
+      </div>
     </div>
 
     <div class="fm-search-wrap">
