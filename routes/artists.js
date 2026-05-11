@@ -452,8 +452,10 @@ ${nav('artists')}
       </div>
       <div class="profile-actions">
         <a href="#contact" class="btn btn-primary">📩 Book / Contact</a>
+        ${a.instagram?`<a href="${a.instagram.startsWith('http')?a.instagram:'https://instagram.com/'+a.instagram.replace('@','')}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);color:#fff;padding:12px 24px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none;">📸 Instagram</a>`:''}
+        ${a.spotify?`<a href="${a.spotify}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#1DB954;color:#fff;padding:12px 24px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none;">🎵 Spotify</a>`:''}
+        ${a.youtube?`<a href="${a.youtube}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#FF0000;color:#fff;padding:12px 24px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none;">▶ YouTube</a>`:''}
         ${a.website?`<a href="${a.website}" target="_blank" rel="noopener" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3);">🌐 Website</a>`:''}
-        ${a.spotify?`<a href="${a.spotify}" target="_blank" rel="noopener" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3);">🎵 Spotify</a>`:''}
       </div>
     </div>
   </div>
@@ -478,15 +480,46 @@ ${nav('artists')}
       </div>
     </div>` : ''}
 
-    <!-- LINKS -->
-    ${(a.youtube||a.soundcloud)?`
+    <!-- SOCIAL LINKS -->
+    ${(a.instagram||a.youtube||a.soundcloud||a.spotify||a.website)?`
     <div class="profile-section">
-      <h2>Listen / Watch</h2>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        ${a.youtube?`<a href="${a.youtube}" target="_blank" class="btn btn-outline">▶ YouTube</a>`:''}
-        ${a.soundcloud?`<a href="${a.soundcloud}" target="_blank" class="btn btn-outline">🔊 SoundCloud</a>`:''}
-        ${a.spotify?`<a href="${a.spotify}" target="_blank" class="btn btn-outline">🎵 Spotify</a>`:''}
-        ${a.instagram?`<a href="${a.instagram}" target="_blank" class="btn btn-outline">📸 Instagram</a>`:''}
+      <h2>Find & Follow</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+        ${a.instagram?`
+        <a href="${a.instagram.startsWith('http')?a.instagram:'https://instagram.com/'+a.instagram.replace('@','')}" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;font-weight:600;transition:all .2s;"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="font-size:22px;">📸</span>
+          <div><div style="font-size:11px;opacity:.8;">Instagram</div><div style="font-size:14px;">Follow</div></div>
+        </a>` : ''}
+        ${a.spotify?`
+        <a href="${a.spotify}" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:#1DB954;color:#fff;text-decoration:none;font-weight:600;transition:all .2s;"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="font-size:22px;">🎵</span>
+          <div><div style="font-size:11px;opacity:.8;">Spotify</div><div style="font-size:14px;">Listen</div></div>
+        </a>` : ''}
+        ${a.youtube?`
+        <a href="${a.youtube}" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:#FF0000;color:#fff;text-decoration:none;font-weight:600;transition:all .2s;"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="font-size:22px;">▶️</span>
+          <div><div style="font-size:11px;opacity:.8;">YouTube</div><div style="font-size:14px;">Watch</div></div>
+        </a>` : ''}
+        ${a.soundcloud?`
+        <a href="${a.soundcloud}" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:#FF5500;color:#fff;text-decoration:none;font-weight:600;transition:all .2s;"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="font-size:22px;">🔊</span>
+          <div><div style="font-size:11px;opacity:.8;">SoundCloud</div><div style="font-size:14px;">Listen</div></div>
+        </a>` : ''}
+        ${a.website?`
+        <a href="${a.website}" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:#0a1a0f;color:#fff;text-decoration:none;font-weight:600;transition:all .2s;"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="font-size:22px;">🌐</span>
+          <div><div style="font-size:11px;opacity:.8;">Website</div><div style="font-size:14px;">Visit</div></div>
+        </a>` : ''}
       </div>
     </div>` : ''}
 
