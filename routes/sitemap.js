@@ -183,7 +183,7 @@ ${events.map(e => `  <url>
 // ─────────────────────────────────────
 router.get('/sitemap-articles.xml', (req, res) => {
   const articles = db.prepare(`
-    SELECT slug, updated_at, created_at
+    SELECT slug, created_at
     FROM articles WHERE status='published'
     ORDER BY created_at DESC LIMIT 5000
   `).all();
@@ -197,7 +197,7 @@ router.get('/sitemap-articles.xml', (req, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${articles.map(a => `  <url>
     <loc>https://festmore.com/articles/${a.slug}</loc>
-    <lastmod>${fmt(a.updated_at || a.created_at)}</lastmod>
+    <lastmod>${fmt(a.created_at)}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`).join('\n')}
