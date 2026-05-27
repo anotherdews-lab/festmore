@@ -1,16 +1,16 @@
-// routes/home.js — PERFORMANCE OPTIMISED v2
-// ✅ Stats cached for 5 minutes (eliminates 4 DB hits per request)
-// ✅ countryCounts.length used instead of separate countries query
-// ✅ Prepared statements cached at module level (not re-prepared every request)
-// ✅ All render logic unchanged — drop-in replacement
+// routes/home.js — FESTMORE v3 REDESIGN
+// ✅ 4-way split hero (Organiser / Vendor / Artist / Visitor)
+// ✅ Gold badge commercial tier
+// ✅ Artist subcategories (Musicians, DJs, Comedians, Painters, etc.)
+// ✅ All existing Stripe, DB, routes, events, articles preserved
+// ✅ Performance: pre-compiled statements + 5min stats cache
 
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
 const { t, getLang, langSwitcher } = require('../utils/i18n');
 
-// ─── PRE-COMPILE ALL STATEMENTS ONCE AT STARTUP ──────────────────────────────
-// better-sqlite3: preparing a statement is ~1ms. Doing it per-request wastes time.
+// ─── PRE-COMPILE STATEMENTS ONCE ─────────────────────────────────────────────
 const stmts = {
   topEvents:      db.prepare(`SELECT id,title,slug,category,city,country,start_date,date_display,price_display,image_url,attendees,featured,payment_status FROM events WHERE status='active' ORDER BY featured DESC, attendees DESC, id DESC LIMIT 6`),
   featuredEvents: db.prepare(`SELECT id,title,slug,category,city,country,start_date,date_display,image_url,attendees FROM events WHERE status='active' AND featured=1 ORDER BY attendees DESC LIMIT 3`),
@@ -18,26 +18,18 @@ const stmts = {
   countryCounts:  db.prepare(`SELECT country, COUNT(*) as count FROM events WHERE status='active' GROUP BY country ORDER BY count DESC`),
   catCounts:      db.prepare(`SELECT category, COUNT(*) as count FROM events WHERE status='active' GROUP BY category ORDER BY count DESC`),
   vendors:        db.prepare(`SELECT id,business_name,category,city,country,avg_rating,total_applications,photos,image_url FROM vendors WHERE status='active' AND payment_status='paid' ORDER BY avg_rating DESC, total_applications DESC, id DESC LIMIT 6`),
-  // COMBINED stats in ONE query instead of 4 separate ones
   statsEvents:    db.prepare(`SELECT COUNT(*) as n FROM events WHERE status='active'`),
   statsVendors:   db.prepare(`SELECT COUNT(*) as n FROM vendors WHERE status='active'`),
   statsArticles:  db.prepare(`SELECT COUNT(*) as n FROM articles WHERE status='published'`),
   statsSubs:      db.prepare(`SELECT COUNT(*) as n FROM subscribers WHERE active=1`),
 };
 
-// ─── STATS CACHE — refreshes every 5 minutes ─────────────────────────────────
-// Stats (event count, vendor count etc.) don't change per-request.
-// Caching them eliminates 4 DB queries on every single homepage load.
-let _statsCache = null;
-let _statsCacheTime = 0;
-const STATS_TTL = 5 * 60 * 1000; // 5 minutes
-
+// ─── STATS CACHE (5 min) ──────────────────────────────────────────────────────
+let _statsCache = null, _statsCacheTime = 0;
+const STATS_TTL = 5 * 60 * 1000;
 function getCachedStats() {
   const now = Date.now();
-  if (_statsCache && (now - _statsCacheTime) < STATS_TTL) {
-    return _statsCache;
-  }
-  // Refresh cache
+  if (_statsCache && (now - _statsCacheTime) < STATS_TTL) return _statsCache;
   _statsCache = {
     events:      stmts.statsEvents.get().n,
     vendors:     stmts.statsVendors.get().n,
@@ -48,39 +40,18 @@ function getCachedStats() {
   return _statsCache;
 }
 
-// ─── HOMEPAGE ROUTE ───────────────────────────────────────────────────────────
 router.get('/', (req, res) => {
-  // 5 queries instead of 10 — stats come from cache
   const topEvents      = stmts.topEvents.all();
   const featuredEvents = stmts.featuredEvents.all();
   const articles       = stmts.articles.all();
   const countryCounts  = stmts.countryCounts.all();
   const catCounts      = stmts.catCounts.all();
   const vendors        = stmts.vendors.all();
-
-  // Stats from cache (0 DB hits after first load)
-  const cachedStats = getCachedStats();
-  const stats = {
-    ...cachedStats,
-    countries: countryCounts.length, // already computed — no extra query needed
-  };
-
+  const cachedStats    = getCachedStats();
+  const stats = { ...cachedStats, countries: countryCounts.length };
   const tr   = t(req);
   const lang = getLang(req);
-
-  res.send(renderHome({
-    topEvents,
-    featuredEvents,
-    articles,
-    countryCounts,
-    catCounts,
-    stats,
-    vendors,
-    user: req.session.user,
-    tr,
-    lang,
-    langHtml: langSwitcher(req)
-  }));
+  res.send(renderHome({ topEvents, featuredEvents, articles, countryCounts, catCounts, stats, vendors, user: req.session.user, tr, lang, langHtml: langSwitcher(req) }));
 });
 
 router.get('/set-lang/:lang', (req, res) => {
@@ -91,337 +62,393 @@ router.get('/set-lang/:lang', (req, res) => {
 module.exports = router;
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
-
-const CATS = {
-  festival:'🎪', concert:'🎵', market:'🛍️', christmas:'🎄', exhibition:'🖼️',
-  business:'💼', kids:'🎠', comics:'🎮', flea:'🏺', online:'💻', city:'🏙️', messe:'🏛️'
-};
-const CAT_LABELS = {
-  festival:'Festivals', concert:'Concerts', market:'Markets', christmas:'Xmas Markets',
-  exhibition:'Exhibitions', business:'Business', kids:'Kids Events', comics:'Comics & Gaming',
-  flea:'Flea Markets', online:'Online Events', city:'City Events', messe:'Trade Fairs'
-};
-const CAT_PHOTOS = {
-  festival:   'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&q=80',
-  concert:    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=80',
-  market:     'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80',
-  christmas:  'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=600&q=80',
-  exhibition: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=80',
-  business:   'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80',
-  kids:       'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=80',
-  flea:       'https://images.unsplash.com/photo-1558402847-7f9d6d65b41c?w=600&q=80',
-  city:       'https://images.unsplash.com/photo-1467803738586-46b7eb7b16a1?w=600&q=80',
-  messe:      'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&q=80',
-  comics:     'https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?w=600&q=80',
-  online:     'https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=600&q=80',
-};
 const FLAGS = {
-  BE:'🇧🇪', CN:'🇨🇳', DK:'🇩🇰', FR:'🇫🇷', DE:'🇩🇪', NL:'🇳🇱', PL:'🇵🇱', SE:'🇸🇪',
-  AE:'🇦🇪', GB:'🇬🇧', US:'🇺🇸', NO:'🇳🇴', FI:'🇫🇮', AT:'🇦🇹', CH:'🇨🇭', IT:'🇮🇹',
-  ES:'🇪🇸', PT:'🇵🇹', IE:'🇮🇪', CZ:'🇨🇿', HU:'🇭🇺', GR:'🇬🇷', HR:'🇭🇷',
-  IN:'🇮🇳', TH:'🇹🇭', JP:'🇯🇵',
-  AU:'🇦🇺', CA:'🇨🇦', BR:'🇧🇷', MX:'🇲🇽', KR:'🇰🇷', ZA:'🇿🇦', AR:'🇦🇷',
-  MA:'🇲🇦', SG:'🇸🇬', RO:'🇷🇴', EE:'🇪🇪',
-  RS:'🇷🇸', AL:'🇦🇱',
+  BE:'🇧🇪',CN:'🇨🇳',DK:'🇩🇰',FR:'🇫🇷',DE:'🇩🇪',NL:'🇳🇱',PL:'🇵🇱',SE:'🇸🇪',
+  AE:'🇦🇪',GB:'🇬🇧',US:'🇺🇸',NO:'🇳🇴',FI:'🇫🇮',AT:'🇦🇹',CH:'🇨🇭',IT:'🇮🇹',
+  ES:'🇪🇸',PT:'🇵🇹',IE:'🇮🇪',CZ:'🇨🇿',HU:'🇭🇺',GR:'🇬🇷',HR:'🇭🇷',
+  IN:'🇮🇳',TH:'🇹🇭',JP:'🇯🇵',AU:'🇦🇺',CA:'🇨🇦',BR:'🇧🇷',MX:'🇲🇽',
+  KR:'🇰🇷',ZA:'🇿🇦',AR:'🇦🇷',MA:'🇲🇦',SG:'🇸🇬',RO:'🇷🇴',EE:'🇪🇪',RS:'🇷🇸',AL:'🇦🇱',
 };
 const COUNTRY_NAMES = {
-  BE:'Belgium', CN:'China', DK:'Denmark', FR:'France', DE:'Germany', NL:'Netherlands',
-  PL:'Poland', SE:'Sweden', AE:'UAE', GB:'United Kingdom', US:'USA', NO:'Norway',
-  FI:'Finland', AT:'Austria', CH:'Switzerland', IT:'Italy', ES:'Spain', PT:'Portugal',
-  IE:'Ireland', CZ:'Czech Republic', HU:'Hungary', GR:'Greece', HR:'Croatia',
-  IN:'India', TH:'Thailand', JP:'Japan',
-  AU:'Australia', CA:'Canada', BR:'Brazil', MX:'Mexico', KR:'South Korea',
-  ZA:'South Africa', AR:'Argentina', MA:'Morocco', SG:'Singapore', RO:'Romania',
-  EE:'Estonia', RS:'Serbia', AL:'Albania',
+  BE:'Belgium',CN:'China',DK:'Denmark',FR:'France',DE:'Germany',NL:'Netherlands',
+  PL:'Poland',SE:'Sweden',AE:'UAE',GB:'United Kingdom',US:'USA',NO:'Norway',
+  FI:'Finland',AT:'Austria',CH:'Switzerland',IT:'Italy',ES:'Spain',PT:'Portugal',
+  IE:'Ireland',CZ:'Czech Republic',HU:'Hungary',GR:'Greece',HR:'Croatia',
+  IN:'India',TH:'Thailand',JP:'Japan',AU:'Australia',CA:'Canada',BR:'Brazil',
+  MX:'Mexico',KR:'South Korea',ZA:'South Africa',AR:'Argentina',MA:'Morocco',
+  SG:'Singapore',RO:'Romania',EE:'Estonia',RS:'Serbia',AL:'Albania',
 };
+const CATS = { festival:'🎪',concert:'🎵',market:'🛍️',christmas:'🎄',exhibition:'🖼️',business:'💼',kids:'🎠',comics:'🎮',flea:'🏺',online:'💻',city:'🏙️',messe:'🏛️' };
 const IMGS = {
-  festival:   'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=75',
-  concert:    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=75',
-  market:     'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=75',
-  christmas:  'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=600&q=75',
-  exhibition: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=75',
-  business:   'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=75',
-  kids:       'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=75',
-  comics:     'https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?w=600&q=75',
-  flea:       'https://images.unsplash.com/photo-1558402847-7f9d6d65b41c?w=600&q=75',
-  online:     'https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=600&q=75',
-  city:       'https://images.unsplash.com/photo-1467803738586-46b7eb7b16a1?w=600&q=75',
-  messe:      'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&q=75',
+  festival:'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=75',
+  concert:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=75',
+  market:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=75',
+  christmas:'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=600&q=75',
+  exhibition:'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=75',
+  business:'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=75',
+  kids:'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=75',
+  flea:'https://images.unsplash.com/photo-1558402847-7f9d6d65b41c?w=600&q=75',
+  city:'https://images.unsplash.com/photo-1467803738586-46b7eb7b16a1?w=600&q=75',
+  messe:'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&q=75',
+  comics:'https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?w=600&q=75',
+  online:'https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=600&q=75',
 };
 
-// ─── MAIN RENDER — IDENTICAL TO ORIGINAL ─────────────────────────────────────
-
+// ─── MAIN RENDER ─────────────────────────────────────────────────────────────
 function renderHome({ topEvents, featuredEvents, articles, countryCounts, catCounts, stats, vendors, user, tr, lang, langHtml }) {
-  const ev = stats.events;
-  const vn = stats.vendors;
-  const ar = stats.articles;
-  const sb = stats.subscribers;
-  const cn = stats.countries;
+  const ev = stats.events, vn = stats.vendors, ar = stats.articles, sb = stats.subscribers, cn = stats.countries;
 
   return `<!DOCTYPE html>
-<html lang="${lang}" dir="${tr.dir || 'ltr'}">
+<html lang="${lang}">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Festmore — Festivals, Markets &amp; Events Worldwide | Find &amp; List Events</title>
-<meta name="description" content="Discover ${ev}+ festivals, markets and events across ${cn} countries. List your event free or find verified vendors for your next festival."/>
+<title>Festmore — Find Events, Book Vendors &amp; Discover Artists Worldwide</title>
+<meta name="description" content="Festmore is the global marketplace for events, vendors and artists. ${ev}+ events across ${cn} countries. Find your next festival, book a vendor or get discovered as an artist."/>
 <link rel="canonical" href="https://festmore.com/"/>
 <meta property="og:type" content="website"/>
-<meta property="og:title" content="Festmore — Festivals, Markets &amp; Events Worldwide"/>
-<meta property="og:description" content="Discover ${ev}+ festivals, markets and events across ${cn} countries."/>
+<meta property="og:title" content="Festmore — Events, Vendors &amp; Artists Worldwide"/>
+<meta property="og:description" content="${ev}+ events · ${vn}+ vendors · ${cn} countries"/>
 <meta property="og:image" content="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80"/>
 <meta property="og:url" content="https://festmore.com/"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Festmore","url":"https://festmore.com","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://festmore.com/events?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <script>window.addEventListener("load",function(){var s=document.createElement("script");s.async=true;s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222";s.crossOrigin="anonymous";document.head.appendChild(s);});</script>
 <link rel="stylesheet" href="/css/main.css"/>
 <style>
-body { font-family: 'Bricolage Grotesque', sans-serif; }
-
-/* HERO */
-.fm-hero { background:#0a0a0a; padding:100px 0 80px; position:relative; overflow:hidden; }
-.fm-hero-bg { position:absolute; inset:0; background-image:url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1400&q=60'); background-size:cover; background-position:center; opacity:.2; }
-.fm-hero-gradient { position:absolute; inset:0; background:linear-gradient(160deg,rgba(10,10,10,.98) 0%,rgba(10,10,10,.75) 60%,rgba(232,71,10,.1) 100%); }
-.fm-hero-inner { position:relative; z-index:2; max-width:1100px; margin:0 auto; padding:0 40px; text-align:center; }
-.fm-hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(232,71,10,.15); border:1px solid rgba(232,71,10,.3); color:#ff7043; font-size:12px; font-weight:700; padding:6px 16px; border-radius:99px; margin-bottom:24px; letter-spacing:.8px; text-transform:uppercase; }
-.fm-hero-badge-dot { width:6px; height:6px; border-radius:50%; background:#ff7043; animation:pulse 2s ease infinite; }
-.fm-hero h1 { font-family:'DM Serif Display',serif; font-size:clamp(36px,6vw,72px); color:#fff; line-height:1.05; margin-bottom:16px; font-weight:400; }
-.fm-hero h1 em { color:#e8470a; font-style:italic; }
-.fm-hero-sub { font-size:18px; color:rgba(255,255,255,.55); margin-bottom:32px; max-width:600px; margin-left:auto; margin-right:auto; line-height:1.6; }
-.fm-search-wrap { max-width:760px; margin:0 auto 24px; }
-.fm-search-bar { background:#fff; border-radius:16px; padding:8px 8px 8px 20px; display:flex; align-items:center; box-shadow:0 24px 80px rgba(0,0,0,.5); }
-.fm-search-icon { font-size:18px; flex-shrink:0; margin-right:8px; }
-.fm-search-input { flex:1; border:none; outline:none; font-size:16px; color:#1a1612; background:transparent; font-family:inherit; min-width:0; padding:8px 0; }
-.fm-search-divider { width:1px; height:32px; background:#e8e2d9; margin:0 16px; flex-shrink:0; }
-.fm-search-location { border:none; outline:none; font-size:15px; color:#1a1612; background:transparent; font-family:inherit; width:180px; flex-shrink:0; padding:8px 0; }
-.fm-search-btn { background:#e8470a; color:#fff; border:none; border-radius:12px; padding:14px 28px; font-size:15px; font-weight:700; cursor:pointer; white-space:nowrap; transition:background .2s; font-family:inherit; }
-.fm-search-btn:hover { background:#c23d09; }
-.fm-date-pills { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:48px; }
-.fm-date-pill { background:rgba(255,255,255,.08); color:rgba(255,255,255,.75); border:1px solid rgba(255,255,255,.15); padding:7px 18px; border-radius:99px; font-size:13px; font-weight:600; text-decoration:none; transition:all .2s; white-space:nowrap; }
-.fm-date-pill:hover { background:#e8470a; border-color:#e8470a; color:#fff; }
-.fm-hero-stats { display:inline-flex; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:16px; overflow:hidden; }
-.fm-hstat { padding:16px 28px; text-align:center; border-right:1px solid rgba(255,255,255,.08); }
-.fm-hstat:last-child { border-right:none; }
-.fm-hstat-n { font-family:'DM Serif Display',serif; font-size:26px; color:#fff; display:block; line-height:1; }
-.fm-hstat-l { font-size:11px; color:rgba(255,255,255,.4); font-weight:600; letter-spacing:.8px; text-transform:uppercase; margin-top:4px; display:block; }
-
-/* TRUST */
-.fm-trust { background:#111; border-bottom:1px solid #1a1a1a; padding:14px 0; }
-.fm-trust-inner { max-width:1200px; margin:0 auto; padding:0 40px; display:flex; align-items:center; justify-content:center; gap:36px; flex-wrap:wrap; }
-.fm-trust-item { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:rgba(255,255,255,.45); }
-
-/* FEATURED BANNER */
-.fm-featured-banner { background:linear-gradient(135deg,#1a0a00,#2d1200); padding:40px 0; border-bottom:1px solid rgba(232,71,10,.2); }
-.fm-featured-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
-.fm-featured-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(232,71,10,.2); border:1px solid rgba(232,71,10,.4); color:#ff7043; font-size:11px; font-weight:800; padding:4px 14px; border-radius:99px; margin-bottom:16px; letter-spacing:1px; text-transform:uppercase; }
-.fm-featured-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-.fm-feat-card { background:rgba(255,255,255,.04); border:1px solid rgba(232,71,10,.25); border-radius:16px; overflow:hidden; text-decoration:none; display:flex; flex-direction:column; transition:all .25s; position:relative; }
-.fm-feat-card:hover { border-color:#e8470a; transform:translateY(-3px); box-shadow:0 16px 48px rgba(232,71,10,.2); }
-.fm-feat-img { height:160px; overflow:hidden; position:relative; }
-.fm-feat-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
-.fm-feat-card:hover .fm-feat-img img { transform:scale(1.06); }
-.fm-feat-badge { position:absolute; top:10px; left:10px; background:#e8470a; color:#fff; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:800; }
-.fm-feat-body { padding:16px; flex:1; }
-.fm-feat-title { font-family:'DM Serif Display',serif; font-size:17px; color:#fff; margin-bottom:6px; line-height:1.2; }
-.fm-feat-meta { font-size:12px; color:rgba(255,255,255,.5); }
-.fm-feat-cta { font-size:12px; font-weight:700; color:#e8470a; padding:0 16px 14px; }
-
-/* EVENTS */
-.fm-events-section { background:#faf8f3; padding:64px 0 48px; }
-.fm-events-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
-.fm-events-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px; }
-.fm-events-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(232,71,10,.08); border:1px solid rgba(232,71,10,.18); color:#e8470a; font-size:11px; font-weight:800; padding:3px 14px; border-radius:99px; margin-bottom:10px; letter-spacing:1px; text-transform:uppercase; }
-.fm-events-title { font-family:'DM Serif Display',serif; font-size:clamp(24px,3vw,38px); font-weight:400; color:#1a1612; margin-bottom:4px; }
-.fm-events-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
-.fm-ec { background:#fff; border:1px solid #e8e2d9; border-radius:20px; overflow:hidden; transition:all .25s; cursor:pointer; display:flex; flex-direction:column; }
-.fm-ec:hover { border-color:#e8470a; box-shadow:0 20px 60px rgba(26,22,18,.12); transform:translateY(-4px); }
-.fm-ec-img { height:220px; position:relative; overflow:hidden; flex-shrink:0; }
-.fm-ec-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
-.fm-ec:hover .fm-ec-img img { transform:scale(1.06); }
-.fm-ec-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(26,22,18,.5) 0%,transparent 50%); }
-.fm-ec-top-badges { position:absolute; top:12px; left:12px; display:flex; gap:6px; }
-.fm-ec-badge { padding:4px 10px; border-radius:99px; font-size:11px; font-weight:700; }
-.fm-ec-price { position:absolute; top:12px; right:12px; padding:5px 12px; border-radius:99px; font-size:12px; font-weight:800; backdrop-filter:blur(8px); }
-.fm-ec-price.free { background:#dcfce7; color:#15803d; }
-.fm-ec-price.paid { background:rgba(26,22,18,.7); color:#fff; }
-.fm-ec-body { padding:20px; display:flex; flex-direction:column; flex:1; }
-.fm-ec-date { font-size:12px; font-weight:700; color:#e8470a; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
-.fm-ec-title { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; color:#1a1612; margin-bottom:6px; line-height:1.2; }
-.fm-ec-location { font-size:13px; color:#7a6f68; margin-bottom:auto; padding-bottom:14px; }
-.fm-ec-footer { display:flex; justify-content:space-between; align-items:center; padding-top:14px; border-top:1px solid #f0ece4; margin-top:auto; }
-.fm-ec-visitors { font-size:12px; color:#b5ada6; }
-.fm-ec-cta { font-size:13px; font-weight:700; color:#e8470a; }
-
-/* VENDOR SECTION */
-.fm-vendors-section { background:#fff; padding:64px 0; }
-.fm-vendors-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
-.fm-vendors-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:32px; }
-.fm-vc { background:#fff; border:1px solid #e8e2d9; border-radius:20px; overflow:hidden; transition:all .25s; text-decoration:none; display:flex; flex-direction:column; }
-.fm-vc:hover { border-color:#4a7c59; box-shadow:0 20px 60px rgba(26,22,18,.1); transform:translateY(-4px); }
-.fm-vc-img { height:180px; position:relative; overflow:hidden; background:#f5f0e8; }
-.fm-vc-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
-.fm-vc:hover .fm-vc-img img { transform:scale(1.06); }
-.fm-vc-img-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:48px; background:linear-gradient(135deg,#f5f0e8,#e8e2d9); }
-.fm-vc-badge { position:absolute; top:10px; left:10px; background:#4a7c59; color:#fff; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:800; }
-.fm-vc-body { padding:18px; flex:1; display:flex; flex-direction:column; }
-.fm-vc-name { font-family:'DM Serif Display',serif; font-size:18px; color:#1a1612; margin-bottom:4px; }
-.fm-vc-cat { font-size:12px; font-weight:700; color:#4a7c59; text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; }
-.fm-vc-loc { font-size:13px; color:#7a6f68; margin-bottom:10px; }
-.fm-vc-rating { display:flex; align-items:center; gap:6px; font-size:13px; margin-bottom:auto; padding-bottom:12px; }
-.fm-vc-stars { color:#e8470a; letter-spacing:1px; }
-.fm-vc-footer { display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid #f0ece4; margin-top:auto; }
-.fm-vc-apps { font-size:12px; color:#b5ada6; }
-.fm-vc-cta { font-size:13px; font-weight:700; color:#4a7c59; }
-
-/* TRENDING */
-.fm-trending { background:#1a1612; padding:18px 0; }
-.fm-trending-inner { max-width:1200px; margin:0 auto; padding:0 40px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center; }
-.fm-trending-label { font-size:12px; font-weight:700; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:.8px; white-space:nowrap; }
-.fm-trending-pill { background:rgba(255,255,255,.06); color:rgba(255,255,255,.65); padding:5px 14px; border-radius:99px; font-size:13px; font-weight:600; text-decoration:none; transition:all .2s; border:1px solid rgba(255,255,255,.08); white-space:nowrap; }
-.fm-trending-pill:hover { background:rgba(232,71,10,.2); color:#ff7043; border-color:rgba(232,71,10,.3); }
-
-/* ARTICLES */
-.fm-articles-section { background:#faf8f3; padding:64px 0; }
-.fm-articles-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
-.fm-articles-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
-.fm-acard { background:#fff; border:1px solid #e8e2d9; border-radius:20px; overflow:hidden; text-decoration:none; display:flex; flex-direction:column; transition:all .25s; }
-.fm-acard:hover { border-color:#e8470a; box-shadow:0 20px 60px rgba(26,22,18,.1); transform:translateY(-4px); }
-.fm-acard-img { height:200px; overflow:hidden; position:relative; }
-.fm-acard-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
-.fm-acard:hover .fm-acard-img img { transform:scale(1.06); }
-.fm-acard-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(26,22,18,.4) 0%,transparent 60%); }
-.fm-acard-cat { position:absolute; top:12px; left:12px; padding:4px 12px; border-radius:99px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#fff; }
-.fm-acard-body { padding:22px; flex:1; display:flex; flex-direction:column; }
-.fm-acard-title { font-family:'DM Serif Display',serif; font-size:19px; font-weight:400; color:#1a1612; margin-bottom:10px; line-height:1.3; flex:1; }
-.fm-acard-excerpt { font-size:13px; color:#7a6f68; line-height:1.6; margin-bottom:16px; }
-.fm-acard-footer { display:flex; justify-content:space-between; align-items:center; padding-top:14px; border-top:1px solid #f0ece4; }
-.fm-acard-date { font-size:11px; color:#b5ada6; }
-.fm-acard-cta { font-size:13px; font-weight:700; color:#e8470a; }
-
-/* SECTION HELPERS */
-.fm-section-tag { display:inline-flex; align-items:center; gap:6px; background:rgba(232,71,10,.07); border:1px solid rgba(232,71,10,.15); color:#e8470a; font-size:11px; font-weight:800; padding:4px 14px; border-radius:99px; margin-bottom:16px; letter-spacing:1px; text-transform:uppercase; }
-.fm-section-h { font-family:'DM Serif Display',serif; font-size:clamp(26px,3.5vw,44px); font-weight:400; margin-bottom:14px; }
-
-/* CATEGORY PHOTOS */
-.fm-cat-section { background:#faf8f3; padding:64px 0; }
-.fm-cat-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
-.fm-cat-photo-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-.fm-cat-photo-card { border-radius:16px; overflow:hidden; position:relative; aspect-ratio:4/3; cursor:pointer; text-decoration:none; display:block; }
-.fm-cat-photo-card img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
-.fm-cat-photo-card:hover img { transform:scale(1.06); }
-.fm-cat-photo-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(26,22,18,.88) 0%,rgba(26,22,18,.1) 60%); }
-.fm-cat-photo-content { position:absolute; bottom:0; left:0; right:0; padding:18px; }
-.fm-cat-photo-icon { font-size:22px; display:block; margin-bottom:5px; }
-.fm-cat-photo-name { font-size:16px; font-weight:700; color:#fff; display:block; margin-bottom:2px; }
-.fm-cat-photo-count { font-size:12px; color:rgba(255,255,255,.6); }
-
-/* WHY */
-.fm-why { background:#fff; padding:80px 0; }
-.fm-why-inner { max-width:1200px; margin:0 auto; padding:0 40px; }
-.fm-why-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:48px; }
-.fm-why-card { background:#faf8f3; border:1px solid #e8e2d9; border-radius:20px; padding:28px; transition:all .25s; }
-.fm-why-card:hover { border-color:#e8470a; box-shadow:0 16px 48px rgba(26,22,18,.08); transform:translateY(-3px); }
-.fm-why-icon { font-size:32px; margin-bottom:14px; display:block; }
-.fm-why-title { font-size:17px; font-weight:700; color:#1a1612; margin-bottom:8px; }
-.fm-why-desc { font-size:13.5px; color:#7a6f68; line-height:1.7; }
-
-/* PRICING */
-.fm-dual { background:#0a0a0a; padding:80px 0; position:relative; overflow:hidden; }
-.fm-dual::before { content:''; position:absolute; top:-200px; right:-200px; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(232,71,10,.1) 0%,transparent 70%); }
-.fm-dual-inner { max-width:1100px; margin:0 auto; padding:0 40px; }
-.fm-dual-header { text-align:center; margin-bottom:48px; }
-.fm-dual-header h2 { font-family:'DM Serif Display',serif; font-size:clamp(26px,4vw,48px); font-weight:400; color:#fff; margin-bottom:12px; }
-.fm-dual-header p { font-size:16px; color:rgba(255,255,255,.45); max-width:480px; margin:0 auto; }
-.fm-dual-cards { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-.fm-plan-card { border-radius:24px; padding:40px; position:relative; overflow:hidden; }
-.fm-plan-organiser { background:linear-gradient(145deg,#1a1612,#2d2520); border:1px solid rgba(232,71,10,.2); }
-.fm-plan-vendor { background:linear-gradient(145deg,#0d1f15,#1a3d28); border:1px solid rgba(74,124,89,.25); }
-.fm-plan-glow-org { position:absolute; top:-60px; right:-60px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(232,71,10,.18) 0%,transparent 70%); }
-.fm-plan-glow-ven { position:absolute; top:-60px; right:-60px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(74,124,89,.25) 0%,transparent 70%); }
-.fm-plan-tag { display:inline-block; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; padding:4px 14px; border-radius:99px; margin-bottom:18px; }
-.fm-tag-org { background:rgba(232,71,10,.18); color:#ff7043; }
-.fm-tag-ven { background:rgba(74,124,89,.22); color:#7ec99a; }
-.fm-plan-emoji { font-size:44px; margin-bottom:14px; display:block; }
-.fm-plan-h { font-family:'DM Serif Display',serif; font-size:26px; font-weight:400; color:#fff; margin-bottom:10px; line-height:1.15; }
-.fm-plan-sub { font-size:14px; color:rgba(255,255,255,.45); line-height:1.7; margin-bottom:24px; }
-.fm-plan-price { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:16px 18px; margin-bottom:24px; }
-.fm-plan-price-n { font-family:'DM Serif Display',serif; font-size:40px; color:#fff; line-height:1; }
-.fm-plan-price-per { color:rgba(255,255,255,.35); font-size:14px; margin-left:4px; }
-.fm-plan-price-note { font-size:12px; color:rgba(255,255,255,.3); margin-top:4px; }
-.fm-plan-benefit { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:13px; color:rgba(255,255,255,.68); }
-.fm-plan-benefit:last-of-type { border-bottom:none; }
-.fm-plan-cta-org { display:block; text-align:center; margin-top:24px; background:#e8470a; color:#fff; padding:14px 24px; border-radius:12px; font-size:15px; font-weight:700; transition:all .2s; text-decoration:none; }
-.fm-plan-cta-org:hover { background:#c23d09; transform:translateY(-2px); }
-.fm-plan-cta-ven { display:block; text-align:center; margin-top:24px; background:#fff; color:#1a3d28; padding:14px 24px; border-radius:12px; font-size:15px; font-weight:700; transition:all .2s; text-decoration:none; }
-.fm-plan-cta-ven:hover { background:#f0f0f0; transform:translateY(-2px); }
-
-/* PROOF */
-.fm-proof { background:#faf8f3; padding:72px 0; }
-.fm-proof-inner { max-width:1000px; margin:0 auto; padding:0 40px; text-align:center; }
-.fm-proof-stats { display:flex; justify-content:center; background:#fff; border:1px solid #e8e2d9; border-radius:20px; overflow:hidden; margin-bottom:48px; }
-.fm-proof-stat { flex:1; padding:28px 20px; text-align:center; border-right:1px solid #e8e2d9; }
-.fm-proof-stat:last-child { border-right:none; }
-.fm-proof-n { font-family:'DM Serif Display',serif; font-size:40px; color:#1a1612; line-height:1; display:block; }
-.fm-proof-l { font-size:11px; font-weight:700; color:#b5ada6; text-transform:uppercase; letter-spacing:.8px; margin-top:5px; display:block; }
-.fm-testimonials { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; text-align:left; }
-.fm-testi { background:#fff; border:1px solid #e8e2d9; border-radius:16px; padding:22px 24px; }
-.fm-testi-stars { color:#e8470a; font-size:13px; margin-bottom:10px; letter-spacing:2px; }
-.fm-testi-text { font-size:13.5px; color:#3d3530; line-height:1.75; margin-bottom:14px; font-style:italic; }
-.fm-testi-author { display:flex; align-items:center; gap:10px; }
-.fm-testi-avatar { width:38px; height:38px; border-radius:50%; background:#e8470a; display:flex; align-items:center; justify-content:center; font-size:15px; color:#fff; font-weight:700; flex-shrink:0; }
-.fm-testi-name { font-size:13px; font-weight:700; color:#1a1612; }
-.fm-testi-role { font-size:11px; color:#b5ada6; }
-
-/* HOW IT WORKS */
-.fm-how { background:#fff; padding:72px 0; }
-.fm-how-inner { max-width:1000px; margin:0 auto; padding:0 40px; }
-.fm-how-steps { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:48px; }
-.fm-step { text-align:center; padding:24px 18px; border:1px solid #e8e2d9; border-radius:18px; background:#faf8f3; }
-.fm-step-num { width:44px; height:44px; border-radius:50%; background:#e8470a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800; margin:0 auto 14px; }
-.fm-step-title { font-size:15px; font-weight:700; color:#1a1612; margin-bottom:7px; }
-.fm-step-desc { font-size:12.5px; color:#7a6f68; line-height:1.65; }
-
-/* COUNTRIES */
-.fm-countries { background:#faf8f3; padding:64px 0; }
-.fm-countries-inner { max-width:1300px; margin:0 auto; padding:0 40px; }
-.fm-country-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; margin-top:28px; }
-.fm-country-card { background:#fff; border:1px solid #e8e2d9; border-radius:12px; padding:14px 16px; text-decoration:none; text-align:center; transition:all .2s; }
-.fm-country-card:hover { border-color:#e8470a; transform:translateY(-2px); }
-.fm-country-flag { font-size:24px; display:block; margin-bottom:5px; }
-.fm-country-name { font-size:13px; font-weight:600; color:#1a1612; display:block; margin-bottom:2px; }
-.fm-country-count { font-size:11px; color:#b5ada6; }
-
-/* URGENCY */
-.fm-urgency { background:linear-gradient(135deg,#e8470a,#c23d09); padding:28px 0; }
-.fm-urgency-inner { max-width:1200px; margin:0 auto; padding:0 40px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; }
-.fm-urgency-text h3 { font-family:'DM Serif Display',serif; font-size:22px; font-weight:400; color:#fff; margin-bottom:4px; }
-.fm-urgency-text p { font-size:14px; color:rgba(255,255,255,.75); }
-.fm-urgency-btns { display:flex; gap:10px; flex-wrap:wrap; }
-.fm-urgency-btn-w { background:#fff; color:#e8470a; padding:12px 24px; border-radius:99px; font-size:13.5px; font-weight:700; text-decoration:none; white-space:nowrap; transition:all .2s; }
-.fm-urgency-btn-w:hover { transform:translateY(-2px); }
-.fm-urgency-btn-t { background:rgba(255,255,255,.15); color:#fff; border:1.5px solid rgba(255,255,255,.4); padding:12px 24px; border-radius:99px; font-size:13.5px; font-weight:700; text-decoration:none; white-space:nowrap; }
-
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:.6;transform:scale(1.2);} }
-
-@media(max-width:900px){
-  .fm-hero-inner,.fm-events-inner,.fm-cat-inner,.fm-why-inner,.fm-dual-inner,.fm-proof-inner,.fm-how-inner,.fm-countries-inner,.fm-trust-inner,.fm-trending-inner,.fm-urgency-inner,.fm-articles-inner,.fm-vendors-inner,.fm-featured-inner { padding:0 20px; }
-  .fm-events-grid,.fm-cat-photo-grid,.fm-articles-grid,.fm-vendors-grid,.fm-featured-grid { grid-template-columns:1fr 1fr; }
-  .fm-why-grid,.fm-dual-cards,.fm-testimonials { grid-template-columns:1fr; }
-  .fm-proof-stats { flex-direction:column; }
-  .fm-how-steps { grid-template-columns:1fr 1fr; }
-  .fm-search-bar { flex-wrap:wrap; padding:12px; border-radius:12px; gap:8px; }
-  .fm-search-input,.fm-search-location { width:100%; }
-  .fm-search-divider { display:none; }
-  .fm-search-btn { width:100%; text-align:center; }
+:root {
+  --flame:#e8470a; --flame2:#c23d09; --gold:#f5a623; --gold2:#e8940a;
+  --ink:#0d0d0d; --ink2:#1a1612; --ink3:#3d3530; --ink4:#7a6f68; --ink5:#b5ada6;
+  --cream:#faf8f3; --white:#fff; --border:#e8e2d9;
+  --green:#4a7c59; --purple:#7c3aed;
+  --font-display:'Instrument Serif',serif; --font-body:'Syne',sans-serif;
 }
-@media(max-width:600px){
-  .fm-events-grid,.fm-articles-grid,.fm-vendors-grid,.fm-featured-grid { grid-template-columns:1fr; }
-  .fm-how-steps { grid-template-columns:1fr; }
-  .fm-hero-stats { flex-direction:column; width:100%; max-width:280px; }
-  .fm-hstat { border-right:none; border-bottom:1px solid rgba(255,255,255,.08); }
-  .fm-hstat:last-child { border-bottom:none; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--white);color:var(--ink2);}
+a{text-decoration:none;}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(13,13,13,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);}
+.nav-inner{max-width:1300px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;gap:24px;}
+.nav-logo{font-family:var(--font-display);font-size:24px;color:var(--white);font-weight:400;letter-spacing:-.5px;flex-shrink:0;}
+.nav-logo span{color:var(--flame);}
+.nav-search-wrap{flex:1;max-width:420px;}
+.nav-search{display:flex;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:0 14px;height:40px;gap:8px;transition:all .2s;}
+.nav-search:focus-within{border-color:rgba(232,71,10,.5);background:rgba(255,255,255,.1);}
+.nav-search input{flex:1;border:none;background:transparent;color:var(--white);font-family:var(--font-body);font-size:14px;outline:none;}
+.nav-search input::placeholder{color:rgba(255,255,255,.35);}
+.nav-links{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.nav-link{color:rgba(255,255,255,.6);font-size:13px;font-weight:600;padding:7px 14px;border-radius:8px;transition:all .2s;}
+.nav-link:hover{color:var(--white);background:rgba(255,255,255,.08);}
+.nav-btn{background:var(--flame);color:var(--white);font-size:13px;font-weight:700;padding:8px 20px;border-radius:8px;transition:all .2s;border:none;cursor:pointer;font-family:var(--font-body);}
+.nav-btn:hover{background:var(--flame2);}
+.nav-burger{display:none;background:none;border:none;color:var(--white);font-size:22px;cursor:pointer;margin-left:auto;}
+.nav-mobile{display:none;flex-direction:column;background:var(--ink);padding:16px 24px;gap:4px;}
+.nav-mobile a{color:rgba(255,255,255,.7);font-size:15px;font-weight:600;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.nav-mobile a:last-child{border-bottom:none;}
+
+/* ── HERO ── */
+.hero{background:var(--ink);min-height:92vh;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;padding:80px 32px 60px;}
+.hero-bg{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1600&q=50');background-size:cover;background-position:center;opacity:.12;}
+.hero-grain{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");opacity:.4;}
+.hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(232,71,10,.12) 0%,transparent 65%);}
+.hero-inner{position:relative;z-index:2;max-width:1100px;margin:0 auto;width:100%;text-align:center;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(232,71,10,.12);border:1px solid rgba(232,71,10,.25);color:#ff7043;font-size:11px;font-weight:700;padding:5px 16px;border-radius:99px;margin-bottom:28px;letter-spacing:1.2px;text-transform:uppercase;}
+.hero-dot{width:5px;height:5px;border-radius:50%;background:#ff7043;animation:blink 2s ease infinite;}
+.hero-h1{font-family:var(--font-display);font-size:clamp(42px,7vw,88px);color:var(--white);line-height:1.0;margin-bottom:20px;font-weight:400;}
+.hero-h1 em{color:var(--flame);font-style:italic;}
+.hero-sub{font-size:clamp(15px,2vw,19px);color:rgba(255,255,255,.45);margin-bottom:52px;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.65;}
+
+/* ── 4-WAY SPLIT ── */
+.split-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:1000px;margin:0 auto 52px;}
+.split-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .3s;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;overflow:hidden;}
+.split-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:20px;}
+.split-card:hover{transform:translateY(-6px);border-color:var(--card-color,var(--flame));}
+.split-card:hover::before{opacity:1;}
+.split-card-events{--card-color:#e8470a;}
+.split-card-events::before{background:linear-gradient(135deg,rgba(232,71,10,.12),transparent);}
+.split-card-vendors{--card-color:#4a7c59;}
+.split-card-vendors::before{background:linear-gradient(135deg,rgba(74,124,89,.12),transparent);}
+.split-card-artists{--card-color:#7c3aed;}
+.split-card-artists::before{background:linear-gradient(135deg,rgba(124,58,237,.12),transparent);}
+.split-card-organisers{--card-color:#f5a623;}
+.split-card-organisers::before{background:linear-gradient(135deg,rgba(245,166,35,.12),transparent);}
+.split-icon{font-size:40px;display:block;}
+.split-label{font-size:16px;font-weight:700;color:var(--white);position:relative;}
+.split-desc{font-size:12px;color:rgba(255,255,255,.4);line-height:1.5;position:relative;}
+.split-count{font-size:11px;font-weight:700;color:var(--card-color,var(--flame));background:rgba(255,255,255,.07);padding:3px 10px;border-radius:99px;position:relative;}
+.split-arrow{font-size:18px;color:var(--card-color,var(--flame));transition:transform .3s;position:relative;}
+.split-card:hover .split-arrow{transform:translateX(4px);}
+
+/* ── SEARCH ── */
+.hero-search-wrap{max-width:700px;margin:0 auto;}
+.hero-search{display:flex;background:var(--white);border-radius:16px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5);}
+.hero-search-input{flex:1;border:none;outline:none;font-size:16px;font-family:var(--font-body);color:var(--ink2);padding:18px 20px;}
+.hero-search-divider{width:1px;background:var(--border);margin:14px 0;flex-shrink:0;}
+.hero-search-loc{border:none;outline:none;font-size:15px;font-family:var(--font-body);color:var(--ink2);padding:18px 20px;width:160px;flex-shrink:0;}
+.hero-search-btn{background:var(--flame);color:var(--white);border:none;padding:0 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background .2s;white-space:nowrap;}
+.hero-search-btn:hover{background:var(--flame2);}
+.hero-stats{display:flex;justify-content:center;gap:0;margin-top:36px;}
+.hstat{padding:14px 28px;text-align:center;border-right:1px solid rgba(255,255,255,.08);}
+.hstat:last-child{border-right:none;}
+.hstat-n{font-family:var(--font-display);font-size:28px;color:var(--white);display:block;line-height:1;}
+.hstat-l{font-size:10px;color:rgba(255,255,255,.35);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;display:block;}
+
+/* ── SECTION ── */
+.section{padding:80px 32px;}
+.section-inner{max-width:1300px;margin:0 auto;}
+.section-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;flex-wrap:wrap;gap:16px;}
+.section-left{}
+.section-tag{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;padding:4px 14px;border-radius:99px;margin-bottom:12px;}
+.tag-flame{background:rgba(232,71,10,.08);border:1px solid rgba(232,71,10,.15);color:var(--flame);}
+.tag-green{background:rgba(74,124,89,.08);border:1px solid rgba(74,124,89,.15);color:var(--green);}
+.tag-purple{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.15);color:var(--purple);}
+.tag-gold{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);color:var(--gold2);}
+.tag-dark{background:rgba(13,13,13,.06);border:1px solid rgba(13,13,13,.1);color:var(--ink3);}
+.section-h{font-family:var(--font-display);font-size:clamp(28px,3.5vw,48px);font-weight:400;color:var(--ink2);line-height:1.1;margin-bottom:8px;}
+.section-sub{font-size:14px;color:var(--ink4);line-height:1.65;max-width:480px;}
+.section-link{font-size:13px;font-weight:700;color:var(--flame);white-space:nowrap;padding:10px 20px;border:1px solid rgba(232,71,10,.2);border-radius:10px;transition:all .2s;}
+.section-link:hover{background:var(--flame);color:var(--white);}
+.section-link-green{color:var(--green);border-color:rgba(74,124,89,.2);}
+.section-link-green:hover{background:var(--green);}
+.section-link-purple{color:var(--purple);border-color:rgba(124,58,237,.2);}
+.section-link-purple:hover{background:var(--purple);}
+
+/* ── EVENT CARDS ── */
+.events-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.ecard{background:var(--white);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .3s;cursor:pointer;display:flex;flex-direction:column;}
+.ecard:hover{border-color:var(--flame);box-shadow:0 24px 64px rgba(26,22,18,.12);transform:translateY(-5px);}
+.ecard-img{height:220px;position:relative;overflow:hidden;flex-shrink:0;}
+.ecard-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+.ecard:hover .ecard-img img{transform:scale(1.07);}
+.ecard-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,13,13,.6) 0%,transparent 55%);}
+.ecard-badges{position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;}
+.ecard-badge{padding:4px 10px;border-radius:99px;font-size:10px;font-weight:700;backdrop-filter:blur(8px);}
+.ecard-price{position:absolute;top:12px;right:12px;padding:5px 12px;border-radius:99px;font-size:11px;font-weight:800;backdrop-filter:blur(8px);}
+.price-free{background:#dcfce7;color:#15803d;}
+.price-paid{background:rgba(13,13,13,.7);color:var(--white);}
+.ecard-body{padding:20px;flex:1;display:flex;flex-direction:column;}
+.ecard-date{font-size:11px;font-weight:700;color:var(--flame);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.ecard-title{font-family:var(--font-display);font-size:20px;color:var(--ink2);margin-bottom:6px;line-height:1.2;flex:1;}
+.ecard-loc{font-size:13px;color:var(--ink4);margin-bottom:auto;padding-bottom:14px;}
+.ecard-footer{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid #f0ece4;margin-top:auto;}
+.ecard-att{font-size:12px;color:var(--ink5);}
+.ecard-cta{font-size:13px;font-weight:700;color:var(--flame);}
+
+/* ── VENDOR CARDS ── */
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.vcard{background:var(--white);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .3s;text-decoration:none;display:flex;flex-direction:column;position:relative;}
+.vcard:hover{border-color:var(--green);box-shadow:0 24px 64px rgba(26,22,18,.1);transform:translateY(-5px);}
+.vcard-img{height:190px;position:relative;overflow:hidden;background:var(--cream);}
+.vcard-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+.vcard:hover .vcard-img img{transform:scale(1.07);}
+.vcard-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(135deg,#f5f0e8,#e8e2d9);}
+
+/* ── GOLD BADGE ── */
+.badge-gold{background:linear-gradient(135deg,#f5a623,#e8940a);color:var(--white);padding:5px 12px;border-radius:99px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 12px rgba(245,166,35,.4);}
+.badge-verified{background:var(--green);color:var(--white);padding:5px 12px;border-radius:99px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:5px;}
+.badge-free-tier{background:rgba(13,13,13,.08);color:var(--ink4);padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;}
+.vcard-badge-wrap{position:absolute;top:10px;left:10px;}
+.vcard-body{padding:18px;flex:1;display:flex;flex-direction:column;}
+.vcard-cat{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
+.vcard-name{font-family:var(--font-display);font-size:19px;color:var(--ink2);margin-bottom:4px;}
+.vcard-loc{font-size:13px;color:var(--ink4);margin-bottom:10px;}
+.vcard-stars{color:var(--flame);letter-spacing:1px;font-size:13px;}
+.vcard-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid #f0ece4;margin-top:auto;}
+.vcard-apps{font-size:12px;color:var(--ink5);}
+.vcard-cta{font-size:13px;font-weight:700;color:var(--green);}
+
+/* ── ARTIST CATEGORIES ── */
+.artist-cats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.acat-card{border-radius:18px;padding:24px 20px;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;transition:all .3s;border:1px solid transparent;background:var(--cream);}
+.acat-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(26,22,18,.1);border-color:var(--purple);}
+.acat-icon{font-size:36px;}
+.acat-name{font-size:14px;font-weight:700;color:var(--ink2);}
+.acat-desc{font-size:11px;color:var(--ink4);line-height:1.5;}
+.acat-cta{font-size:11px;font-weight:700;color:var(--purple);margin-top:4px;}
+
+/* ── PRICING ── */
+.pricing-dark{background:var(--ink);padding:80px 32px;}
+.pricing-inner{max-width:1100px;margin:0 auto;}
+.pricing-header{text-align:center;margin-bottom:52px;}
+.pricing-header h2{font-family:var(--font-display);font-size:clamp(28px,4vw,52px);color:var(--white);margin-bottom:12px;font-weight:400;}
+.pricing-header p{font-size:16px;color:rgba(255,255,255,.4);max-width:440px;margin:0 auto;}
+.pricing-tabs{display:flex;justify-content:center;gap:10px;margin-bottom:40px;}
+.ptab{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);padding:10px 24px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font-body);}
+.ptab.active,.ptab:hover{background:var(--flame);border-color:var(--flame);color:var(--white);}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.pcard{border-radius:20px;padding:32px;position:relative;overflow:hidden;}
+.pcard-free{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);}
+.pcard-standard{background:linear-gradient(145deg,#1a1612,#2d1a08);border:1px solid rgba(232,71,10,.3);}
+.pcard-gold{background:linear-gradient(145deg,#1a1200,#2d2000);border:1px solid rgba(245,166,35,.4);}
+.pcard-gold::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.2) 0%,transparent 70%);}
+.pcard-standard::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(232,71,10,.15) 0%,transparent 70%);}
+.pcard-popular{position:absolute;top:16px;right:16px;background:var(--flame);color:var(--white);font-size:10px;font-weight:800;padding:3px 12px;border-radius:99px;letter-spacing:.8px;text-transform:uppercase;}
+.pcard-badge-display{margin-bottom:18px;}
+.pcard-tier{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.pcard-free .pcard-tier{color:rgba(255,255,255,.4);}
+.pcard-standard .pcard-tier{color:#ff7043;}
+.pcard-gold .pcard-tier{color:var(--gold);}
+.pcard-price{font-family:var(--font-display);font-size:48px;color:var(--white);line-height:1;margin-bottom:4px;}
+.pcard-period{font-size:13px;color:rgba(255,255,255,.3);}
+.pcard-note{font-size:11px;color:rgba(255,255,255,.25);margin-bottom:24px;margin-top:4px;}
+.pcard-feature{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:rgba(255,255,255,.65);}
+.pcard-feature:last-of-type{border-bottom:none;}
+.pcard-feature-icon{flex-shrink:0;margin-top:1px;}
+.pcard-cta{display:block;text-align:center;padding:14px;border-radius:12px;font-size:14px;font-weight:700;margin-top:24px;transition:all .2s;font-family:var(--font-body);}
+.pcard-free .pcard-cta{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.1);}
+.pcard-free .pcard-cta:hover{background:rgba(255,255,255,.12);color:var(--white);}
+.pcard-standard .pcard-cta{background:var(--flame);color:var(--white);}
+.pcard-standard .pcard-cta:hover{background:var(--flame2);transform:translateY(-2px);}
+.pcard-gold .pcard-cta{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-weight:800;}
+.pcard-gold .pcard-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,166,35,.4);}
+
+/* ── ARTICLES ── */
+.agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.acard{background:var(--white);border:1px solid var(--border);border-radius:20px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:all .3s;}
+.acard:hover{border-color:var(--flame);box-shadow:0 20px 60px rgba(26,22,18,.1);transform:translateY(-4px);}
+.acard-img{height:200px;overflow:hidden;position:relative;}
+.acard-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+.acard:hover .acard-img img{transform:scale(1.06);}
+.acard-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,13,13,.4) 0%,transparent 60%);}
+.acard-cat{position:absolute;top:12px;left:12px;padding:4px 12px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--white);}
+.acard-body{padding:22px;flex:1;display:flex;flex-direction:column;}
+.acard-title{font-family:var(--font-display);font-size:20px;color:var(--ink2);margin-bottom:8px;line-height:1.25;flex:1;}
+.acard-excerpt{font-size:13px;color:var(--ink4);line-height:1.65;margin-bottom:16px;}
+.acard-footer{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid #f0ece4;}
+.acard-date{font-size:11px;color:var(--ink5);}
+.acard-cta{font-size:13px;font-weight:700;color:var(--flame);}
+
+/* ── COUNTRIES ── */
+.countries-bg{background:var(--cream);}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+.ccard{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px;text-decoration:none;text-align:center;transition:all .2s;}
+.ccard:hover{border-color:var(--flame);transform:translateY(-2px);}
+.cflag{font-size:24px;display:block;margin-bottom:4px;}
+.cname{font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:2px;}
+.ccount{font-size:11px;color:var(--ink5);}
+
+/* ── WHY ── */
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;}
+.why-card{background:var(--cream);border:1px solid var(--border);border-radius:20px;padding:28px;transition:all .3s;}
+.why-card:hover{border-color:var(--flame);box-shadow:0 16px 48px rgba(26,22,18,.07);transform:translateY(-3px);}
+.why-icon{font-size:32px;margin-bottom:14px;display:block;}
+.why-title{font-size:16px;font-weight:700;color:var(--ink2);margin-bottom:8px;}
+.why-desc{font-size:13px;color:var(--ink4);line-height:1.7;}
+
+/* ── FEATURED BANNER ── */
+.featured-banner{background:linear-gradient(135deg,#1a0a00,#2d1200);padding:52px 32px;border-bottom:1px solid rgba(232,71,10,.15);}
+.fbinner{max-width:1300px;margin:0 auto;}
+.fbgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.fbcard{background:rgba(255,255,255,.04);border:1px solid rgba(232,71,10,.2);border-radius:16px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:all .3s;}
+.fbcard:hover{border-color:var(--flame);transform:translateY(-3px);box-shadow:0 16px 48px rgba(232,71,10,.2);}
+.fbcard-img{height:160px;overflow:hidden;position:relative;}
+.fbcard-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+.fbcard:hover .fbcard-img img{transform:scale(1.06);}
+.fbcard-body{padding:16px;flex:1;}
+.fbcard-title{font-family:var(--font-display);font-size:17px;color:var(--white);margin-bottom:5px;line-height:1.2;}
+.fbcard-meta{font-size:12px;color:rgba(255,255,255,.45);}
+.fbcard-cta{font-size:12px;font-weight:700;color:var(--flame);padding:0 16px 14px;}
+
+/* ── URGENCY STRIP ── */
+.urgency{background:linear-gradient(135deg,var(--flame),var(--flame2));padding:28px 32px;}
+.urgency-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}
+.urgency h3{font-family:var(--font-display);font-size:22px;color:var(--white);font-weight:400;margin-bottom:4px;}
+.urgency p{font-size:13px;color:rgba(255,255,255,.7);}
+.urgency-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.ubtn-w{background:var(--white);color:var(--flame);padding:12px 24px;border-radius:99px;font-size:13px;font-weight:700;transition:all .2s;}
+.ubtn-w:hover{transform:translateY(-2px);}
+.ubtn-t{background:rgba(255,255,255,.15);color:var(--white);border:1.5px solid rgba(255,255,255,.4);padding:12px 24px;border-radius:99px;font-size:13px;font-weight:700;}
+
+/* ── TRUST BAR ── */
+.trust{background:#111;border-bottom:1px solid rgba(255,255,255,.07);padding:14px 32px;}
+.trust-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap;}
+.trust-item{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.4);}
+.trust-check{color:var(--flame);}
+
+/* ── HOW IT WORKS ── */
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:48px;}
+.how-step{text-align:center;padding:28px 20px;border:1px solid var(--border);border-radius:18px;background:var(--cream);}
+.how-num{width:48px;height:48px;border-radius:50%;background:var(--flame);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;margin:0 auto 16px;}
+.how-icon{font-size:28px;margin-bottom:12px;display:block;}
+.how-title{font-size:14px;font-weight:700;color:var(--ink2);margin-bottom:7px;}
+.how-desc{font-size:12px;color:var(--ink4);line-height:1.65;}
+
+/* ── NEWSLETTER ── */
+.nl-section{background:var(--white);padding:72px 32px;}
+.nl-inner{max-width:1000px;margin:0 auto;}
+.nl-box{background:linear-gradient(135deg,#0d0d0d,#1a1612);border-radius:24px;padding:52px 48px;display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap;}
+.nl-left h2{font-family:var(--font-display);font-size:32px;color:var(--white);font-weight:400;margin-bottom:8px;}
+.nl-left p{font-size:14px;color:rgba(255,255,255,.4);max-width:340px;line-height:1.6;}
+.nl-form{display:flex;gap:10px;flex-wrap:wrap;}
+.nl-input{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:var(--white);padding:14px 18px;border-radius:10px;font-family:var(--font-body);font-size:14px;outline:none;width:280px;transition:all .2s;}
+.nl-input::placeholder{color:rgba(255,255,255,.3);}
+.nl-input:focus{border-color:rgba(232,71,10,.5);background:rgba(255,255,255,.1);}
+.nl-btn{background:var(--flame);color:var(--white);border:none;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:all .2s;white-space:nowrap;}
+.nl-btn:hover{background:var(--flame2);}
+
+/* ── TESTIMONIALS ── */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.tcard{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.tcard-stars{color:var(--flame);font-size:13px;letter-spacing:2px;margin-bottom:12px;}
+.tcard-text{font-size:13px;color:var(--ink3);line-height:1.75;margin-bottom:16px;font-style:italic;}
+.tcard-author{display:flex;align-items:center;gap:10px;}
+.tcard-avatar{width:40px;height:40px;border-radius:50%;background:var(--flame);display:flex;align-items:center;justify-content:center;color:var(--white);font-size:15px;font-weight:700;flex-shrink:0;}
+.tcard-name{font-size:13px;font-weight:700;color:var(--ink2);}
+.tcard-role{font-size:11px;color:var(--ink5);}
+
+/* ── PROOF STATS ── */
+.proof-stats{display:flex;background:var(--white);border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+.pstat{flex:1;padding:28px 20px;text-align:center;border-right:1px solid var(--border);}
+.pstat:last-child{border-right:none;}
+.pstat-n{font-family:var(--font-display);font-size:42px;color:var(--ink2);display:block;line-height:1;}
+.pstat-l{font-size:10px;font-weight:700;color:var(--ink5);text-transform:uppercase;letter-spacing:1px;margin-top:5px;display:block;}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);padding:60px 32px 32px;}
+.footer-inner{max-width:1300px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.07);}
+.footer-brand p{font-size:13px;color:rgba(255,255,255,.35);line-height:1.7;margin-top:12px;max-width:280px;}
+.footer-logo{font-family:var(--font-display);font-size:26px;color:var(--white);}
+.footer-logo span{color:var(--flame);}
+.footer-col h4{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.3);margin-bottom:16px;}
+.footer-col a{display:block;color:rgba(255,255,255,.5);font-size:13px;margin-bottom:10px;transition:color .2s;}
+.footer-col a:hover{color:var(--white);}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:10px;}
+
+@keyframes blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .split-grid{grid-template-columns:repeat(2,1fr);}
+  .events-grid,.vgrid,.agrid,.fbgrid,.tgrid{grid-template-columns:repeat(2,1fr);}
+  .artist-cats-grid{grid-template-columns:repeat(4,1fr);}
+  .pricing-grid{grid-template-columns:1fr;}
+  .how-grid{grid-template-columns:repeat(2,1fr);}
+  .footer-top{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:768px){
+  .nav-links,.nav-search-wrap{display:none;}
+  .nav-burger{display:block;}
+  .nav-mobile{display:flex;}
+  .hero{padding:60px 20px 40px;min-height:auto;}
+  .split-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .split-card{padding:20px 14px;}
+  .hero-search{flex-direction:column;border-radius:12px;}
+  .hero-search-divider{width:100%;height:1px;margin:0;}
+  .hero-search-loc{width:100%;}
+  .hero-search-btn{padding:16px;text-align:center;}
+  .events-grid,.vgrid,.agrid,.artist-cats-grid,.fbgrid,.tgrid{grid-template-columns:1fr;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .how-grid{grid-template-columns:1fr;}
+  .footer-top{grid-template-columns:1fr;}
+  .proof-stats{flex-direction:column;}
+  .pstat{border-right:none;border-bottom:1px solid var(--border);}
+  .nl-box{padding:32px 24px;}
+  .nl-input{width:100%;}
+  .section{padding:52px 20px;}
 }
 </style>
 </head>
@@ -429,236 +456,404 @@ body { font-family: 'Bricolage Grotesque', sans-serif; }
 
 ${renderNav(user, tr, langHtml)}
 
-<!-- 1. HERO -->
-<section class="fm-hero">
-  <div class="fm-hero-bg"></div>
-  <div class="fm-hero-gradient"></div>
-  <div class="fm-hero-inner">
-    <div class="fm-hero-badge">
-      <span class="fm-hero-badge-dot"></span>
-      Europe's #1 Vendor Marketplace
-    </div>
-    <h1>Find Events. <em>Book Vendors.</em><br/>Grow Together.</h1>
-    <p class="fm-hero-sub">The world's best platform connecting festival vendors with event organisers. ${ev}+ events across ${cn} countries.</p>
+<!-- ══ HERO ══════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
 
-    <div style="margin-bottom:36px;">
-      <p style="color:rgba(255,255,255,.5);font-size:11px;font-weight:700;letter-spacing:2px;text-align:center;margin-bottom:12px;text-transform:uppercase;">Discover</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;">
-        <a href="/events" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#0a1a0f;padding:16px 28px;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          🌍 Browse Events
-        </a>
-        <a href="/vendors" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#0a1a0f;padding:16px 28px;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          🏪 Browse Vendors
-        </a>
-        <a href="/artists" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#7c3aed;padding:16px 28px;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          🎤 Browse Artists
-        </a>
-      </div>
-      <p style="color:rgba(255,255,255,.5);font-size:11px;font-weight:700;letter-spacing:2px;text-align:center;margin-bottom:12px;text-transform:uppercase;">List Your Business</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <a href="/events/submit" style="display:inline-flex;align-items:center;gap:8px;background:#e8470a;color:#fff;padding:13px 22px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          🎪 List Event — Free
-        </a>
-        <a href="/vendors/register" style="display:inline-flex;align-items:center;gap:8px;background:#4a7c59;color:#fff;padding:13px 22px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          🏪 Become Vendor — €49/yr
-        </a>
-        <a href="/artists/register" style="display:inline-flex;align-items:center;gap:8px;background:#7c3aed;color:#fff;padding:13px 22px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          🎤 List Your Act — Free
-        </a>
-      </div>
+    <div class="hero-eyebrow">
+      <span class="hero-dot"></span>
+      The Global Events &amp; Talent Marketplace
     </div>
 
-    <div class="fm-search-wrap">
-      <form class="fm-search-bar" action="/events" method="GET">
-        <span class="fm-search-icon">🔍</span>
-        <input class="fm-search-input" type="text" name="q" placeholder="Search festivals, concerts, markets…"/>
-        <div class="fm-search-divider"></div>
-        <input class="fm-search-location" type="text" name="city" placeholder="📍 City or country"/>
-        <button class="fm-search-btn" type="submit">Search</button>
+    <h1 class="hero-h1">
+      Events. Vendors.<br/><em>Artists.</em> All in One Place.
+    </h1>
+    <p class="hero-sub">
+      The only platform connecting event organisers, vendors and artists worldwide.
+      ${ev}+ events across ${cn} countries.
+    </p>
+
+    <!-- 4-WAY SPLIT -->
+    <div class="split-grid">
+      <a href="/events" class="split-card split-card-events">
+        <span class="split-icon">🎪</span>
+        <span class="split-label">Events</span>
+        <span class="split-desc">Festivals, markets, concerts &amp; more</span>
+        <span class="split-count">${ev}+ events</span>
+        <span class="split-arrow">→</span>
+      </a>
+      <a href="/vendors" class="split-card split-card-vendors">
+        <span class="split-icon">🏪</span>
+        <span class="split-label">Vendors</span>
+        <span class="split-desc">Food stalls, craft vendors &amp; services</span>
+        <span class="split-count">${vn}+ vendors</span>
+        <span class="split-arrow">→</span>
+      </a>
+      <a href="/artists" class="split-card split-card-artists">
+        <span class="split-icon">🎤</span>
+        <span class="split-label">Artists</span>
+        <span class="split-desc">Musicians, DJs, comedians &amp; more</span>
+        <span class="split-count">All genres</span>
+        <span class="split-arrow">→</span>
+      </a>
+      <a href="/events/submit" class="split-card split-card-organisers">
+        <span class="split-icon">📋</span>
+        <span class="split-label">Organisers</span>
+        <span class="split-desc">List your event &amp; find vendors</span>
+        <span class="split-count">Free to start</span>
+        <span class="split-arrow">→</span>
+      </a>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="hero-search-wrap">
+      <form class="hero-search" action="/events" method="GET">
+        <input class="hero-search-input" type="text" name="q" placeholder="🔍  Search festivals, markets, concerts…"/>
+        <div class="hero-search-divider"></div>
+        <input class="hero-search-loc" type="text" name="city" placeholder="📍 City or country"/>
+        <button class="hero-search-btn" type="submit">Search</button>
       </form>
     </div>
 
-    <div class="fm-date-pills">
-      <a href="/events?when=weekend" class="fm-date-pill">This Weekend</a>
-      <a href="/events?when=week" class="fm-date-pill">This Week</a>
-      <a href="/events?when=month" class="fm-date-pill">This Month</a>
-      <a href="/events?when=summer" class="fm-date-pill">☀️ Summer 2026</a>
-      <a href="/events?price=free" class="fm-date-pill">🆓 Free Events</a>
-      <a href="/events?category=festival" class="fm-date-pill">🎪 Festivals</a>
-      <a href="/events?category=christmas" class="fm-date-pill">🎄 Xmas Markets</a>
+    <!-- STATS -->
+    <div class="hero-stats">
+      <div class="hstat"><span class="hstat-n">${ev}+</span><span class="hstat-l">Events</span></div>
+      <div class="hstat"><span class="hstat-n">${vn}+</span><span class="hstat-l">Vendors</span></div>
+      <div class="hstat"><span class="hstat-n">${cn}</span><span class="hstat-l">Countries</span></div>
+      <div class="hstat"><span class="hstat-n">${sb}+</span><span class="hstat-l">Subscribers</span></div>
+      <div class="hstat"><span class="hstat-n">${ar}+</span><span class="hstat-l">Articles</span></div>
     </div>
 
-    <div class="fm-hero-stats">
-      <div class="fm-hstat"><span class="fm-hstat-n">${ev}+</span><span class="fm-hstat-l">Events</span></div>
-      <div class="fm-hstat"><span class="fm-hstat-n">${vn}+</span><span class="fm-hstat-l">Vendors</span></div>
-      <div class="fm-hstat"><span class="fm-hstat-n">${cn}</span><span class="fm-hstat-l">Countries</span></div>
-      <div class="fm-hstat"><span class="fm-hstat-n">${sb}+</span><span class="fm-hstat-l">Subscribers</span></div>
+  </div>
+</section>
+
+<!-- ══ TRUST BAR ══════════════════════════════════════════════════════ -->
+<div class="trust">
+  <div class="trust-inner">
+    ${['Free Event Listings','Verified Vendors','Gold Badge Artists',cn+' Countries','Secure Stripe Payments','Direct Applications'].map(t => `<div class="trust-item"><span class="trust-check">✓</span>${t}</div>`).join('')}
+  </div>
+</div>
+
+<!-- ══ FEATURED EVENTS ════════════════════════════════════════════════ -->
+${featuredEvents.length > 0 ? `
+<section class="featured-banner">
+  <div class="fbinner">
+    <div class="section-top" style="margin-bottom:24px;">
+      <div>
+        <div class="section-tag tag-flame">⭐ Featured Events</div>
+        <h2 style="font-family:var(--font-display);font-size:32px;color:var(--white);font-weight:400;">Promoted by Organisers</h2>
+      </div>
+      <a href="/events?sort=featured" style="font-size:13px;font-weight:700;color:#ff7043;">View all featured →</a>
+    </div>
+    <div class="fbgrid">
+      ${featuredEvents.map(e => `
+      <a href="/events/${e.slug}" class="fbcard">
+        <div class="fbcard-img"><img src="${e.image_url || IMGS[e.category] || IMGS.festival}" alt="${e.title}" loading="lazy"/></div>
+        <div class="fbcard-body">
+          <div class="fbcard-title">${e.title}</div>
+          <div class="fbcard-meta">${FLAGS[e.country]||'🌍'} ${e.city} · ${e.date_display||e.start_date}</div>
+        </div>
+        <div class="fbcard-cta">View event →</div>
+      </a>`).join('')}
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:12px;color:rgba(255,255,255,.3);">Want your event featured? <a href="/events/pricing" style="color:#ff7043;font-weight:700;">Upgrade to Featured — €79/yr →</a></p>
+  </div>
+</section>` : ''}
+
+<!-- ══ EVENTS ════════════════════════════════════════════════════════ -->
+<section class="section" style="background:var(--cream);">
+  <div class="section-inner">
+    <div class="section-top">
+      <div>
+        <div class="section-tag tag-flame">🔥 Must-See Events</div>
+        <h2 class="section-h">Events You Cannot Miss</h2>
+        <p class="section-sub">The world's biggest festivals, markets and concerts — all in one place</p>
+      </div>
+      <a href="/events" class="section-link">View all ${ev}+ events →</a>
+    </div>
+    <div class="events-grid">
+      ${topEvents.map(e => eventCard(e)).join('')}
+    </div>
+    <div style="text-align:center;margin-top:36px;">
+      <a href="/events" style="display:inline-flex;align-items:center;gap:10px;background:var(--flame);color:var(--white);padding:16px 48px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(232,71,10,.3);">
+        Browse All ${ev}+ Events →
+      </a>
     </div>
   </div>
 </section>
 
-<!-- 2. TRUST BAR -->
-<div class="fm-trust">
-  <div class="fm-trust-inner">
-    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>Free Event Listings</div>
-    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>Verified Vendors</div>
-    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>${cn} Countries</div>
-    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>Secure Stripe Payments</div>
-    <div class="fm-trust-item"><span style="color:#e8470a;">✓</span>Direct Vendor Applications</div>
-  </div>
-</div>
-
-<!-- 3. FEATURED EVENTS BANNER -->
-${featuredEvents.length > 0 ? `
-<section class="fm-featured-banner">
-  <div class="fm-featured-inner">
-    <div class="fm-featured-tag">⭐ ${tr.featured_events}</div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <h2 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;color:#fff;margin:0;">${tr.featured_events}</h2>
-      <a href="/events?sort=featured" style="font-size:13px;font-weight:700;color:#ff7043;text-decoration:none;">${tr.view_all} →</a>
-    </div>
-    <div class="fm-featured-grid">
-      ${featuredEvents.map(e => {
-        const img = e.image_url || IMGS[e.category] || IMGS.festival;
-        const flag = FLAGS[e.country] || '🌍';
-        return `<a href="/events/${e.slug}" class="fm-feat-card">
-          <div class="fm-feat-img">
-            <img src="${img}" alt="${e.title}" loading="lazy"/>
-            <span class="fm-feat-badge">⭐ Featured</span>
-          </div>
-          <div class="fm-feat-body">
-            <div class="fm-feat-title">${e.title}</div>
-            <div class="fm-feat-meta">${flag} ${e.city} · ${e.date_display || e.start_date}</div>
-          </div>
-          <div class="fm-feat-cta">View event →</div>
-        </a>`;
-      }).join('')}
-    </div>
-    <div style="margin-top:20px;text-align:center;">
-      <a href="/events/pricing" style="font-size:13px;color:rgba(255,255,255,.4);text-decoration:none;">Want your event featured here? <strong style="color:#ff7043;">Upgrade for €79/year →</strong></a>
-    </div>
-  </div>
-</section>` : ''}
-
-<!-- 4. VENDOR SHOWCASE -->
-<section class="fm-vendors-section">
-  <div class="fm-vendors-inner">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap;gap:16px;">
+<!-- ══ VENDORS ════════════════════════════════════════════════════════ -->
+<section class="section" style="background:var(--white);">
+  <div class="section-inner">
+    <div class="section-top">
       <div>
-        <div class="fm-section-tag" style="background:rgba(74,124,89,.08);border-color:rgba(74,124,89,.2);color:#4a7c59;">🏪 Verified Vendors</div>
-        <h2 class="fm-section-h" style="margin-bottom:4px;">Meet Our Verified Vendors</h2>
-        <p style="font-size:14px;color:#7a6f68;">Food trucks, artisan crafts, entertainment and more — ready to make your event unforgettable.</p>
+        <div class="section-tag tag-green">🏪 Verified Vendors</div>
+        <h2 class="section-h">Find the Perfect Vendor</h2>
+        <p class="section-sub">Food trucks, artisan crafts, entertainment services and more — ready to make your event unforgettable</p>
       </div>
-      <a href="/vendors" style="font-size:14px;font-weight:700;color:#4a7c59;text-decoration:none;white-space:nowrap;">View all ${vn}+ vendors →</a>
+      <a href="/vendors" class="section-link section-link-green">View all ${vn}+ vendors →</a>
     </div>
+
     ${vendors.length > 0 ? `
-    <div class="fm-vendors-grid">
+    <div class="vgrid">
       ${vendors.map(v => {
-        let photos = [];
-        try { photos = JSON.parse(v.photos || '[]'); } catch(e) {}
+        let photos = []; try { photos = JSON.parse(v.photos||'[]'); } catch(e) {}
         const photo = photos[0] || v.image_url || '';
         const rating = parseFloat(v.avg_rating) || 5.0;
         const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
+        const isGold = v.payment_status === 'gold';
         const apps = parseInt(v.total_applications) || 0;
-        return `<a href="/vendors/profile/${v.id}" class="fm-vc">
-          <div class="fm-vc-img">
-            ${photo ? `<img src="${photo}" alt="${v.business_name}" loading="lazy"/>` : `<div class="fm-vc-img-placeholder">🏪</div>`}
-            <span class="fm-vc-badge">✅ Verified</span>
+        return `<a href="/vendors/profile/${v.id}" class="vcard">
+          <div class="vcard-img">
+            ${photo ? `<img src="${photo}" alt="${v.business_name}" loading="lazy"/>` : `<div class="vcard-placeholder">🏪</div>`}
+            <div class="vcard-badge-wrap">
+              ${isGold ? `<span class="badge-gold">🥇 Gold Verified</span>` : `<span class="badge-verified">✅ Verified</span>`}
+            </div>
           </div>
-          <div class="fm-vc-body">
-            <div class="fm-vc-cat">${v.category || 'Vendor'}</div>
-            <div class="fm-vc-name">${v.business_name}</div>
-            <div class="fm-vc-loc">📍 ${v.city}${v.country ? ', ' + (COUNTRY_NAMES[v.country] || v.country) : ''}</div>
-            <div class="fm-vc-rating"><span class="fm-vc-stars">${stars}</span><span style="font-size:12px;color:#7a6f68;">${rating.toFixed(1)}</span></div>
-            <div class="fm-vc-footer">
-              <span class="fm-vc-apps">${apps > 0 ? apps + ' event applications' : 'New vendor'}</span>
-              <span class="fm-vc-cta">View profile →</span>
+          <div class="vcard-body">
+            <div class="vcard-cat">${v.category||'Vendor'}</div>
+            <div class="vcard-name">${v.business_name}</div>
+            <div class="vcard-loc">📍 ${v.city}${v.country?', '+(COUNTRY_NAMES[v.country]||v.country):''}</div>
+            <div class="vcard-stars">${stars} <span style="font-size:12px;color:var(--ink4);font-family:var(--font-body);">${rating.toFixed(1)}</span></div>
+            <div class="vcard-footer">
+              <span class="vcard-apps">${apps > 0 ? apps+' applications' : 'New vendor'}</span>
+              <span class="vcard-cta">View profile →</span>
             </div>
           </div>
         </a>`;
       }).join('')}
-    </div>
-    <div style="text-align:center;margin-top:32px;">
-      <a href="/vendors" style="display:inline-flex;align-items:center;gap:10px;background:#4a7c59;color:#fff;padding:16px 48px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(74,124,89,.35);">Browse All ${vn}+ Vendors →</a>
-      <div style="margin-top:12px;font-size:13px;color:#b5ada6;">Food Trucks · Artisan Crafts · Entertainment · Market Stalls · Photography</div>
     </div>` : `
-    <div style="background:#faf8f3;border:1px solid #e8e2d9;border-radius:20px;padding:48px;text-align:center;">
-      <div style="font-size:48px;margin-bottom:16px;">🏪</div>
-      <h3 style="font-family:'DM Serif Display',serif;font-size:24px;font-weight:400;margin-bottom:8px;">Be the First Vendor</h3>
-      <p style="color:#7a6f68;margin-bottom:24px;">Join Festmore and get discovered by event organisers across ${cn} countries.</p>
-      <a href="/vendors/register" class="btn btn-primary btn-lg">Register as Vendor — €49/yr →</a>
+    <div style="background:var(--cream);border:1px solid var(--border);border-radius:20px;padding:48px;text-align:center;">
+      <div style="font-size:52px;margin-bottom:16px;">🏪</div>
+      <h3 style="font-family:var(--font-display);font-size:26px;margin-bottom:8px;">Be the First Verified Vendor</h3>
+      <p style="color:var(--ink4);margin-bottom:24px;">Join Festmore and get discovered by organisers across ${cn} countries.</p>
+      <a href="/vendors/register" style="display:inline-block;background:var(--green);color:var(--white);padding:14px 32px;border-radius:12px;font-size:15px;font-weight:700;">Register as Vendor — €49/yr</a>
     </div>`}
-  </div>
-</section>
 
-<!-- 5. MUST-SEE EVENTS -->
-<section class="fm-events-section">
-  <div class="fm-events-inner">
-    <div class="fm-events-header">
-      <div>
-        <div class="fm-events-tag">🔥 Must-See Events</div>
-        <h2 class="fm-events-title">Events You Cannot Miss</h2>
-        <p style="font-size:14px;color:#7a6f68;">The biggest festivals, markets and concerts worldwide</p>
-      </div>
-      <a href="/events" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">View all ${ev}+ →</a>
-    </div>
-    <div class="fm-events-grid">
-      ${topEvents.map(e => fmEventCard(e)).join('')}
-    </div>
     <div style="text-align:center;margin-top:36px;">
-      <a href="/events" style="display:inline-flex;align-items:center;gap:10px;background:#e8470a;color:#fff;padding:16px 48px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(232,71,10,.35);">Explore All ${ev}+ Events →</a>
+      <a href="/vendors/register" style="display:inline-flex;align-items:center;gap:10px;background:var(--green);color:var(--white);padding:16px 40px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(74,124,89,.3);">
+        🏪 Become a Vendor
+      </a>
+      <span style="display:inline-block;margin:0 16px;color:var(--ink5);font-size:14px;">or</span>
+      <a href="/vendors" style="display:inline-flex;align-items:center;gap:10px;background:var(--cream);color:var(--green);border:2px solid var(--green);padding:16px 40px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;">
+        Browse All Vendors →
+      </a>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--ink5);">Food Trucks · Artisan Crafts · Entertainment · Market Stalls · Photography · Catering</div>
+  </div>
+</section>
+
+<!-- ══ ARTISTS ════════════════════════════════════════════════════════ -->
+<section class="section" style="background:linear-gradient(135deg,#0d0820 0%,#1a1035 100%);">
+  <div class="section-inner">
+    <div class="section-top">
+      <div>
+        <div class="section-tag tag-purple">🎤 Artists &amp; Performers</div>
+        <h2 class="section-h" style="color:var(--white);">Book Incredible Talent</h2>
+        <p class="section-sub" style="color:rgba(255,255,255,.45);">Musicians, DJs, comedians, painters, dancers and more — browse verified artists from ${cn} countries</p>
+      </div>
+      <a href="/artists" class="section-link section-link-purple" style="border-color:rgba(124,58,237,.3);color:#a78bfa;">View all artists →</a>
+    </div>
+
+    <!-- ARTIST SUBCATEGORIES -->
+    <div class="artist-cats-grid" style="margin-bottom:40px;">
+      ${[
+        {icon:'🎵',name:'Musicians & Bands',desc:'Live music for every occasion',slug:'musicians'},
+        {icon:'🎛️',name:'DJs',desc:'Electronic, house, pop & more',slug:'djs'},
+        {icon:'🎭',name:'Comedians',desc:'Stand-up & improv performers',slug:'comedians'},
+        {icon:'🎨',name:'Visual Artists',desc:'Live painting & illustration',slug:'painters'},
+        {icon:'💃',name:'Dancers',desc:'Dance groups & performers',slug:'dancers'},
+        {icon:'📸',name:'Photographers',desc:'Event & festival photography',slug:'photographers'},
+        {icon:'🎪',name:'Circus & Street',desc:'Fire, acrobatics & street acts',slug:'circus'},
+        {icon:'🎙️',name:'Hosts & MCs',desc:'Presenters & event hosts',slug:'hosts'},
+      ].map(c => `
+      <a href="/artists?type=${c.slug}" class="acat-card" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);">
+        <span class="acat-icon">${c.icon}</span>
+        <span class="acat-name" style="color:var(--white);">${c.name}</span>
+        <span class="acat-desc" style="color:rgba(255,255,255,.4);">${c.desc}</span>
+        <span class="acat-cta" style="color:#a78bfa;">Browse →</span>
+      </a>`).join('')}
+    </div>
+
+    <div style="text-align:center;">
+      <a href="/artists" style="display:inline-flex;align-items:center;gap:10px;background:var(--purple);color:var(--white);padding:16px 40px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 8px 32px rgba(124,58,237,.35);">
+        🔍 Browse All Artists
+      </a>
+      <span style="display:inline-block;margin:0 16px;color:rgba(255,255,255,.3);font-size:14px;">or</span>
+      <a href="/artists/register" style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);color:var(--white);border:2px solid rgba(255,255,255,.2);padding:16px 40px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;">
+        🎤 List Your Act Free
+      </a>
     </div>
   </div>
 </section>
 
-<!-- 6. TRENDING -->
-<div class="fm-trending">
-  <div class="fm-trending-inner">
-    <span class="fm-trending-label">🔍 Trending:</span>
-    ${[
-      ["Pol'and'Rock 2026","/festival/polandrock-2026"],
-      ["Glastonbury 2026","/events?q=glastonbury"],
-      ["Tomorrowland 2026","/events?q=tomorrowland"],
-      ["Roskilde Festival","/events?q=roskilde"],
-      ["Diwali India","/events?q=diwali"],
-      ["Christmas Markets","/events?category=christmas"],
-      ["Free Festivals","/events?price=free"],
-      ["Rock am Ring","/events?q=rock+am+ring"],
-      ["Yi Peng Thailand","/events?q=yi+peng"],
-    ].map(([label,href]) => `<a href="${href}" class="fm-trending-pill">${label}</a>`).join('')}
-  </div>
-</div>
-
-<!-- 7. LATEST ARTICLES -->
-${articles.length ? `
-<section class="fm-articles-section">
-  <div class="fm-articles-inner">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;gap:16px;">
-      <div>
-        <div class="fm-section-tag">📰 Latest Articles</div>
-        <h2 class="fm-section-h" style="margin-bottom:4px;">${tr.festival_guides}</h2>
-        <p style="font-size:14px;color:#7a6f68;">Expert guides for vendors, organisers and festival lovers</p>
-      </div>
-      <a href="/articles" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;white-space:nowrap;">Read all ${ar}+ articles →</a>
+<!-- ══ PRICING ════════════════════════════════════════════════════════ -->
+<section class="pricing-dark">
+  <div class="pricing-inner">
+    <div class="pricing-header">
+      <div class="section-tag tag-gold" style="margin-bottom:16px;">💰 Transparent Pricing</div>
+      <h2>Simple Plans. Real Results.</h2>
+      <p>Start free. Upgrade when you're ready. No hidden fees.</p>
     </div>
-    <div class="fm-articles-grid">
+
+    <!-- VENDOR PRICING -->
+    <h3 style="font-family:var(--font-display);font-size:22px;color:rgba(255,255,255,.6);font-weight:400;text-align:center;margin-bottom:24px;">For Vendors &amp; Artists</h3>
+    <div class="pricing-grid" style="margin-bottom:52px;">
+
+      <div class="pcard pcard-free">
+        <div class="pcard-tier">Free</div>
+        <div class="pcard-badge-display"><span class="badge-free-tier">No badge</span></div>
+        <div class="pcard-price">€0</div>
+        <div class="pcard-note">Forever free</div>
+        ${['Business name & category','City & country','Basic profile visible','Browse events'].map(f => `<div class="pcard-feature"><span class="pcard-feature-icon">○</span>${f}</div>`).join('')}
+        <a href="/vendors/register" class="pcard-cta">Get Started Free</a>
+      </div>
+
+      <div class="pcard pcard-standard">
+        <div class="pcard-popular">Most Popular</div>
+        <div class="pcard-tier">Standard</div>
+        <div class="pcard-badge-display"><span class="badge-verified">✅ Verified</span></div>
+        <div class="pcard-price">€49</div>
+        <div class="pcard-period">/year · less than €5/month</div>
+        <div class="pcard-note">One booking pays for years</div>
+        ${['Blue Verified badge on profile','Full profile with photos & bio','Your website link displayed','Apply directly to events','Appear in vendor search','Weekly newsletter inclusion'].map(f => `<div class="pcard-feature"><span class="pcard-feature-icon" style="color:#4a7c59;">✅</span>${f}</div>`).join('')}
+        <a href="/vendors/register" class="pcard-cta">Get Verified — €49/yr</a>
+      </div>
+
+      <div class="pcard pcard-gold">
+        <div class="pcard-tier">Gold</div>
+        <div class="pcard-badge-display"><span class="badge-gold">🥇 Gold Verified</span></div>
+        <div class="pcard-price">€99</div>
+        <div class="pcard-period">/year · less than €9/month</div>
+        <div class="pcard-note">Maximum visibility &amp; trust</div>
+        ${['Gold badge — stands out instantly','Priority placement in search','Featured on homepage','Dedicated profile page','Direct contact button','Analytics dashboard','All Standard features included'].map(f => `<div class="pcard-feature"><span class="pcard-feature-icon" style="color:var(--gold);">🥇</span>${f}</div>`).join('')}
+        <a href="/vendors/register" class="pcard-cta">Get Gold — €99/yr</a>
+      </div>
+
+    </div>
+
+    <!-- ORGANISER PRICING -->
+    <h3 style="font-family:var(--font-display);font-size:22px;color:rgba(255,255,255,.6);font-weight:400;text-align:center;margin-bottom:24px;">For Event Organisers</h3>
+    <div class="pricing-grid">
+
+      <div class="pcard pcard-free">
+        <div class="pcard-tier">Free Listing</div>
+        <div class="pcard-price">€0</div>
+        <div class="pcard-note">Always free to list</div>
+        ${['Event page with full details','Vendor applications inbox','Appear in search results','SEO page on Festmore'].map(f => `<div class="pcard-feature"><span class="pcard-feature-icon">○</span>${f}</div>`).join('')}
+        <a href="/events/submit" class="pcard-cta">List Event Free</a>
+      </div>
+
+      <div class="pcard pcard-standard">
+        <div class="pcard-popular">Best Value</div>
+        <div class="pcard-tier">Featured</div>
+        <div class="pcard-price">€79</div>
+        <div class="pcard-period">/year per event</div>
+        <div class="pcard-note">Appear above free listings</div>
+        ${['Featured tag on event card','Homepage banner placement','Priority in search results','Newsletter to '+sb+'+ subscribers','Vendor application priority','All Free features'].map(f => `<div class="pcard-feature"><span class="pcard-feature-icon" style="color:var(--flame);">✅</span>${f}</div>`).join('')}
+        <a href="/events/pricing" class="pcard-cta">Get Featured — €79/yr</a>
+      </div>
+
+      <div class="pcard pcard-gold">
+        <div class="pcard-tier">Premium</div>
+        <div class="pcard-price">€149</div>
+        <div class="pcard-period">/year per event</div>
+        <div class="pcard-note">Maximum event exposure</div>
+        ${['Gold border on event card','Top of all search results','Social media promotion','Dedicated event article','Organiser verified badge','All Featured features'].map(f => `<div class="pcard-feature"><span class="pcard-feature-icon" style="color:var(--gold);">🥇</span>${f}</div>`).join('')}
+        <a href="/events/pricing" class="pcard-cta">Go Premium — €149/yr</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ WHY FESTMORE ══════════════════════════════════════════════════ -->
+<section class="section" style="background:var(--white);">
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div class="section-tag tag-dark" style="margin-bottom:12px;">Why Festmore</div>
+      <h2 class="section-h" style="text-align:center;">Better Than Any Alternative</h2>
+      <p style="font-size:15px;color:var(--ink4);max-width:500px;margin:0 auto;line-height:1.75;">The only platform built for everyone in the live events industry — all in one place.</p>
+    </div>
+    <div class="why-grid">
+      ${[
+        ['🌍','${cn} Countries','The largest event discovery platform in Europe with events from Sweden to Thailand, USA to Australia.'],
+        ['🥇','Gold Badge System','Stand out instantly with our Gold Verified badge — the mark that organisers and visitors trust most.'],
+        ['🔍','Ranks on Google','Every listing gets its own SEO-optimised page. Get found directly on Google by people searching right now.'],
+        ['🏪','Direct Applications','Vendors apply to events, organisers review profiles — no agency fees, no middleman, direct connections.'],
+        ['🎤','All Artist Types','Musicians, DJs, comedians, painters, dancers, photographers — every performance category covered.'],
+        ['📊','Real Analytics','See exactly how many people view your listing, where they come from and which events are growing fastest.'],
+      ].map(([icon,title,desc]) => `<div class="why-card"><span class="why-icon">${icon}</span><div class="why-title">${title.replace('${cn}', cn)}</div><div class="why-desc">${desc}</div></div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══════════════════════════════════════════════════ -->
+<section class="section" style="background:var(--cream);">
+  <div class="section-inner">
+    <div style="text-align:center;">
+      <div class="section-tag tag-dark">How It Works</div>
+      <h2 class="section-h" style="text-align:center;">Up and Running in Minutes</h2>
+    </div>
+    <div class="how-grid">
+      ${[
+        ['1','📝','Create Your Profile','Vendors, artists and organisers each get their own profile type. Takes under 5 minutes.'],
+        ['2','🔍','Get Discovered','Your profile appears in search results across ${cn} countries instantly.'],
+        ['3','📩','Connect Directly','Vendors apply to events. Organisers browse talent. Direct messaging, no middleman.'],
+        ['4','📈','Grow Together','More bookings for vendors, better events for organisers. The platform grows with you.'],
+      ].map(([n,icon,title,desc]) => `<div class="how-step"><div class="how-num">${n}</div><span class="how-icon">${icon}</span><div class="how-title">${title}</div><div class="how-desc">${desc.replace('${cn}', cn)}</div></div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOCIAL PROOF ══════════════════════════════════════════════════ -->
+<section class="section" style="background:var(--white);">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-tag tag-dark" style="margin-bottom:12px;">By the Numbers</div>
+    <h2 class="section-h" style="text-align:center;margin-bottom:36px;">A Platform You Can Trust</h2>
+    <div class="proof-stats" style="margin-bottom:48px;">
+      <div class="pstat"><span class="pstat-n">${ev}+</span><span class="pstat-l">Events</span></div>
+      <div class="pstat"><span class="pstat-n">${vn}+</span><span class="pstat-l">Vendors</span></div>
+      <div class="pstat"><span class="pstat-n">${cn}</span><span class="pstat-l">Countries</span></div>
+      <div class="pstat"><span class="pstat-n">${sb}+</span><span class="pstat-l">Subscribers</span></div>
+      <div class="pstat"><span class="pstat-n">${ar}+</span><span class="pstat-l">Articles</span></div>
+    </div>
+    <div class="tgrid">
+      ${[
+        ['M','Marcus Weber','Event Organiser, Berlin','"Festmore gave our Christmas market incredible visibility. We received vendor applications within the first week of listing."'],
+        ['A','Anna Lindqvist','Street Food Vendor, Sweden','"Finding the right events used to take hours of emailing. Festmore makes it effortless — I found 3 new bookings in my first month."'],
+        ['P','Pieter van den Berg','Market Organiser, Amsterdam','"The vendor marketplace is genuinely useful. We found exactly the food vendors we needed for our spring market in minutes."'],
+      ].map(([i,n,r,q]) => `<div class="tcard"><div class="tcard-stars">★★★★★</div><div class="tcard-text">${q}</div><div class="tcard-author"><div class="tcard-avatar">${i}</div><div><div class="tcard-name">${n}</div><div class="tcard-role">${r}</div></div></div></div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<!-- ══ ARTICLES ════════════════════════════════════════════════════════ -->
+${articles.length ? `
+<section class="section" style="background:var(--cream);">
+  <div class="section-inner">
+    <div class="section-top">
+      <div>
+        <div class="section-tag tag-flame">📰 Latest Articles</div>
+        <h2 class="section-h">Guides &amp; Inspiration</h2>
+        <p class="section-sub">Expert guides for vendors, organisers and festival lovers</p>
+      </div>
+      <a href="/articles" class="section-link">Read all ${ar}+ articles →</a>
+    </div>
+    <div class="agrid">
       ${articles.map(a => {
-        const catColors = { festival:'#4a7c59', guide:'#c9922a', christmas:'#1a6b8a', market:'#7c4a59', default:'#e8470a' };
-        const catColor = catColors[a.category] || catColors.default;
-        const dateStr = new Date(a.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-        return `<a href="/articles/${a.slug}" class="fm-acard">
-          <div class="fm-acard-img">
-            <img src="${a.image_url || IMGS.festival}" alt="${a.title}" loading="lazy"/>
-            <div class="fm-acard-overlay"></div>
-            <span class="fm-acard-cat" style="background:${catColor};">${a.category || 'Guide'}</span>
-          </div>
-          <div class="fm-acard-body">
-            <h3 class="fm-acard-title">${a.title}</h3>
-            <p class="fm-acard-excerpt">${(a.excerpt || '').substring(0, 110)}…</p>
-            <div class="fm-acard-footer">
-              <span class="fm-acard-date">${dateStr}</span>
-              <span class="fm-acard-cta">Read more →</span>
-            </div>
+        const catColors = {festival:'#4a7c59',guide:'#c9922a',christmas:'#1a6b8a',market:'#7c4a59',default:'var(--flame)'};
+        const cc = catColors[a.category] || catColors.default;
+        const ds = new Date(a.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+        return `<a href="/articles/${a.slug}" class="acard">
+          <div class="acard-img"><img src="${a.image_url||IMGS.festival}" alt="${a.title}" loading="lazy"/><div class="acard-overlay"></div><span class="acard-cat" style="background:${cc};">${a.category||'Guide'}</span></div>
+          <div class="acard-body">
+            <h3 class="acard-title">${a.title}</h3>
+            <p class="acard-excerpt">${(a.excerpt||'').substring(0,110)}…</p>
+            <div class="acard-footer"><span class="acard-date">${ds}</span><span class="acard-cta">Read more →</span></div>
           </div>
         </a>`;
       }).join('')}
@@ -666,213 +861,48 @@ ${articles.length ? `
   </div>
 </section>` : ''}
 
-<!-- 8. ADSENSE -->
-<div style="max-width:1300px;margin:0 auto;padding:24px 40px 0;">
-  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
-</div>
-
-<!-- 9. BROWSE BY CATEGORY -->
-<section class="fm-cat-section">
-  <div class="fm-cat-inner">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
+<!-- ══ COUNTRIES ═════════════════════════════════════════════════════ -->
+<section class="section countries-bg">
+  <div class="section-inner">
+    <div class="section-top">
       <div>
-        <div class="fm-section-tag">${tr.browse_events}</div>
-        <h2 class="fm-section-h">${tr.browse_sub}</h2>
-      </div>
-      <a href="/events" style="font-size:14px;font-weight:700;color:#e8470a;text-decoration:none;">View all →</a>
-    </div>
-    <div class="fm-cat-photo-grid">
-      ${Object.entries(CATS).slice(0, 8).map(([k, icon]) => {
-        const count = (catCounts.find(c => c.category === k) || { count: 0 }).count;
-        const photo = CAT_PHOTOS[k] || CAT_PHOTOS.festival;
-        return `<a href="/events?category=${k}" class="fm-cat-photo-card">
-          <img src="${photo}" alt="${CAT_LABELS[k]}" loading="lazy"/>
-          <div class="fm-cat-photo-overlay"></div>
-          <div class="fm-cat-photo-content">
-            <span class="fm-cat-photo-icon">${icon}</span>
-            <span class="fm-cat-photo-name">${CAT_LABELS[k]}</span>
-            <span class="fm-cat-photo-count">${count} events</span>
-          </div>
-        </a>`;
-      }).join('')}
-    </div>
-  </div>
-</section>
-
-<!-- 10. WHY FESTMORE -->
-<section class="fm-why">
-  <div class="fm-why-inner">
-    <div style="text-align:center;">
-      <div class="fm-section-tag">${tr.why_tag}</div>
-      <h2 class="fm-section-h" style="text-align:center;">${tr.why_h}</h2>
-      <p style="font-size:15px;color:#7a6f68;max-width:520px;margin:0 auto;line-height:1.75;">${tr.why_sub}</p>
-    </div>
-    <div class="fm-why-grid">
-      ${[
-        ['🌍','Worldwide Coverage','Visible to visitors, organisers and vendors across Europe, India, Japan, Thailand and beyond.'],
-        ['🔍','Ranks on Google','Every listing gets its own SEO page. Visitors searching for events find you directly on Google.'],
-        ['📧','Newsletter to '+sb+'+ Subscribers','Paid listings featured in our weekly newsletter to '+sb+'+ active subscribers.'],
-        ['✅','Verified Badge System','Paid vendors and events get a Verified badge that builds trust with organisers and visitors.'],
-        ['🏪','Direct Vendor Applications','The only platform where vendors can apply directly to events with available spots worldwide.'],
-        ['📊','Real Analytics','Track how many people view your listing and where they come from.'],
-      ].map(([icon,title,desc]) => `<div class="fm-why-card">
-        <span class="fm-why-icon">${icon}</span>
-        <div class="fm-why-title">${title}</div>
-        <div class="fm-why-desc">${desc}</div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
-
-<!-- 11. PRICING -->
-<section class="fm-dual">
-  <div class="fm-dual-inner">
-    <div class="fm-dual-header">
-      <div class="fm-section-tag" style="background:rgba(232,71,10,.15);color:#ff7043;">${tr.pricing_tag}</div>
-      <h2>${tr.pricing_h}</h2>
-      <p>${tr.pricing_sub}</p>
-    </div>
-    <div class="fm-dual-cards">
-      <div class="fm-plan-card fm-plan-organiser">
-        <div class="fm-plan-glow-org"></div>
-        <span class="fm-plan-tag fm-tag-org">${tr.for_organisers}</span>
-        <span class="fm-plan-emoji">🎪</span>
-        <h3 class="fm-plan-h">List Your Event &amp; Find Vendors</h3>
-        <p class="fm-plan-sub">Start free. Upgrade when you want more visibility and vendor applications.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px;">
-          ${[['Free','€0','Basic listing'],['Featured','€79/yr','Homepage + top'],['Premium','€149/yr','Maximum']].map(([n,p,d]) =>
-            `<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center;">
-              <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;margin-bottom:3px;">${n}</div>
-              <div style="font-family:'DM Serif Display',serif;font-size:18px;color:#fff;">${p}</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px;">${d}</div>
-            </div>`
-          ).join('')}
-        </div>
-        ${['Live within minutes — completely free','Vendors can apply directly to your event','Featured events appear on our homepage','Included in weekly newsletter to '+sb+'+ subscribers','Full SEO page with your own Festmore URL'].map(b => `<div class="fm-plan-benefit">✅ ${b}</div>`).join('')}
-        <a href="/events/submit" class="fm-plan-cta-org">List Your Event Free →</a>
-        <div style="text-align:center;margin-top:10px;font-size:12px;color:rgba(255,255,255,.25);">No credit card required to start</div>
-      </div>
-      <div class="fm-plan-card fm-plan-vendor">
-        <div class="fm-plan-glow-ven"></div>
-        <span class="fm-plan-tag fm-tag-ven">${tr.for_vendors}</span>
-        <span class="fm-plan-emoji">🏪</span>
-        <h3 class="fm-plan-h">Get Booked at the World's Best Events</h3>
-        <p class="fm-plan-sub">One verified profile. Unlimited opportunities. Less than €5/month.</p>
-        <div class="fm-plan-price">
-          <div><span class="fm-plan-price-n">€49</span><span class="fm-plan-price-per">/year</span></div>
-          <div class="fm-plan-price-note">Less than €5/month · One booking pays for years</div>
-        </div>
-        ${['Verified badge on your profile','Apply directly to festivals and markets','Discovered by '+cn+' countries of organisers','Upload photos and portfolio','Featured in weekly newsletter'].map(b => `<div class="fm-plan-benefit">✅ ${b}</div>`).join('')}
-        <a href="/vendors/register" class="fm-plan-cta-ven">Become a Vendor — €49/yr →</a>
-        <div style="text-align:center;margin-top:10px;font-size:12px;color:rgba(255,255,255,.25);">One booking pays for the entire year</div>
+        <div class="section-tag tag-dark">🌍 ${cn} Countries</div>
+        <h2 class="section-h">Browse by Country</h2>
+        <p class="section-sub">Events and vendors from across Europe, Americas, Asia and beyond</p>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- 12. SOCIAL PROOF -->
-<section class="fm-proof">
-  <div class="fm-proof-inner">
-    <div class="fm-section-tag">By the Numbers</div>
-    <h2 class="fm-section-h">A Growing Platform You Can Trust</h2>
-    <div class="fm-proof-stats" style="margin-top:32px;">
-      <div class="fm-proof-stat"><span class="fm-proof-n">${ev}+</span><span class="fm-proof-l">Events</span></div>
-      <div class="fm-proof-stat"><span class="fm-proof-n">${vn}+</span><span class="fm-proof-l">Vendors</span></div>
-      <div class="fm-proof-stat"><span class="fm-proof-n">${cn}</span><span class="fm-proof-l">Countries</span></div>
-      <div class="fm-proof-stat"><span class="fm-proof-n">${sb}+</span><span class="fm-proof-l">Subscribers</span></div>
-      <div class="fm-proof-stat"><span class="fm-proof-n">${ar}+</span><span class="fm-proof-l">Articles</span></div>
-    </div>
-    <div class="fm-testimonials" style="margin-top:40px;">
-      ${[
-        ['M','Marcus Weber','Event Organiser, Berlin','"Festmore gave our Christmas market incredible online visibility. We received vendor applications within the first week."'],
-        ['A','Anna Lindqvist','Street Food Vendor, Stockholm','"Finding the right events used to take hours. Festmore makes it simple — I found 3 new bookings in my first month."'],
-        ['P','Pieter van den Berg','Market Organiser, Amsterdam','"The vendor marketplace is genuinely useful. We found exactly the food vendors we needed for our spring market."'],
-      ].map(([i,n,r,q]) => `<div class="fm-testi">
-        <div class="fm-testi-stars">★★★★★</div>
-        <div class="fm-testi-text">${q}</div>
-        <div class="fm-testi-author">
-          <div class="fm-testi-avatar">${i}</div>
-          <div><div class="fm-testi-name">${n}</div><div class="fm-testi-role">${r}</div></div>
-        </div>
-      </div>`).join('')}
+    <div class="cgrid">
+      ${countryCounts.map(c => `<a href="/events?country=${c.country}" class="ccard"><span class="cflag">${FLAGS[c.country]||'🌍'}</span><span class="cname">${COUNTRY_NAMES[c.country]||c.country}</span><span class="ccount">${c.count} events</span></a>`).join('')}
     </div>
   </div>
 </section>
 
-<!-- 13. HOW IT WORKS -->
-<section class="fm-how">
-  <div class="fm-how-inner">
-    <div style="text-align:center;">
-      <div class="fm-section-tag">How It Works</div>
-      <h2 class="fm-section-h" style="text-align:center;">Simple for Everyone</h2>
-    </div>
-    <div class="fm-how-steps">
-      <div class="fm-step"><div class="fm-step-num">1</div><div style="font-size:26px;margin-bottom:10px;">📝</div><div class="fm-step-title">Create Your Profile</div><div class="fm-step-desc">Vendors create a profile. Organisers list their event. Both take under 5 minutes.</div></div>
-      <div class="fm-step"><div class="fm-step-num">2</div><div style="font-size:26px;margin-bottom:10px;">🔍</div><div class="fm-step-title">Get Discovered</div><div class="fm-step-desc">Your profile or event appears in search results and across our platform worldwide.</div></div>
-      <div class="fm-step"><div class="fm-step-num">3</div><div style="font-size:26px;margin-bottom:10px;">📩</div><div class="fm-step-title">Connect Directly</div><div class="fm-step-desc">Vendors apply to events. Organisers browse vendor profiles. Direct messaging included.</div></div>
-      <div class="fm-step"><div class="fm-step-num">4</div><div style="font-size:26px;margin-bottom:10px;">📈</div><div class="fm-step-title">Grow Together</div><div class="fm-step-desc">Vendors get more bookings. Events get better vendors. Everyone wins.</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- 14. BROWSE BY COUNTRY -->
-<section class="fm-countries">
-  <div class="fm-countries-inner">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap;gap:16px;">
-      <div>
-        <section style="background:linear-gradient(135deg,#1e1048 0%,#7c3aed 100%);padding:64px 40px;text-align:center;border-radius:20px;margin-bottom:32px;">
-          <div style="max-width:900px;margin:0 auto;">
-            <div style="display:inline-block;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:1px;margin-bottom:16px;">🎤 NEW — ARTISTS</div>
-            <h2 style="font-size:36px;font-weight:900;color:#fff;margin-bottom:12px;line-height:1.2;">Find & Book Artists<br/>for Your Event</h2>
-            <p style="color:rgba(255,255,255,.8);font-size:17px;max-width:560px;margin:0 auto 32px;">DJs, bands, solo artists and performers from 39 countries. Browse profiles, listen to music, book directly — no agency fees.</p>
-            <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:40px;">
-              <a href="/artists" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:#7c3aed;padding:16px 32px;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;">🔍 Browse Artists</a>
-              <a href="/artists/register" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.4);padding:16px 32px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;">🎤 List Your Act Free</a>
-            </div>
-          </div>
-        </section>
-        <div class="fm-section-tag">${tr.browse_country}</div>
-        <h2 class="fm-section-h" style="margin-bottom:0;">${tr.browse_country} — ${cn} Countries</h2>
+<!-- ══ NEWSLETTER ═════════════════════════════════════════════════════ -->
+<section class="nl-section">
+  <div class="nl-inner">
+    <div class="nl-box">
+      <div class="nl-left">
+        <h2>Stay in the Loop</h2>
+        <p>New events, vendor opportunities and festival guides delivered weekly to ${sb}+ subscribers.</p>
       </div>
-    </div>
-    <div class="fm-country-grid">
-      ${countryCounts.map(c => `
-      <a href="/events?country=${c.country}" class="fm-country-card">
-        <span class="fm-country-flag">${FLAGS[c.country] || '🌍'}</span>
-        <span class="fm-country-name">${COUNTRY_NAMES[c.country] || c.country}</span>
-        <span class="fm-country-count">${c.count} events</span>
-      </a>`).join('')}
-    </div>
-  </div>
-</section>
-
-<!-- 15. NEWSLETTER -->
-<section class="section" style="background:#fff;">
-  <div class="container">
-    <div class="newsletter-box">
-      <div class="newsletter-left">
-        <h2>${tr.newsletter_h}</h2>
-        <p>${tr.newsletter_sub}</p>
-      </div>
-      <form class="newsletter-form" id="newsletter-form">
-        <input type="email" name="email" placeholder="${tr.newsletter_placeholder}" required class="nl-input"/>
-        <button type="submit" class="btn btn-primary">${tr.newsletter_btn}</button>
+      <form class="nl-form" id="newsletter-form">
+        <input type="email" name="email" placeholder="Your email address" required class="nl-input"/>
+        <button type="submit" class="nl-btn">Subscribe Free →</button>
       </form>
     </div>
   </div>
 </section>
 
-<!-- 16. URGENCY CTA -->
-<div class="fm-urgency">
-  <div class="fm-urgency-inner">
-    <div class="fm-urgency-text">
-      <h3>${tr.urgency_h.replace('{events}', ev).replace('{vendors}', vn)}</h3>
-      <p>${tr.urgency_sub}</p>
+<!-- ══ URGENCY CTA ════════════════════════════════════════════════════ -->
+<div class="urgency">
+  <div class="urgency-inner">
+    <div>
+      <h3>Ready to Join ${ev}+ Events &amp; ${vn}+ Vendors?</h3>
+      <p>Start free today — no credit card required. Upgrade whenever you're ready.</p>
     </div>
-    <div class="fm-urgency-btns">
-      <a href="/events/submit" class="fm-urgency-btn-w">${tr.urgency_btn1}</a>
-      <a href="/vendors/register" class="fm-urgency-btn-t">${tr.urgency_btn2}</a>
+    <div class="urgency-btns">
+      <a href="/events/submit" class="ubtn-w">List Your Event Free</a>
+      <a href="/vendors/register" class="ubtn-t">Become a Vendor</a>
     </div>
   </div>
 </div>
@@ -888,10 +918,8 @@ document.getElementById('newsletter-form').addEventListener('submit', function(e
     .then(r => r.json())
     .then(json => {
       if (json.ok) {
-        document.getElementById('newsletter-form').innerHTML = '<p style="color:#4a7c59;font-weight:700;font-size:16px;padding:20px 0;">✅ ${tr.newsletter_success}</p>';
-      } else {
-        alert(json.msg);
-      }
+        document.getElementById('newsletter-form').innerHTML = '<p style="color:#4a7c59;font-weight:700;font-size:16px;padding:12px 0;">✅ You\'re subscribed! Welcome to Festmore.</p>';
+      } else { alert(json.msg); }
     });
 });
 </script>
@@ -899,44 +927,42 @@ document.getElementById('newsletter-form').addEventListener('submit', function(e
 }
 
 // ─── EVENT CARD ───────────────────────────────────────────────────────────────
-function fmEventCard(e) {
-  const img    = e.image_url || IMGS[e.category] || IMGS.festival;
-  const flag   = FLAGS[e.country] || '';
-  const icon   = CATS[e.category] || '🎪';
+function eventCard(e) {
+  const img = e.image_url || IMGS[e.category] || IMGS.festival;
+  const flag = FLAGS[e.country] || '';
+  const icon = CATS[e.category] || '🎪';
   const isFree = e.price_display === 'Free' || e.price_display === 'Free Entry';
-  const price  = isFree ? '🟢 Free' : (e.price_display || 'See website');
-  return `<article class="fm-ec" onclick="window.location='/events/${e.slug}'">
-  <div class="fm-ec-img">
+  const price = isFree ? '🟢 Free' : (e.price_display || 'See website');
+  return `<article class="ecard" onclick="window.location='/events/${e.slug}'">
+  <div class="ecard-img">
     <img src="${img}" alt="${e.title}" loading="lazy"/>
-    <div class="fm-ec-overlay"></div>
-    <div class="fm-ec-top-badges">
-      ${e.featured ? '<span class="fm-ec-badge" style="background:#e8470a;color:#fff;">★ Featured</span>' : ''}
-      <span class="fm-ec-badge" style="background:rgba(0,0,0,.55);color:#fff;">${icon} ${e.category}</span>
+    <div class="ecard-overlay"></div>
+    <div class="ecard-badges">
+      ${e.featured ? '<span class="ecard-badge" style="background:var(--flame);color:var(--white);">★ Featured</span>' : ''}
+      <span class="ecard-badge" style="background:rgba(0,0,0,.55);color:var(--white);">${icon} ${e.category}</span>
     </div>
-    <div class="fm-ec-price ${isFree?'free':'paid'}">${price}</div>
+    <div class="ecard-price ${isFree?'price-free':'price-paid'}">${price}</div>
   </div>
-  <div class="fm-ec-body">
-    <div class="fm-ec-date">${e.date_display || e.start_date || ''}</div>
-    <h3 class="fm-ec-title">${e.title}</h3>
-    <div class="fm-ec-location">📍 ${e.city}${e.country ? ', '+(COUNTRY_NAMES[e.country]||e.country) : ''} ${flag}</div>
-    <div class="fm-ec-footer">
-      <span class="fm-ec-visitors">${e.attendees ? '👥 '+parseInt(e.attendees).toLocaleString() : ''}</span>
-      <span class="fm-ec-cta">View details →</span>
+  <div class="ecard-body">
+    <div class="ecard-date">${e.date_display || e.start_date || ''}</div>
+    <h3 class="ecard-title">${e.title}</h3>
+    <div class="ecard-loc">📍 ${e.city}${e.country ? ', '+(COUNTRY_NAMES[e.country]||e.country) : ''} ${flag}</div>
+    <div class="ecard-footer">
+      <span class="ecard-att">${e.attendees ? '👥 '+parseInt(e.attendees).toLocaleString() : ''}</span>
+      <span class="ecard-cta">View details →</span>
     </div>
   </div>
 </article>`;
 }
 
 function eventCardHTML(e) {
-  const img    = e.image_url || IMGS[e.category] || IMGS.festival;
-  const flag   = FLAGS[e.country] || '';
-  const icon   = CATS[e.category] || '';
+  const img = e.image_url || IMGS[e.category] || IMGS.festival;
+  const flag = FLAGS[e.country] || '';
+  const icon = CATS[e.category] || '';
   const isFree = e.price_display === 'Free';
-  const isFL   = e.payment_status === 'free';
+  const isFL = e.payment_status === 'free';
   return `<article class="event-card"><a href="/events/${e.slug}">
-    <div class="event-img">
-      <img src="${img}" alt="${e.title}" loading="lazy"/>
-      <div class="event-img-overlay"></div>
+    <div class="event-img"><img src="${img}" alt="${e.title}" loading="lazy"/><div class="event-img-overlay"></div>
       <div class="event-badges">
         ${e.featured ? '<span class="badge badge-feat">★ Featured</span>' : ''}
         <span class="badge badge-cat">${icon} ${e.category}</span>
@@ -945,11 +971,11 @@ function eventCardHTML(e) {
       </div>
     </div>
     <div class="event-body">
-      <div class="event-date">${e.date_display || e.start_date}</div>
+      <div class="event-date">${e.date_display||e.start_date}</div>
       <h3>${e.title}</h3>
       <div class="event-loc">${flag} ${e.city}</div>
       <div class="event-footer">
-        <span class="event-stat">${(e.attendees || 0).toLocaleString()} visitors</span>
+        <span class="event-stat">${(e.attendees||0).toLocaleString()} visitors</span>
         <span class="event-price ${isFree?'price-free':'price-paid'}">${e.price_display}</span>
       </div>
     </div>
@@ -958,34 +984,35 @@ function eventCardHTML(e) {
 
 function renderNav(user, tr, langHtml) {
   const userLinks = user
-    ? `<a href="/dashboard" class="btn btn-outline btn-sm">${tr.nav_dashboard}</a><a href="/auth/logout" class="btn btn-ghost btn-sm">${tr.nav_logout}</a>`
-    : `<a href="/auth/login" class="btn btn-outline btn-sm">${tr.nav_login}</a><a href="/events/submit" class="btn btn-primary btn-sm">+ List Event Free</a>`;
-  return `<nav class="main-nav">
+    ? `<a href="/dashboard" class="nav-btn" style="background:rgba(255,255,255,.1);">Dashboard</a><a href="/auth/logout" class="nav-link">Logout</a>`
+    : `<a href="/auth/login" class="nav-link">Login</a><a href="/events/submit" class="nav-btn">+ List Free</a>`;
+  return `<nav class="nav">
     <div class="nav-inner">
-      <a href="/" class="logo"><span class="logo-fest">Fest</span><span class="logo-more">more</span><span class="logo-dot"></span></a>
-      <form class="nav-search" action="/events" method="GET"><span style="color:var(--ink4);font-size:15px;">🔍</span><input type="text" name="q" placeholder="${tr.nav_search}"/></form>
-      <div class="nav-right" style="display:flex;align-items:center;gap:8px;">${langHtml}${userLinks}</div>
-      <button class="nav-burger" onclick="document.querySelector('.nav-mobile').classList.toggle('open')">☰</button>
-    </div>
-    <div class="nav-cats-bar">
-      <a href="/events" class="nav-cat">🌍 All</a>
-      <a href="/events?category=festival" class="nav-cat">🎪 Festivals</a>
-      <a href="/events?category=market" class="nav-cat">🛍️ Markets</a>
-      <a href="/events?category=christmas" class="nav-cat">🎄 Xmas</a>
-      <a href="/events?category=concert" class="nav-cat">🎵 Concerts</a>
-      <a href="/events?category=flea" class="nav-cat">🏺 Flea Markets</a>
-      <a href="/vendors" class="nav-cat">🏪 Vendors</a>
-      <a href="/artists" class="nav-cat">🎤 Artists</a>
-      <a href="/articles" class="nav-cat">📰 Articles</a>
-      <a href="/events/submit" class="nav-cat" style="color:var(--flame);font-weight:700;">+ List Event Free</a>
+      <a href="/" class="nav-logo"><span>Fest</span>more</a>
+      <div class="nav-search-wrap">
+        <form class="nav-search" action="/events" method="GET">
+          <span style="color:rgba(255,255,255,.35);font-size:14px;">🔍</span>
+          <input type="text" name="q" placeholder="Search events, vendors, artists…"/>
+        </form>
+      </div>
+      <div class="nav-links">
+        <a href="/events" class="nav-link">Events</a>
+        <a href="/vendors" class="nav-link">Vendors</a>
+        <a href="/artists" class="nav-link">Artists</a>
+        <a href="/articles" class="nav-link">Articles</a>
+        ${langHtml}
+        ${userLinks}
+      </div>
+      <button class="nav-burger" onclick="document.querySelector('.nav-mobile').classList.toggle('open')" aria-label="Menu">☰</button>
     </div>
     <div class="nav-mobile">
-      <a href="/events">All Events</a>
-      <a href="/vendors">Vendors</a>
-      <a href="/artists">Artists</a>
-      <a href="/articles">Articles</a>
+      <a href="/events">🎪 Events</a>
+      <a href="/vendors">🏪 Vendors</a>
+      <a href="/artists">🎤 Artists</a>
+      <a href="/articles">📰 Articles</a>
       <a href="/events/submit">+ List Event Free</a>
-      <a href="/vendors/register">Become a Vendor</a>
+      <a href="/vendors/register">Become a Vendor — €49/yr</a>
+      <a href="/artists/register">List Your Act Free</a>
       ${user ? `<a href="/dashboard">Dashboard</a><a href="/auth/logout">Logout</a>` : `<a href="/auth/login">Login</a>`}
     </div>
   </nav>`;
@@ -993,18 +1020,39 @@ function renderNav(user, tr, langHtml) {
 
 function renderFooter(stats, tr) {
   return `<footer>
-    <div class="footer-top">
-      <div class="footer-brand">
-        <div class="logo" style="margin-bottom:14px;"><span class="logo-fest" style="color:#fff;">Fest</span><span class="logo-more">more</span></div>
-        <p>Europe's leading event vendor marketplace. Connecting festivals with vendors across ${stats.countries || 26} countries worldwide.</p>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo"><span>Fest</span>more</div>
+          <p>The global marketplace connecting event organisers, vendors and artists. ${stats.events}+ events across ${stats.countries} countries worldwide.</p>
+        </div>
+        <div class="footer-col">
+          <h4>For Organisers</h4>
+          <a href="/events/submit">List Event Free</a>
+          <a href="/events/pricing">Pricing</a>
+          <a href="/vendors">Find Vendors</a>
+          <a href="/artists">Find Artists</a>
+          <a href="/events">Browse Events</a>
+        </div>
+        <div class="footer-col">
+          <h4>For Vendors</h4>
+          <a href="/vendors/register">Register — €49/yr</a>
+          <a href="/vendors">Browse Vendors</a>
+          <a href="/artists/register">List Artist — Free</a>
+          <a href="/contact">Contact Us</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="/about">About</a>
+          <a href="/articles">Articles</a>
+          <a href="/contact">Contact</a>
+          <a href="/privacy">Privacy Policy</a>
+        </div>
       </div>
-      <div class="footer-col"><h4>${tr.footer_for_org}</h4><a href="/events/submit">${tr.footer_list}</a><a href="/events/pricing">${tr.footer_pricing}</a><a href="/vendors">${tr.footer_find_vendors}</a><a href="/events">${tr.footer_browse}</a></div>
-      <div class="footer-col"><h4>${tr.footer_for_ven}</h4><a href="/vendors/register">${tr.footer_create} — €49/yr</a><a href="/artists">Browse Artists</a><a href="/artists/register">List Your Act — Free</a><a href="/contact">${tr.footer_contact}</a></div>
-      <div class="footer-col"><h4>Company</h4><a href="/about">About Us</a><a href="/articles">Articles</a><a href="/contact">Contact</a><a href="/privacy">Privacy Policy</a></div>
-    </div>
-    <div class="footer-bottom">
-      <span>© ${new Date().getFullYear()} Festmore.com — All rights reserved</span>
-      <span>${stats.events}+ Events · ${stats.vendors}+ Vendors · ${stats.countries} Countries</span>
+      <div class="footer-bottom">
+        <span>© ${new Date().getFullYear()} Festmore.com — All rights reserved</span>
+        <span>${stats.events}+ Events · ${stats.vendors}+ Vendors · ${stats.countries} Countries</span>
+      </div>
     </div>
   </footer>`;
 }
@@ -1012,7 +1060,7 @@ function renderFooter(stats, tr) {
 module.exports.renderNav     = renderNav;
 module.exports.renderFooter  = renderFooter;
 module.exports.eventCardHTML = eventCardHTML;
-module.exports.fmEventCard   = fmEventCard;
+module.exports.fmEventCard   = eventCard;
 module.exports.IMGS          = IMGS;
 module.exports.FLAGS         = FLAGS;
 module.exports.CATS          = CATS;
