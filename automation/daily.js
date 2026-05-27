@@ -169,4 +169,4 @@ async function runDailyAutomation() {
   console.log('════════════════════════════════════');
 }
 
-module.exports = { runDailyAutomation };
+module.exports = { runDailyAutomation, run: runDailyAutomation };
