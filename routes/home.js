@@ -162,6 +162,20 @@ a{text-decoration:none;}
 .hero-h1 em{color:var(--flame);font-style:italic;}
 .hero-sub{font-size:clamp(15px,1.8vw,20px);color:rgba(255,255,255,.5);margin-bottom:60px;max-width:580px;margin-left:auto;margin-right:auto;line-height:1.6;}
 
+/* ── HERO CTAs ── */
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.hcta{display:inline-flex;align-items:center;gap:8px;padding:15px 28px;border-radius:12px;font-size:15px;font-weight:700;font-family:var(--font-body);transition:all .25s;white-space:nowrap;letter-spacing:-.2px;}
+.hcta-primary{background:var(--flame);color:var(--white);box-shadow:0 4px 24px rgba(232,71,10,.4);}
+.hcta-primary:hover{background:var(--flame2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(232,71,10,.5);}
+.hcta-green{background:var(--green);color:var(--white);box-shadow:0 4px 24px rgba(74,124,89,.35);}
+.hcta-green:hover{background:#3d6b4c;transform:translateY(-2px);box-shadow:0 8px 32px rgba(74,124,89,.45);}
+.hcta-purple{background:var(--purple);color:var(--white);box-shadow:0 4px 24px rgba(124,58,237,.35);}
+.hcta-purple:hover{background:#6d28d9;transform:translateY(-2px);box-shadow:0 8px 32px rgba(124,58,237,.45);}
+.hero-cta-browse{display:flex;align-items:center;gap:12px;margin-bottom:48px;}
+.hcta-ghost{color:rgba(255,255,255,.5);font-size:13px;font-weight:600;transition:color .2s;}
+.hcta-ghost:hover{color:var(--white);}
+.hcta-dot{color:rgba(255,255,255,.2);font-size:13px;}
+
 /* ── 4-WAY SPLIT ── */
 .split-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;width:100%;max-width:1060px;margin:0 auto 52px;}
 .split-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px 24px;text-align:center;cursor:pointer;transition:all .35s;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:14px;position:relative;overflow:hidden;backdrop-filter:blur(10px);}
@@ -476,6 +490,26 @@ ${renderNav(user, tr, langHtml)}
       ${ev}+ events · ${vn}+ vendors · ${cn} countries.<br/>
       The only platform built for everyone in live events.
     </p>
+
+    <!-- PRIMARY ACTION BUTTONS -->
+    <div class="hero-ctas">
+      <a href="/events/submit" class="hcta hcta-primary">
+        🎪 List Your Event — Free
+      </a>
+      <a href="/vendors/register" class="hcta hcta-green">
+        🏪 Register as Vendor — €49/yr
+      </a>
+      <a href="/artists/register" class="hcta hcta-purple">
+        🎤 List as Artist — Free
+      </a>
+    </div>
+    <div class="hero-cta-browse">
+      <a href="/events" class="hcta-ghost">Browse Events</a>
+      <span class="hcta-dot">·</span>
+      <a href="/vendors" class="hcta-ghost">Find Vendors</a>
+      <span class="hcta-dot">·</span>
+      <a href="/artists" class="hcta-ghost">Discover Artists</a>
+    </div>
 
     <!-- 4-WAY SPLIT — full width centered -->
     <div class="split-grid">
