@@ -75,6 +75,7 @@ app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
 app.use('/notifications', require('./routes/notifications'));
 app.use('/artists', require('./routes/artists'));
+app.use('/admin-panel', require('./routes/admin-panel'));
 
 // ─────────────────────────────────────
 // EMAIL TEST ROUTE
