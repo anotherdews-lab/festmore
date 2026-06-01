@@ -102,6 +102,16 @@ router.get('/', requireLogin, (req, res) => {
         <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">All Vendors</div>
         <div style="font-size:12px;color:rgba(255,255,255,.35);line-height:1.5;">${adminStats.vendors} total vendors</div>
       </a>
+      <a href="/admin/artists" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;text-decoration:none;display:block;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
+        <div style="font-size:28px;margin-bottom:10px;">🎤</div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">All Artists</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.35);line-height:1.5;">Manage &amp; verify artists</div>
+      </a>
+      <a href="/admin/artists" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;text-decoration:none;display:block;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
+        <div style="font-size:28px;margin-bottom:10px;">🎤</div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">All Artists</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.35);line-height:1.5;">Manage &amp; verify artists</div>
+      </a>
       <a href="/admin/subscribers" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;text-decoration:none;display:block;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
         <div style="font-size:28px;margin-bottom:10px;">👥</div>
         <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">Subscribers</div>
