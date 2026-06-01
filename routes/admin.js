@@ -617,6 +617,194 @@ router.get('/artists/:id/delete', requireAdmin, (req, res) => {
   res.redirect('/admin/artists?msg=deleted');
 });
 
+
+// ═══════════════════════════════════════════════════════════════════
+// ARTISTS ADMIN — /admin/artists
+// ═══════════════════════════════════════════════════════════════════
+
+router.get('/artists', requireAdmin, (req, res) => {
+  const { q = '', filter = '' } = req.query;
+
+  // Build query
+  let where = `WHERE status='active'`;
+  if (q) where += ` AND (name LIKE '%${q.replace(/'/g,"''")}%' OR city LIKE '%${q.replace(/'/g,"''")}%' OR genre LIKE '%${q.replace(/'/g,"''")}%' OR email LIKE '%${q.replace(/'/g,"''")}%')`;
+  if (filter === 'free')    where += ` AND payment_status='free'`;
+  if (filter === 'paid')    where += ` AND payment_status='paid'`;
+  if (filter === 'gold')    where += ` AND payment_status='gold'`;
+  if (filter === 'unverified') where += ` AND verified=0`;
+
+  let artists = [];
+  try {
+    artists = db.prepare(`SELECT * FROM artists ${where} ORDER BY created_at DESC LIMIT 200`).all();
+  } catch(e) {
+    // artists table might use different column names
+    try {
+      artists = db.prepare(`SELECT * FROM artists ORDER BY created_at DESC LIMIT 200`).all();
+    } catch(e2) {
+      console.log('Artists table error:', e2.message);
+    }
+  }
+
+  const stats = {};
+  try {
+    stats.total    = db.prepare(`SELECT COUNT(*) n FROM artists WHERE status='active'`).get().n;
+    stats.paid     = db.prepare(`SELECT COUNT(*) n FROM artists WHERE status='active' AND payment_status IN ('paid','gold')`).get().n;
+    stats.gold     = db.prepare(`SELECT COUNT(*) n FROM artists WHERE status='active' AND payment_status='gold'`).get().n;
+    stats.free     = db.prepare(`SELECT COUNT(*) n FROM artists WHERE status='active' AND payment_status='free'`).get().n;
+    stats.verified = db.prepare(`SELECT COUNT(*) n FROM artists WHERE status='active' AND verified=1`).get().n;
+  } catch(e) {
+    stats.total = artists.length; stats.paid = 0; stats.gold = 0; stats.free = 0; stats.verified = 0;
+  }
+
+  const content = `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:16px;">
+    <div>
+      <h1 style="font-family:'DM Serif Display',serif;font-size:32px;font-weight:400;margin-bottom:4px;">🎤 Artists</h1>
+      <p style="color:var(--ink3);font-size:14px;">Manage artist profiles, verify accounts and upgrade tiers</p>
+    </div>
+    <a href="/artists/register" target="_blank" class="btn btn-primary btn-sm">+ Add Artist</a>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;">
+    <div class="stat-card"><div class="stat-n">${stats.total}</div><div class="stat-l">Total Artists</div></div>
+    <div class="stat-card"><div class="stat-n" style="color:#15803d;">${stats.verified}</div><div class="stat-l">Verified</div></div>
+    <div class="stat-card"><div class="stat-n" style="color:#e8470a;">${stats.paid}</div><div class="stat-l">Paid</div></div>
+    <div class="stat-card"><div class="stat-n" style="color:#b45309;">${stats.gold}</div><div class="stat-l">Gold</div></div>
+    <div class="stat-card"><div class="stat-n" style="color:#0369a1;">${stats.free}</div><div class="stat-l">Free</div></div>
+  </div>
+
+  <div class="admin-card">
+    <form method="GET" action="/admin/artists" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <input name="q" value="${q||''}" placeholder="Search name, city, genre, email..." 
+        style="flex:1;min-width:240px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;"/>
+      <select name="filter" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;background:#fff;cursor:pointer;">
+        <option value="" ${!filter?'selected':''}>All Artists</option>
+        <option value="free"       ${filter==='free'?'selected':''}>Free only</option>
+        <option value="unverified" ${filter==='unverified'?'selected':''}>Unverified</option>
+        <option value="paid"       ${filter==='paid'?'selected':''}>✅ Verified (Paid)</option>
+        <option value="gold"       ${filter==='gold'?'selected':''}>🥇 Gold</option>
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm" style="padding:10px 20px;">Filter</button>
+      ${q||filter ? '<a href="/admin/artists" class="btn btn-outline btn-sm" style="padding:10px 16px;">Clear</a>' : ''}
+      <span style="font-size:13px;color:var(--ink4);align-self:center;">${artists.length} results</span>
+    </form>
+
+    ${artists.length === 0 ? '<p style="text-align:center;color:var(--ink4);padding:40px;">No artists found.</p>' : `
+    <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead><tr>
+        <th style="width:40px;"></th>
+        <th>Artist</th>
+        <th>Type / Genre</th>
+        <th>Location</th>
+        <th>Contact</th>
+        <th>Status</th>
+        <th>Joined</th>
+        <th>Actions</th>
+      </tr></thead>
+      <tbody>${artists.map(a => `
+        <tr>
+          <td>${a.image_url
+            ? `<img src="${a.image_url}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:#f0ece4;"/>`
+            : `<div style="width:36px;height:36px;border-radius:8px;background:#f0ece4;display:flex;align-items:center;justify-content:center;font-size:18px;">🎤</div>`}
+          </td>
+          <td>
+            <strong style="font-size:14px;">${a.name}</strong>
+            <div style="font-size:11px;color:var(--ink4);margin-top:2px;">
+              <a href="/artists/${a.slug}" target="_blank" style="color:var(--flame);">view profile →</a>
+            </div>
+          </td>
+          <td style="font-size:12px;color:var(--ink3);max-width:140px;">${a.genre||a.artist_type||'—'}</td>
+          <td style="font-size:12px;color:var(--ink3);">${a.city||'—'}${a.country?', '+a.country:''}</td>
+          <td style="font-size:11px;color:var(--ink4);">${a.email||a.booking_email||'—'}</td>
+          <td>
+            ${a.payment_status==='gold'
+              ? '<span class="badge-gold">🥇 Gold</span>'
+              : a.payment_status==='paid'
+              ? '<span class="badge-active">✅ Verified</span>'
+              : '<span class="badge-free">Free</span>'}
+            ${a.featured ? ' <span class="badge-purple">⭐ Featured</span>' : ''}
+          </td>
+          <td style="font-size:11px;color:var(--ink4);">${(a.created_at||'').substring(0,10)}</td>
+          <td>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              ${a.payment_status === 'free' ? `
+                <a href="/admin/artists/${a.id}/verify" class="btn btn-sm" 
+                   style="background:#dcfce7;color:#15803d;padding:5px 10px;font-size:11px;font-weight:700;border-radius:6px;white-space:nowrap;"
+                   onclick="return confirm('Give ${a.name} free Verified badge?')">✅ Verify Free</a>
+                <a href="/admin/artists/${a.id}/paid" class="btn btn-sm"
+                   style="background:#e8470a;color:#fff;padding:5px 10px;font-size:11px;font-weight:700;border-radius:6px;white-space:nowrap;"
+                   onclick="return confirm('Upgrade ${a.name} to Verified (Paid)?')">✅ Paid Verified</a>
+                <a href="/admin/artists/${a.id}/gold" class="btn btn-sm"
+                   style="background:#fef9c3;color:#b45309;border:1px solid #f59e0b;padding:5px 10px;font-size:11px;font-weight:700;border-radius:6px;white-space:nowrap;"
+                   onclick="return confirm('Upgrade ${a.name} to Gold?')">🥇 Gold</a>
+              ` : a.payment_status === 'paid' ? `
+                <a href="/admin/artists/${a.id}/gold" class="btn btn-sm"
+                   style="background:#fef9c3;color:#b45309;border:1px solid #f59e0b;padding:5px 10px;font-size:11px;font-weight:700;border-radius:6px;white-space:nowrap;"
+                   onclick="return confirm('Upgrade to Gold?')">🥇 Upgrade Gold</a>
+                <a href="/admin/artists/${a.id}/downgrade" class="btn btn-sm"
+                   style="background:#f0ece4;color:var(--ink3);padding:5px 10px;font-size:11px;border-radius:6px;white-space:nowrap;"
+                   onclick="return confirm('Downgrade to free?')">↓ Downgrade</a>
+              ` : `
+                <a href="/admin/artists/${a.id}/downgrade" class="btn btn-sm"
+                   style="background:#f0ece4;color:var(--ink3);padding:5px 10px;font-size:11px;border-radius:6px;white-space:nowrap;"
+                   onclick="return confirm('Downgrade from Gold?')">↓ Downgrade</a>
+              `}
+              <a href="/admin/artists/${a.id}/delete" class="btn btn-sm"
+                 style="background:#fee2e2;color:#dc2626;padding:5px 8px;font-size:11px;border-radius:6px;"
+                 onclick="return confirm('Permanently delete ${a.name}?')">✕</a>
+            </div>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>`}
+  </div>`;
+
+  res.send(adminPage('Artists', content));
+});
+
+// ─── ARTIST ACTION ROUTES ─────────────────────────────────────────────────────
+
+router.get('/artists/:id/verify', requireAdmin, (req, res) => {
+  try {
+    db.prepare(`UPDATE artists SET verified=1, payment_status='free' WHERE id=?`).run(req.params.id);
+    console.log('Admin: verified artist', req.params.id);
+  } catch(e) { console.log('Verify error:', e.message); }
+  res.redirect('/admin/artists?msg=verified');
+});
+
+router.get('/artists/:id/paid', requireAdmin, (req, res) => {
+  try {
+    db.prepare(`UPDATE artists SET verified=1, payment_status='paid' WHERE id=?`).run(req.params.id);
+    console.log('Admin: paid-verified artist', req.params.id);
+  } catch(e) { console.log('Paid verify error:', e.message); }
+  res.redirect('/admin/artists?msg=paid');
+});
+
+router.get('/artists/:id/gold', requireAdmin, (req, res) => {
+  try {
+    db.prepare(`UPDATE artists SET verified=1, payment_status='gold', featured=1 WHERE id=?`).run(req.params.id);
+    console.log('Admin: gold artist', req.params.id);
+  } catch(e) { console.log('Gold error:', e.message); }
+  res.redirect('/admin/artists?msg=gold');
+});
+
+router.get('/artists/:id/downgrade', requireAdmin, (req, res) => {
+  try {
+    db.prepare(`UPDATE artists SET verified=0, payment_status='free', featured=0 WHERE id=?`).run(req.params.id);
+  } catch(e) { console.log('Downgrade error:', e.message); }
+  res.redirect('/admin/artists?msg=downgraded');
+});
+
+router.get('/artists/:id/delete', requireAdmin, (req, res) => {
+  try {
+    db.prepare(`UPDATE artists SET status='deleted' WHERE id=?`).run(req.params.id);
+    console.log('Admin: deleted artist', req.params.id);
+  } catch(e) { console.log('Delete error:', e.message); }
+  res.redirect('/admin/artists?msg=deleted');
+});
+
 module.exports = router;
 
 // ─── HELPERS ─────────────────────────
@@ -631,6 +819,7 @@ function sidebar(pendingEventsCount, pendingVendorsCount) {
   <div class="admin-nav-section">Content</div>
   <a href="/admin/events" class="admin-nav-item">🎪 Events ${pendingEventsCount>0?`<span style="background:var(--flame);color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;margin-left:auto;">${pendingEventsCount}</span>`:''}</a>
   <a href="/admin/vendors" class="admin-nav-item">🏪 Vendors ${pendingVendorsCount>0?`<span style="background:#e8470a;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;margin-left:auto;">${pendingVendorsCount}</span>`:''}</a>
+  <a href="/admin/artists" class="admin-nav-item">🎤 Artists</a>
   <a href="/admin/artists" class="admin-nav-item">🎤 Artists</a>
   <a href="/admin/articles" class="admin-nav-item">📰 Articles</a>
   <div class="admin-nav-section">Users</div>
@@ -664,6 +853,8 @@ function adminStyles() {
 .badge-active{background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
 .badge-pending{background:#fef9c3;color:#a16207;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
 .badge-free{background:#e0f2fe;color:#0369a1;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
+.badge-gold{background:#fef9c3;color:#b45309;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;border:1px solid #f59e0b;}
+.badge-purple{background:#f3e8ff;color:#7c3aed;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
 .badge-gold{background:#fef9c3;color:#b45309;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;border:1px solid #f59e0b;}
 .badge-purple{background:#f3e8ff;color:#7c3aed;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
 .admin-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;}
