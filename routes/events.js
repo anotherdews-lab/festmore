@@ -393,23 +393,51 @@ function renderEventDetail(e, related, user) {
     ? '<div id="apply-section"><button onclick="toggleApply()" class="btn btn-primary" style="width:100%;margin-bottom:8px;">Apply to This Event →</button><div id="apply-form" style="display:none;margin-top:12px;"><textarea id="apply-message" placeholder="Tell the organiser about your business..." rows="4" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 14px;font-size:13px;color:#fff;outline:none;resize:vertical;font-family:inherit;box-sizing:border-box;margin-bottom:10px;"></textarea><div id="apply-result" style="display:none;margin-bottom:10px;"></div><button onclick="submitApplication(' + e.id + ')" class="btn btn-primary" style="width:100%;background:#4a7c59;">Submit Application →</button></div></div>'
     : '<a href="/auth/login?redirect=/events/' + e.slug + '" class="btn btn-primary" style="display:block;text-align:center;margin-bottom:8px;">Login to Apply →</a><a href="/vendors/register" style="display:block;text-align:center;font-size:13px;color:rgba(255,255,255,.5);margin-top:8px;">Not a vendor yet? Register here →</a>';
 
-  const schemaData = JSON.stringify({
-    "@context":"https://schema.org","@type":"Event",
-    "name":e.title,"description":(e.description||"").substring(0,500),"image":[img],
-    "startDate":e.start_date?e.start_date+"T00:00:00":null,
-    "endDate":e.end_date?e.end_date+"T23:59:00":e.start_date+"T23:59:00",
+  // Build valid Google Event schema
+  const isFreeEvent = e.price_display==="Free"||e.price_display==="Free Entry"||e.price_display==="Free admission";
+  const safeDesc = (e.description||"").substring(0,500).replace(/[\x00-\x1F\x7F]/g," ").replace(/"/g,\'\\"\'');
+  const schemaObj = {
+    "@context":"https://schema.org",
+    "@type":"Event",
+    "name":e.title,
+    "description":safeDesc,
+    "image":[img],
+    "url":"https://festmore.com/events/"+e.slug,
     "eventStatus":"https://schema.org/EventScheduled",
     "eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode",
-    "location":{"@type":"Place","name":e.address||e.city||"TBC","address":{"@type":"PostalAddress","streetAddress":e.address||"","addressLocality":e.city||"","addressCountry":e.country||""}},
-    "organizer":{"@type":"Organization","name":e.organiser_name||"Festmore","url":e.website||"https://festmore.com"},
-    "offers":{"@type":"Offer","price":"0","priceCurrency":"EUR","url":e.ticket_url||e.website||"https://festmore.com/events/"+e.slug},
-    "performer":{"@type":"PerformingGroup","name":e.title},
-    "isAccessibleForFree":e.price_display==="Free"||e.price_display==="Free Entry"
-  });
+    "location":{
+      "@type":"Place",
+      "name":e.city||"TBC",
+      "address":{
+        "@type":"PostalAddress",
+        "addressLocality":e.city||"",
+        "addressCountry":e.country||""
+      }
+    },
+    "organizer":{
+      "@type":"Organization",
+      "name":"Festmore",
+      "url":"https://festmore.com"
+    },
+    "offers":{
+      "@type":"Offer",
+      "price":isFreeEvent?"0":"",
+      "priceCurrency":"EUR",
+      "availability":"https://schema.org/InStock",
+      "url":e.ticket_url||e.website||"https://festmore.com/events/"+e.slug,
+      "validFrom":e.start_date||new Date().toISOString().split("T")[0]
+    },
+    "isAccessibleForFree":isFreeEvent
+  };
+  // Only add dates if they exist - null dates cause Google validation errors
+  if (e.start_date) { schemaObj.startDate = e.start_date+"T00:00:00"; }
+  if (e.end_date) { schemaObj.endDate = e.end_date+"T23:59:00"; }
+  else if (e.start_date) { schemaObj.endDate = e.start_date+"T23:59:00"; }
+  const schemaData = JSON.stringify(schemaObj);
 
   return '<!DOCTYPE html><html lang="en"><head>'
     + '<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>'
-    + '<title>' + e.title + ' ' + new Date(e.start_date).getFullYear() + ' — ' + e.city + ' | Festmore</title>'
+    + '<title>' + e.title + (e.start_date ? ' ' + new Date(e.start_date).getFullYear() : '') + ' — ' + e.city + ' | Festmore</title>'
     + '<meta name="description" content="' + (e.description||'').substring(0,155) + '"/>'
     + '<meta property="og:title" content="' + e.title + ' — Festmore"/>'
     + '<meta property="og:image" content="' + img + '"/>'
