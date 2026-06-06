@@ -31,6 +31,33 @@ app.use(session({
   cookie: { secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
 
+// Redirect www to non-www
+app.use((req, res, next) => {
+  if (req.headers.host && req.headers.host.startsWith('www.')) {
+    return res.redirect(301, 'https://festmore.com' + req.url);
+  }
+  next();
+});
+
+// Catch old news-style URLs (no /events/ or /articles/ prefix, contains hyphens, returns 404)
+app.use((req, res, next) => {
+  const path = req.path;
+  if (!path.startsWith('/events') && !path.startsWith('/articles') &&
+      !path.startsWith('/vendors') && !path.startsWith('/artists') &&
+      !path.startsWith('/admin') && !path.startsWith('/auth') &&
+      !path.startsWith('/api') && !path.startsWith('/css') &&
+      !path.startsWith('/js') && !path.startsWith('/images') &&
+      !path.startsWith('/dashboard') && !path.startsWith('/sitemap') &&
+      !path.startsWith('/robots') && !path.startsWith('/newsletter') &&
+      !path.startsWith('/payments') && !path.startsWith('/organiser') &&
+      path !== '/' && path !== '/about' && path !== '/contact' &&
+      path !== '/privacy' && path !== '/search' &&
+      path.includes('-') && path.split('/').length === 2) {
+    return res.redirect(301, '/articles');
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   res.locals.user      = req.session.user || null;
   res.locals.siteUrl   = process.env.SITE_URL || 'http://localhost:3000';
