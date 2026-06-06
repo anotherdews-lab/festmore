@@ -395,7 +395,7 @@ function renderEventDetail(e, related, user) {
 
   // Build valid Google Event schema
   const isFreeEvent = e.price_display==="Free"||e.price_display==="Free Entry"||e.price_display==="Free admission";
-  const safeDesc = (e.description||"").substring(0,500).replace(/[\x00-\x1F\x7F]/g," ").replace(/"/g,\'\\"\'');
+  const safeDesc = (e.description||"").substring(0,500).replace(/"/g,"'").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   const schemaObj = {
     "@context":"https://schema.org",
     "@type":"Event",
@@ -424,12 +424,10 @@ function renderEventDetail(e, related, user) {
       "price":isFreeEvent?"0":"",
       "priceCurrency":"EUR",
       "availability":"https://schema.org/InStock",
-      "url":e.ticket_url||e.website||"https://festmore.com/events/"+e.slug,
-      "validFrom":e.start_date||new Date().toISOString().split("T")[0]
+      "url":e.ticket_url||e.website||"https://festmore.com/events/"+e.slug
     },
     "isAccessibleForFree":isFreeEvent
   };
-  // Only add dates if they exist - null dates cause Google validation errors
   if (e.start_date) { schemaObj.startDate = e.start_date+"T00:00:00"; }
   if (e.end_date) { schemaObj.endDate = e.end_date+"T23:59:00"; }
   else if (e.start_date) { schemaObj.endDate = e.start_date+"T23:59:00"; }
