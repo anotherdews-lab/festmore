@@ -500,7 +500,7 @@ ${renderNav(user, tr, langHtml)}
         🏪 Register as Vendor — €49/yr
       </a>
       <a href="/artists/register" class="hcta hcta-purple">
-        🎤 List as Artist — Free
+        🎨 Register as Artist — Free
       </a>
     </div>
     <div class="hero-cta-browse">
@@ -508,7 +508,7 @@ ${renderNav(user, tr, langHtml)}
       <span class="hcta-dot">·</span>
       <a href="/vendors" class="hcta-ghost">Find Vendors</a>
       <span class="hcta-dot">·</span>
-      <a href="/artists" class="hcta-ghost">Discover Artists</a>
+      <a href="/artists" class="hcta-ghost">Meet Our Artists</a>
     </div>
 
     <!-- 4-WAY SPLIT — full width centered -->
@@ -1047,7 +1047,7 @@ function renderNav(user, tr, langHtml) {
       <a href="/articles">📰 Articles</a>
       <a href="/events/submit">+ List Event Free</a>
       <a href="/vendors/register">Become a Vendor — €49/yr</a>
-      <a href="/artists/register">List Your Act Free</a>
+      <a href="/artists/register">Register as Artist — Free</a>
       ${user ? `<a href="/dashboard">Dashboard</a><a href="/auth/logout">Logout</a>` : `<a href="/auth/login">Login</a>`}
     </div>
   </nav>`;
