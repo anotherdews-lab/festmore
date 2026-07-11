@@ -852,7 +852,7 @@ router.post('/register', express.json(), async (req, res) => {
       [name,slug,genre,subgenre||null,city,country,bio||null,short_bio||null,email,
        booking_email||null,website||null,instagram||null,youtube||null,spotify||null,soundcloud||null,
        image_url||null,photo_2||null,photo_3||null,fee_display||'Contact for fee',
-       languages||null, plan==='paid'?'paid':'free', plan==='paid'?1:0]
+       languages||null, 'free', 0]
     );
 
     // Notify admin
