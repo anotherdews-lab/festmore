@@ -252,7 +252,7 @@ router.get('/vendors/:id/gold', requireAdmin, async (req,res) => {
     const { Client } = require('pg');
     const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
     await c.connect();
-    await c.query("UPDATE vendors SET verified=1, payment_status='gold', featured=1 WHERE id=$1", [req.params.id]);
+    await c.query("UPDATE vendors SET verified=1, payment_status='gold' WHERE id=$1", [req.params.id]);
     await c.end();
     console.log('Admin: gold vendor', req.params.id);
   } catch(e) { console.log('Gold vendor error:', e.message); }
