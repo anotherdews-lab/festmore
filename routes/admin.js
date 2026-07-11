@@ -811,10 +811,22 @@ router.get('/cleanup-fake-artists', requireAdmin, async (req, res) => {
     const { Client } = require('pg');
     const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl: { rejectUnauthorized: false } });
     await c.connect();
-    const r1 = await c.query("DELETE FROM artists WHERE name = 'KfnqDuxw'");
-    const r2 = await c.query("DELETE FROM artists WHERE email LIKE '%DBMS_PIPE%' OR email LIKE '%select%' OR email LIKE '%sleep%'");
+    const r = await c.query(`
+      DELETE FROM artists WHERE 
+        name = 'KfnqDuxw'
+        OR name ~ '^[A-Z][a-z]{6,10}[A-Z][a-z]{2,6}$'
+        OR email LIKE '%DBMS%'
+        OR email LIKE '%select%'
+        OR email LIKE '%sleep%'
+        OR email LIKE '%@@%'
+        OR email LIKE '%testing@example%'
+        OR email LIKE '%0x%'
+        OR (LENGTH(name) > 30)
+        OR (created_at > '2026-07-06' AND created_at < '2026-07-09' AND payment_status = 'free' AND verified = 0 AND id > 40)
+    `);
+    const remaining = await c.query('SELECT COUNT(*) n FROM artists');
     await c.end();
-    res.send('Deleted ' + (r1.rowCount + r2.rowCount) + ' fake artists. <a href="/admin">Back to admin</a>');
+    res.send('Deleted ' + r.rowCount + ' fake artists. ' + remaining.rows[0].n + ' artists remaining. <a href="/admin/artists">View artists</a>');
   } catch(e) {
     res.send('Error: ' + e.message);
   }
