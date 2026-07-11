@@ -236,6 +236,8 @@ router.get('/vendors', requireAdmin, (req, res) => {
           <td>${v.verified?'✅':'—'}</td>
           <td style="display:flex;gap:4px;flex-wrap:wrap;">
             <a href="/admin/vendors/${v.id}/approve" class="btn btn-primary btn-sm" style="padding:5px 10px;">✅ Approve</a>
+            <a href="/admin/vendors/${v.id}/gold" class="btn btn-sm" style="background:#fef9c3;color:#b45309;border:1px solid #f59e0b;padding:5px 10px;font-size:11px;font-weight:700;border-radius:6px;" onclick="return confirm('Upgrade to Gold?')">🥇 Gold</a>
+            <a href="/admin/vendors/${v.id}/delete" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;padding:5px 8px;font-size:11px;border-radius:6px;" onclick="return confirm('Delete vendor?')">✕</a>
             <a href="/vendors/profile/${v.id}" target="_blank" class="btn btn-outline btn-sm" style="padding:5px 10px;">View</a>
             <a href="/admin/vendors/${v.id}/delete" class="btn btn-sm" style="padding:5px 10px;background:#fee2e2;color:#dc2626;" onclick="return confirm('Delete?')">✕</a>
           </td>
@@ -243,6 +245,21 @@ router.get('/vendors', requireAdmin, (req, res) => {
       </tbody>
     </table>
   `));
+});
+
+router.get('/vendors/:id/gold', requireAdmin, (req,res) => {
+  try {
+    db.prepare("UPDATE vendors SET verified=1, payment_status='gold', featured=1 WHERE id=?").run(parseInt(req.params.id));
+    console.log('Admin: gold vendor', req.params.id);
+  } catch(e) { console.log('Gold vendor error:', e.message); }
+  res.redirect('/admin/vendors');
+});
+
+router.get('/vendors/:id/delete', requireAdmin, (req,res) => {
+  try {
+    db.prepare("UPDATE vendors SET status='deleted' WHERE id=?").run(parseInt(req.params.id));
+  } catch(e) {}
+  res.redirect('/admin/vendors');
 });
 
 router.get('/vendors/:id/approve', requireAdmin, (req,res) => {
