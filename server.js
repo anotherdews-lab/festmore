@@ -15,6 +15,20 @@ const fs      = require('fs');
 require('./cron'); 
 
 const app  = express();
+// RATE LIMITER
+const _rl = {};
+function rateLimit(max, ms) {
+  return (req, res, next) => {
+    const k = (req.ip||'x') + req.path;
+    const now = Date.now();
+    _rl[k] = (_rl[k]||[]).filter(t => now-t < ms);
+    if (_rl[k].length >= max) return res.status(429).send('Too many requests. Try again later.');
+    _rl[k].push(now);
+    next();
+  };
+}
+setInterval(()=>{ const now=Date.now(); Object.keys(_rl).forEach(k=>{ _rl[k]=(_rl[k]||[]).filter(t=>now-t<3600000); if(!_rl[k].length)delete _rl[k]; }); }, 600000);
+
 const PORT = process.env.PORT || 3000;
 
 // ─────────────────────────────────────
@@ -99,6 +113,10 @@ app.use('/admin',        require('./routes/admin-social'));
 app.use('/applications', require('./routes/applications'));
 app.use('/messages',     require('./routes/messages'));
 app.use('/festival',     require('./routes/landing'));
+app.use('/artists/register', rateLimit(5, 3600000));
+app.use('/vendors/register', rateLimit(5, 3600000));
+app.use('/events/submit', rateLimit(10, 3600000));
+app.use('/reviews', rateLimit(10, 3600000));
 app.use('/',             require('./routes/sitemap'));
 app.use('/',             require('./routes/pages'));
 app.use('/notifications', require('./routes/notifications'));
