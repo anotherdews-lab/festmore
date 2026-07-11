@@ -288,10 +288,7 @@ router.get('/vendors/:id/approve', requireAdmin, async (req,res) => {
   } catch(e) { console.log('Approve vendor error:', e.message); }
   res.redirect(req.headers.referer||'/admin/vendors');
 });
-router.get('/vendors/:id/delete', requireAdmin, (req,res) => {
-  db.prepare("DELETE FROM vendors WHERE id=?").run(parseInt(req.params.id));
-  res.redirect('/admin/vendors');
-});
+
 
 // ARTICLES
 router.get('/articles', requireAdmin, (req, res) => {
