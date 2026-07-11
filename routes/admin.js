@@ -805,6 +805,21 @@ router.get('/artists/:id/delete', requireAdmin, (req, res) => {
   res.redirect('/admin/artists?msg=deleted');
 });
 
+
+router.get('/cleanup-fake-artists', requireAdmin, async (req, res) => {
+  try {
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl: { rejectUnauthorized: false } });
+    await c.connect();
+    const r1 = await c.query("DELETE FROM artists WHERE name = 'KfnqDuxw'");
+    const r2 = await c.query("DELETE FROM artists WHERE email LIKE '%DBMS_PIPE%' OR email LIKE '%select%' OR email LIKE '%sleep%'");
+    await c.end();
+    res.send('Deleted ' + (r1.rowCount + r2.rowCount) + ' fake artists. <a href="/admin">Back to admin</a>');
+  } catch(e) {
+    res.send('Error: ' + e.message);
+  }
+});
+
 module.exports = router;
 
 // ─── HELPERS ─────────────────────────
@@ -874,12 +889,6 @@ ${sidebar(0,0)}
 <div class="admin-main">${content}</div>
 </body></html>`;
 }
-router.get('/cleanup-fake-artists', requireAdmin, (req, res) => {
-  const deleted = db.prepare("DELETE FROM artists WHERE name = 'KfnqDuxw'").run();
-  res.send('Deleted ' + deleted.changes + ' fake artists');
-});
 
-router.get('/cleanup-fake-artists', requireAdmin, (req, res) => {
-  const deleted = db.prepare("DELETE FROM artists WHERE name = 'KfnqDuxw'").run();
-  res.send('Deleted ' + deleted.changes + ' fake artists');
-});
+
+
