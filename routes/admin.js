@@ -216,12 +216,15 @@ router.get('/events/:id/delete', requireAdmin, (req,res) => {
 
 // VENDORS
 router.get('/vendors', requireAdmin, async (req, res) => {
-  const { Client } = require('pg');
-  const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
-  await c.connect();
-  const result = await c.query("SELECT * FROM vendors WHERE status != 'deleted' ORDER BY created_at DESC LIMIT 200");
-  const vendors = result.rows;
-  await c.end();
+  let vendors = [];
+  try {
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await c.connect();
+    const result = await c.query("SELECT * FROM vendors WHERE status != 'deleted' ORDER BY created_at DESC LIMIT 200");
+    vendors = result.rows;
+    await c.end();
+  } catch(e) { console.log('Vendor admin error:', e.message); }
   res.send(adminPage('Vendors', `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
