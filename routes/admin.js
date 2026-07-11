@@ -878,3 +878,8 @@ router.get('/cleanup-fake-artists', requireAdmin, (req, res) => {
   const deleted = db.prepare("DELETE FROM artists WHERE name = 'KfnqDuxw'").run();
   res.send('Deleted ' + deleted.changes + ' fake artists');
 });
+
+router.get('/cleanup-fake-artists', requireAdmin, (req, res) => {
+  const deleted = db.prepare("DELETE FROM artists WHERE name = 'KfnqDuxw'").run();
+  res.send('Deleted ' + deleted.changes + ' fake artists');
+});
