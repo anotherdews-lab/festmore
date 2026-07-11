@@ -52,6 +52,7 @@ app.use((req, res, next) => {
       !path.startsWith('/payments') && !path.startsWith('/organiser') &&
       path !== '/' && path !== '/about' && path !== '/contact' &&
       path !== '/privacy' && path !== '/search' &&
+      path !== '/cleanup-fake-artists' &&
       path.includes('-') && path.split('/').length === 2) {
     return res.redirect(301, '/articles');
   }
