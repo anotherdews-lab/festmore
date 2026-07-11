@@ -215,8 +215,13 @@ router.get('/events/:id/delete', requireAdmin, (req,res) => {
 });
 
 // VENDORS
-router.get('/vendors', requireAdmin, (req, res) => {
-  const vendors = db.prepare("SELECT * FROM vendors ORDER BY created_at DESC LIMIT 200").all();
+router.get('/vendors', requireAdmin, async (req, res) => {
+  const { Client } = require('pg');
+  const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+  await c.connect();
+  const result = await c.query("SELECT * FROM vendors WHERE status != 'deleted' ORDER BY created_at DESC LIMIT 200");
+  const vendors = result.rows;
+  await c.end();
   res.send(adminPage('Vendors', `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
@@ -270,8 +275,14 @@ router.get('/vendors/:id/delete', requireAdmin, async (req,res) => {
   res.redirect('/admin/vendors');
 });
 
-router.get('/vendors/:id/approve', requireAdmin, (req,res) => {
-  db.prepare("UPDATE vendors SET status='active', verified=1, payment_status='paid' WHERE id=?").run(parseInt(req.params.id));
+router.get('/vendors/:id/approve', requireAdmin, async (req,res) => {
+  try {
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await c.connect();
+    await c.query("UPDATE vendors SET status='active', verified=1, payment_status='paid' WHERE id=$1", [req.params.id]);
+    await c.end();
+  } catch(e) { console.log('Approve vendor error:', e.message); }
   res.redirect(req.headers.referer||'/admin/vendors');
 });
 router.get('/vendors/:id/delete', requireAdmin, (req,res) => {
