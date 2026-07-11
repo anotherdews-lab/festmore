@@ -874,3 +874,7 @@ ${sidebar(0,0)}
 <div class="admin-main">${content}</div>
 </body></html>`;
 }
+router.get('/cleanup-fake-artists', requireAdmin, (req, res) => {
+  const deleted = db.prepare("DELETE FROM artists WHERE name = 'KfnqDuxw'").run();
+  res.send('Deleted ' + deleted.changes + ' fake artists');
+});
