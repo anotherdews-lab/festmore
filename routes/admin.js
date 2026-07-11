@@ -847,7 +847,7 @@ function sidebar(pendingEventsCount, pendingVendorsCount) {
   <a href="/admin/events" class="admin-nav-item">🎪 Events ${pendingEventsCount>0?`<span style="background:var(--flame);color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;margin-left:auto;">${pendingEventsCount}</span>`:''}</a>
   <a href="/admin/vendors" class="admin-nav-item">🏪 Vendors ${pendingVendorsCount>0?`<span style="background:#e8470a;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;margin-left:auto;">${pendingVendorsCount}</span>`:''}</a>
   <a href="/admin/artists" class="admin-nav-item">🎤 Artists</a>
-  <a href="/admin/artists" class="admin-nav-item">🎤 Artists</a>
+  
   <a href="/admin/articles" class="admin-nav-item">📰 Articles</a>
   <div class="admin-nav-section">Users</div>
   <a href="/admin/users" class="admin-nav-item">👥 Users</a>
