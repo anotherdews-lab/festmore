@@ -13,6 +13,11 @@ router.post('/vendor/:id/add', async (req, res) => {
   const vendorId = parseInt(req.params.id);
   const { reviewer_name, reviewer_email, reviewer_role, rating, title, body } = req.body;
 
+  // Bot protection
+  const suspiciousFields = [reviewer_name, body, reviewer_email || ''].join(' ');
+  const botPatterns = [/select\s+.*from/i, /drop\s+table/i, /<script/i, /union\s+select/i, /sleep\s*\(/i];
+  if (botPatterns.some(p => p.test(suspiciousFields))) return res.redirect(`/vendors/profile/${vendorId}?error=Invalid input`);
+  if (reviewer_name && reviewer_name.match(/^[0-9]+$/)) return res.redirect(`/vendors/profile/${vendorId}?error=Invalid name`);
   if (!reviewer_name || !rating || !body) {
     return res.redirect(`/vendors/profile/${vendorId}?error=Please fill in name, rating and review`);
   }
