@@ -247,18 +247,26 @@ router.get('/vendors', requireAdmin, (req, res) => {
   `));
 });
 
-router.get('/vendors/:id/gold', requireAdmin, (req,res) => {
+router.get('/vendors/:id/gold', requireAdmin, async (req,res) => {
   try {
-    db.prepare("UPDATE vendors SET verified=1, payment_status='gold', featured=1 WHERE id=?").run(parseInt(req.params.id));
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await c.connect();
+    await c.query("UPDATE vendors SET verified=1, payment_status='gold', featured=1 WHERE id=$1", [req.params.id]);
+    await c.end();
     console.log('Admin: gold vendor', req.params.id);
   } catch(e) { console.log('Gold vendor error:', e.message); }
   res.redirect('/admin/vendors');
 });
 
-router.get('/vendors/:id/delete', requireAdmin, (req,res) => {
+router.get('/vendors/:id/delete', requireAdmin, async (req,res) => {
   try {
-    db.prepare("UPDATE vendors SET status='deleted' WHERE id=?").run(parseInt(req.params.id));
-  } catch(e) {}
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await c.connect();
+    await c.query("UPDATE vendors SET status='deleted' WHERE id=$1", [req.params.id]);
+    await c.end();
+  } catch(e) { console.log('Delete vendor error:', e.message); }
   res.redirect('/admin/vendors');
 });
 
