@@ -832,6 +832,15 @@ ${foot()}
 
 // ─── REGISTER POST ────────────────────────────────────────────────────────────
 router.post('/register', express.json(), async (req, res) => {
+  // ── BOT/SPAM PROTECTION ──────────────────────────────────────────
+  const fieldsToCheck = [req.body.name, req.body.email, req.body.city, req.body.bio, req.body.website].join(' ');
+  const suspiciousPatterns = [/select\s+.*\s+from/i,/drop\s+table/i,/union\s+select/i,/sleep\s*\(/i,/dbms_pipe/i,/<script/i,/0x[0-9a-f]+/i,/@@\w+/i];
+  if (suspiciousPatterns.some(p => p.test(fieldsToCheck))) return res.status(400).json({ error: 'Invalid input' });
+  const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(req.body.email || '')) return res.status(400).json({ error: 'Invalid email' });
+  const blockedDomains = ['example.com','test.com','fake.com','mailinator.com'];
+  if (blockedDomains.includes((req.body.email||'').split('@')[1]?.toLowerCase())) return res.status(400).json({ error: 'Please use a real email' });
+  // ── END SPAM PROTECTION ──────────────────────────────────────────
   const { name, genre, subgenre, city, country, bio, short_bio, email,
           booking_email, website, instagram, youtube, spotify, soundcloud,
           image_url, photo_2, photo_3, fee_display, languages, plan } = req.body;
