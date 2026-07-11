@@ -67,7 +67,7 @@ ${sidebar(pendingEvents.length, pendingVendors.length)}
           <td style="font-size:12px;">${v.email||'—'}</td>
           <td>${v.city}, ${v.country}</td>
           <td><span class="${v.payment_status==='paid'?'badge-active':'badge-pending'}">${v.payment_status}</span></td>
-          <td style="font-size:12px;color:var(--ink3);">${(v.created_at||'').substring(0,10)}</td>
+          <td style="font-size:12px;color:var(--ink3);">${v.created_at ? new Date(v.created_at).toISOString().substring(0,10) : ''}</td>
           <td style="display:flex;gap:6px;">
             <a href="/admin/vendors/${v.id}/approve" class="btn btn-primary btn-sm">✅ Approve & Activate</a>
             <a href="/admin/vendors/${v.id}/delete" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;" onclick="return confirm('Delete?')">✕</a>
@@ -236,7 +236,7 @@ router.get('/vendors', requireAdmin, async (req, res) => {
       <thead><tr><th>Business</th><th>Email</th><th>Category</th><th>City</th><th>Status</th><th>Payment</th><th>Verified</th><th>Actions</th></tr></thead>
       <tbody>${vendors.map(v=>`
         <tr style="${v.payment_status==='paid'&&!v.verified?'background:#fffbeb;':''}">
-          <td style="font-weight:600;">${v.business_name}<div style="font-size:11px;color:var(--ink3);">${(v.created_at||'').substring(0,10)}</div></td>
+          <td style="font-weight:600;">${v.business_name}<div style="font-size:11px;color:var(--ink3);">${v.created_at ? new Date(v.created_at).toISOString().substring(0,10) : ''}</div></td>
           <td style="font-size:12px;color:var(--ink3);">${v.email||'—'}</td>
           <td>${v.category}</td><td>${v.city}, ${v.country}</td>
           <td><span class="${v.status==='active'?'badge-active':'badge-pending'}">${v.status}</span></td>
