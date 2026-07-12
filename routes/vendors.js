@@ -1147,8 +1147,8 @@ function vendorCardHTML(v) {
     <div class="vcard-overlay"></div>
     <div class="vcard-country">${flag} ${cn}</div>
     <div class="vcard-badges">
-      ${v.premium ? '<span style="background:linear-gradient(135deg,#c9922a,#e8b84b);color:#fff;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">⭐ Premium</span>' : ''}
-      ${v.verified ? '<span style="background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">✅ Verified</span>' : '<span style="background:#f1f5f9;color:#94a3b8;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">Unverified</span>'}
+      ${v.payment_status==='gold' ? '<span style="background:linear-gradient(135deg,#c9922a,#e8b84b);color:#fff;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">🥇 Gold Verified</span>' : ''}
+      ${v.verified || v.payment_status==='paid' || v.payment_status==='gold' ? '<span style="background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">✅ Verified</span>' : '<span style="background:#f1f5f9;color:#94a3b8;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;">Unverified</span>'}
     </div>
     ${extra.price_range ? `<div class="vcard-price">${extra.price_range}</div>` : ''}
   </div>
