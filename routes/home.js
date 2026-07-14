@@ -13,7 +13,8 @@ const { t, getLang, langSwitcher } = require('../utils/i18n');
 // ─── PRE-COMPILE STATEMENTS ───────────────────────────────────────────────────
 const stmts = {
   topEvents:      db.prepare(`SELECT id,title,slug,category,city,country,start_date,date_display,price_display,image_url,attendees,featured,payment_status FROM events WHERE status='active' ORDER BY featured DESC, attendees DESC, id DESC LIMIT 6`),
-  wantedEvents:   db.prepare(`SELECT id,title,slug,category,city,country,start_date,date_display,attendees,vendor_spots,image_url FROM events WHERE status='active' AND vendor_spots > 0 ORDER BY featured DESC, attendees DESC, id DESC LIMIT 6`),
+  wantedEvents:   db.prepare(`SELECT id,title,slug,category,city,country,start_date,date_display,attendees,vendor_spots,image_url,payment_status,featured FROM events WHERE status='active' AND vendor_spots > 0 ORDER BY featured DESC, CASE payment_status WHEN 'premium' THEN 3 WHEN 'standard' THEN 2 WHEN 'featured' THEN 2 ELSE 1 END DESC, attendees DESC, id DESC LIMIT 6`),
+  featuredPaid:   db.prepare(`SELECT id,title,slug,category,city,country,start_date,date_display,attendees,image_url,payment_status FROM events WHERE status='active' AND (payment_status IN ('standard','premium','featured') OR featured=1) ORDER BY CASE payment_status WHEN 'premium' THEN 3 WHEN 'standard' THEN 2 ELSE 1 END DESC, attendees DESC LIMIT 3`),
   artists:        db.prepare(`SELECT id,name,slug,genre,city,country,image_url,fee_display,payment_status,verified FROM artists WHERE status='active' ORDER BY payment_status DESC, verified DESC, id DESC LIMIT 8`),
   vendors:        db.prepare(`SELECT id,business_name,category,city,country,avg_rating,total_applications,photos,image_url,payment_status FROM vendors WHERE status='active' AND payment_status='paid' ORDER BY avg_rating DESC, id DESC LIMIT 6`),
   articles:       db.prepare(`SELECT id,title,slug,excerpt,image_url,category,created_at FROM articles WHERE status='published' ORDER BY created_at DESC LIMIT 3`),
@@ -43,13 +44,15 @@ router.get('/', (req, res) => {
   const stats        = getStats();
   const topEvents    = stmts.topEvents.all();
   const wantedEvents = stmts.wantedEvents.all();
+  let featuredPaid = [];
+  try { featuredPaid = stmts.featuredPaid.all(); } catch(e) {}
   const artists      = stmts.artists.all();
   const vendors      = stmts.vendors.all();
   const articles     = stmts.articles.all();
   const countries    = stmts.countryCounts.all();
   const lang         = getLang(req);
   const langHtml     = langSwitcher(req);
-  res.send(render({ stats, topEvents, wantedEvents, artists, vendors, articles, countries, user: req.session.user, lang, langHtml }));
+  res.send(render({ stats, topEvents, wantedEvents, featuredPaid, artists, vendors, articles, countries, user: req.session.user, lang, langHtml }));
 });
 
 router.get('/set-lang/:lang', (req, res) => {
@@ -66,7 +69,7 @@ const IMGS = { festival:'https://images.unsplash.com/photo-1533174072545-7a4b6ad
 const CATS = { festival:'🎪',concert:'🎵',market:'🛍️',christmas:'🎄',exhibition:'🖼️',business:'💼',flea:'🏺',online:'💻' };
 
 // ─── MAIN RENDER ──────────────────────────────────────────────────────────────
-function render({ stats, topEvents, wantedEvents, artists, vendors, articles, countries, user, lang, langHtml }) {
+function render({ stats, topEvents, wantedEvents, featuredPaid, artists, vendors, articles, countries, user, lang, langHtml }) {
   const ev = stats.events, vn = stats.vendors, ar = stats.articles, sb = stats.subscribers;
   const cn = countries.length;
 
@@ -524,6 +527,42 @@ ${renderNav(user, langHtml)}
     </div>
   </div>
 </section>
+
+<!-- ═══ FEATURED PAID EVENTS ════════════════════════════════════════════ -->
+${featuredPaid && featuredPaid.length > 0 ? `
+<section style="background:linear-gradient(135deg,#1a0800,#2d1200);padding:40px 28px;border-bottom:1px solid rgba(232,71,10,.15);">
+  <div class="section-inner">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(232,71,10,.12);border:1px solid rgba(232,71,10,.2);color:#ff6b35;font-size:10px;font-weight:800;padding:4px 12px;border-radius:99px;margin-bottom:10px;letter-spacing:1.2px;text-transform:uppercase;">⭐ Promoted Events</div>
+        <h2 style="font-family:var(--display);font-size:28px;color:#fff;font-weight:700;margin:0;">Featured by Organisers</h2>
+      </div>
+      <a href="/events?sort=featured" style="font-size:13px;font-weight:700;color:#ff6b35;white-space:nowrap;">View all featured →</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      ${featuredPaid.map(e => {
+        const img = e.image_url || IMGS[e.category] || IMGS.default;
+        const flag = FLAGS[e.country] || '';
+        const isPremium = e.payment_status === 'premium';
+        return `<a href="/events/${e.slug}" style="background:rgba(255,255,255,.04);border:1px solid ${isPremium?'rgba(201,146,42,.4)':'rgba(232,71,10,.2)'};border-radius:16px;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:all .3s;">
+          <div style="height:150px;overflow:hidden;position:relative;">
+            <img src="${img}" alt="${e.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"/>
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),transparent);"></div>
+            <span style="position:absolute;top:8px;left:8px;background:${isPremium?'linear-gradient(135deg,#c9922a,#e8b84b)':'var(--flame)'};color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:99px;">${isPremium?'⭐ Premium':'★ Featured'}</span>
+          </div>
+          <div style="padding:14px;flex:1;">
+            <div style="font-family:var(--display);font-size:16px;color:#fff;margin-bottom:5px;font-weight:600;line-height:1.2;">${e.title}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.4);">${flag} ${e.city} · ${e.date_display||e.start_date||''}</div>
+          </div>
+          <div style="padding:0 14px 14px;font-size:12px;font-weight:700;color:${isPremium?'#e8b84b':'#ff6b35'};">View event →</div>
+        </a>`;
+      }).join('')}
+    </div>
+    <p style="text-align:center;margin-top:18px;font-size:12px;color:rgba(255,255,255,.25);">
+      Want your event here? <a href="/events/pricing" style="color:#ff6b35;font-weight:700;">Get Featured — €79/yr →</a>
+    </p>
+  </div>
+</section>` : ''}
 
 <!-- ═══ EVENTS ════════════════════════════════════════════════════════════ -->
 <section class="section" style="background:var(--warm);">

@@ -445,7 +445,12 @@ function renderEventDetail(e, related, user) {
     + '<link rel="stylesheet" href="/css/main.css"/></head><body>'
     + renderNavSimple(user)
     + '<div class="event-detail-hero" style="background-image:linear-gradient(to right, rgba(26,22,18,0.92) 50%, rgba(26,22,18,0.4)), url(\'' + img + '\');"><div class="container">'
-    + '<div class="event-detail-meta"><span class="badge badge-cat">' + icon + ' ' + (CAT_NAMES[e.category]||e.category) + '</span>' + (e.featured?'<span class="badge badge-feat">★ Featured</span>':'') + (e.price_display==='Free'?'<span class="badge badge-free">Free Entry</span>':'') + (isFree?'<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;">Basic Listing</span>':'') + '</div>'
+    + '<div class="event-detail-meta"><span class="badge badge-cat">' + icon + ' ' + (CAT_NAMES[e.category]||e.category) + '</span>'
+    + (e.payment_status==='premium'?'<span class="badge" style="background:linear-gradient(135deg,#c9922a,#e8b84b);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:99px;">⭐ Premium</span>':'')
+    + (e.payment_status==='standard'||e.featured?'<span class="badge badge-feat">★ Featured</span>':'')
+    + (e.price_display==='Free'?'<span class="badge badge-free">Free Entry</span>':'')
+    + (isFree&&e.payment_status==='free'?'<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;">Basic Listing</span>':'')
+    + '</div>'
     + '<h1 style="font-family:\'DM Serif Display\',serif;font-size:clamp(28px,5vw,52px);font-weight:400;color:#fff;margin:12px 0;">' + e.title + '</h1>'
     + '<div style="display:flex;gap:20px;flex-wrap:wrap;color:rgba(255,255,255,0.7);font-size:15px;"><span>📍 ' + flag + ' ' + e.city + ', ' + (COUNTRY_NAMES[e.country]||e.country) + '</span><span>📅 ' + (e.date_display||e.start_date) + '</span><span>🎟️ ' + e.price_display + '</span></div>'
     + '</div></div>'
@@ -469,7 +474,16 @@ function renderEventDetail(e, related, user) {
     + (e.website ? '<a href="' + e.website + '" target="_blank" rel="nofollow noopener" class="btn btn-primary" style="display:block;text-align:center;margin-top:16px;">Visit Official Website →</a>' : '')
     + (e.ticket_url ? '<a href="' + e.ticket_url + '" target="_blank" rel="nofollow noopener" class="btn btn-outline" style="display:block;text-align:center;margin-top:8px;">Buy Tickets →</a>' : '')
     + '<button onclick="shareEvent()" class="btn btn-ghost" style="width:100%;margin-top:8px;">Share This Event 🔗</button></div>'
-    + (isFree ? '<div style="margin-top:16px;background:var(--ivory);border:1px solid var(--border);border-radius:16px;padding:22px;text-align:center;"><div style="font-size:13px;color:var(--ink3);margin-bottom:12px;">Are you the organiser of this event?</div><a href="/events/pricing" class="btn btn-primary btn-sm" style="display:block;">Upgrade for More Visibility →</a></div>' : '')
+    + (isFree ? `<div style="margin-top:16px;background:linear-gradient(135deg,#fff7ed,#fff);border:1.5px solid rgba(232,71,10,.2);border-radius:16px;padding:24px;text-align:center;">
+  <div style="font-size:22px;margin-bottom:8px;">⭐</div>
+  <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">Are you the organiser?</div>
+  <div style="font-size:13px;color:var(--ink3);margin-bottom:16px;line-height:1.6;">Upgrade to Featured (€79/yr) to appear at the top of search results, on the Festmore homepage and in our newsletter to 500+ subscribers.</div>
+  <a href="/events/pricing" style="display:inline-block;background:var(--flame);color:#fff;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">Get Featured — €79/yr →</a>
+  <div style="font-size:11px;color:var(--ink4);margin-top:10px;">One booking pays for the whole year</div>
+</div>` : (e.payment_status==='standard'||e.featured) ? `<div style="margin-top:16px;background:linear-gradient(135deg,#f0fdf4,#fff);border:1.5px solid rgba(74,124,89,.2);border-radius:16px;padding:20px;text-align:center;">
+  <div style="font-size:13px;font-weight:700;color:var(--sage);margin-bottom:4px;">★ Featured Event</div>
+  <div style="font-size:12px;color:var(--ink4);">This event is featured on Festmore — appearing at the top of search results and in our newsletter.</div>
+</div>` : '')
     + '<ins class="adsbygoogle" style="display:block;margin-top:16px;" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>'
     + '<div style="margin-top:16px;background:var(--ink);border-radius:16px;padding:24px;color:#fff;"><h4 style="font-family:\'DM Serif Display\',serif;font-size:18px;font-weight:400;margin-bottom:8px;">🏪 Are you a vendor?</h4><p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;">Apply to participate at this event with your vendor profile.</p>' + applySection + '</div>'
     + '</aside></div>'
@@ -486,7 +500,11 @@ function eventCardHTMLFull(e) {
   const isFreeList = e.payment_status === 'free';
   return '<article class="event-card" itemscope itemtype="https://schema.org/Event"><a href="/events/' + e.slug + '">'
     + '<div class="event-img"><img src="' + img + '" alt="' + e.title + ' — ' + e.city + '" loading="lazy" itemprop="image"/><div class="event-img-overlay"></div>'
-    + '<div class="event-badges">' + (e.featured?'<span class="badge badge-feat">★ Featured</span>':'') + '<span class="badge badge-cat">' + icon + ' ' + e.category + '</span>' + (isFree?'<span class="badge badge-free">Free</span>':'') + (isFreeList?'<span class="badge" style="background:rgba(0,0,0,.4);color:#fff;">🔓 Unverified</span>':'<span class="badge" style="background:#4a7c59;color:#fff;">✅ Verified</span>') + '</div></div>'
+    + '<div class="event-badges">'
+    + (e.payment_status==='premium'?'<span class="badge" style="background:linear-gradient(135deg,#c9922a,#e8b84b);color:#fff;font-size:10px;font-weight:800;">⭐ Premium</span>':e.featured?'<span class="badge badge-feat">★ Featured</span>':'')
+    + '<span class="badge badge-cat">' + icon + ' ' + e.category + '</span>'
+    + (isFree?'<span class="badge badge-free">Free</span>':'')
+    + '</div></div>'
     + '<div class="event-body"><div class="event-date">' + (e.date_display||e.start_date) + '</div><h3 itemprop="name">' + e.title + '</h3><div class="event-loc">' + flag + ' ' + e.city + '</div>'
     + '<div class="event-footer"><span class="event-stat">👥 ' + (e.attendees||0).toLocaleString() + '</span><span class="event-price ' + (isFree?'price-free':'price-paid') + '">' + e.price_display + '</span></div>'
     + '</div></a></article>';
