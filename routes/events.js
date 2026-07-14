@@ -480,9 +480,20 @@ function renderEventDetail(e, related, user) {
   <div style="font-size:13px;color:var(--ink3);margin-bottom:16px;line-height:1.6;">Upgrade to Featured (€79/yr) to appear at the top of search results, on the Festmore homepage and in our newsletter to 500+ subscribers.</div>
   <a href="/events/pricing" style="display:inline-block;background:var(--flame);color:#fff;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">Get Featured — €79/yr →</a>
   <div style="font-size:11px;color:var(--ink4);margin-top:10px;">One booking pays for the whole year</div>
-</div>` : (e.payment_status==='standard'||e.featured) ? `<div style="margin-top:16px;background:linear-gradient(135deg,#f0fdf4,#fff);border:1.5px solid rgba(74,124,89,.2);border-radius:16px;padding:20px;text-align:center;">
-  <div style="font-size:13px;font-weight:700;color:var(--sage);margin-bottom:4px;">★ Featured Event</div>
-  <div style="font-size:12px;color:var(--ink4);">This event is featured on Festmore — appearing at the top of search results and in our newsletter.</div>
+</div>` : (e.payment_status==='standard'||e.featured) ? `<div style="margin-top:16px;background:linear-gradient(135deg,#0a1a0f,#1a3020);border-radius:16px;padding:24px;color:#fff;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(74,124,89,.15);border-radius:50%;"></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="background:linear-gradient(135deg,#4a7c59,#6db89a);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:99px;letter-spacing:.8px;text-transform:uppercase;">★ Featured Event</span>
+    <span style="background:rgba(109,184,154,.15);color:#6db89a;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;">✓ Newsletter</span>
+    <span style="background:rgba(109,184,154,.15);color:#6db89a;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;">✓ Top Results</span>
+  </div>
+  <div style="font-family:'DM Serif Display',serif;font-size:18px;color:#fff;margin-bottom:6px;font-weight:400;">This is a Featured Event</div>
+  <div style="font-size:13px;color:rgba(255,255,255,.55);line-height:1.65;">This event appears at the top of Festmore search results, on the homepage and in our weekly newsletter to 500+ event industry subscribers across Europe.</div>
+  <div style="display:flex;gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);">
+    <div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:800;color:#6db89a;">#1</div><div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;">Search Position</div></div>
+    <div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:800;color:#6db89a;">500+</div><div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;">Newsletter Subscribers</div></div>
+    <div style="text-align:center;flex:1;"><div style="font-size:22px;font-weight:800;color:#6db89a;">42</div><div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;">Countries Reached</div></div>
+  </div>
 </div>` : '')
     + '<ins class="adsbygoogle" style="display:block;margin-top:16px;" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>'
     + '<div style="margin-top:16px;background:var(--ink);border-radius:16px;padding:24px;color:#fff;"><h4 style="font-family:\'DM Serif Display\',serif;font-size:18px;font-weight:400;margin-bottom:8px;">🏪 Are you a vendor?</h4><p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;">Apply to participate at this event with your vendor profile.</p>' + applySection + '</div>'
