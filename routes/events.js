@@ -452,8 +452,10 @@ function renderEventDetail(e, related, user) {
     + (isFree&&e.payment_status==='free'?'<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;">Basic Listing</span>':'')
     + '</div>'
     + '<h1 style="font-family:\'DM Serif Display\',serif;font-size:clamp(28px,5vw,52px);font-weight:400;color:#fff;margin:12px 0;">' + e.title + '</h1>'
-    + '<div style="display:flex;gap:20px;flex-wrap:wrap;color:rgba(255,255,255,0.7);font-size:15px;"><span>📍 ' + flag + ' ' + e.city + ', ' + (COUNTRY_NAMES[e.country]||e.country) + '</span><span>📅 ' + (e.date_display||e.start_date) + '</span><span>🎟️ ' + e.price_display + '</span></div>'
+    + ((!isFree) ? '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:6px 14px;margin-bottom:14px;"><span style="width:8px;height:8px;border-radius:50%;background:#6db89a;display:inline-block;"></span><span style="font-size:12px;color:rgba(255,255,255,.7);font-weight:600;">Featured on Festmore</span></div>' : '')
+    + '<div style="display:flex;gap:20px;flex-wrap:wrap;color:rgba(255,255,255,0.7);font-size:15px;"><span>📍 ' + flag + ' ' + e.city + ', ' + (COUNTRY_NAMES[e.country]||e.country) + '</span><span>📅 ' + (e.date_display||e.start_date) + '</span><span>🎟️ ' + e.price_display + '</span>' + (e.attendees?'<span>👥 ' + parseInt(e.attendees).toLocaleString() + ' expected</span>':'') + '</div>'
     + '</div></div>'
+    + ((!isFree && e.photos) ? (() => { let photos=[]; try{photos=JSON.parse(e.photos||'[]');}catch(x){} return photos.length>0 ? '<div style="background:#111;padding:20px 0;"><div class="container"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">' + photos.slice(0,6).map(p=>'<img src="'+p+'" style="width:100%;height:160px;object-fit:cover;border-radius:10px;" loading="lazy"/>').join('') + '</div></div></div>' : ''; })() : '')
     + '<div class="container" style="padding:40px 0;display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:start;">'
     + '<div>'
     + '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2486135003689222" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>'
