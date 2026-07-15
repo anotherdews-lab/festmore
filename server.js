@@ -131,7 +131,7 @@ app.get('/test-email', async (req, res) => {
     const { Resend } = require('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: 'Festmore <onboarding@resend.dev>',
+      from: 'Festmore <hello@festmore.com>',
       to: process.env.EMAIL_USER || 'gha44ar@aim.com',
       subject: 'Festmore Email Test',
       text: 'Email is working! Sent via Resend.'

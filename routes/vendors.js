@@ -63,7 +63,7 @@ async function sendWelcomeEmail(vendor, loginPassword) {
     const firstName = vendor.business_name.split(' ')[0];
 
     await resend.emails.send({
-     from: 'Festmore <onboarding@resend.dev>',
+     from: 'Festmore <hello@festmore.com>',
       to: vendor.email,
       subject: `You're live on Festmore — here are your login details`,
       html: `<!DOCTYPE html>

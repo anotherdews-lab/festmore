@@ -45,7 +45,7 @@ async function notifyAdmin(type, title, city, country, email, plan, slug) {
     const flag = FLAGS[country] || '🌍';
     const planBadge = plan === 'premium' ? '⭐ PREMIUM €149' : plan === 'standard' ? '💰 STANDARD €79' : '🆓 FREE';
     await resend.emails.send({
-      from: 'Festmore <onboarding@resend.dev>',
+      from: 'Festmore <hello@festmore.com>',
       to: 'anotherdews@gmail.com',
       subject: '🎪 New Event: ' + title,
       html: '<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">'
@@ -199,7 +199,7 @@ async function sendWelcomeToOrganiser(email, title, slug, plan) {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const isPaid = plan !== 'free';
     await resend.emails.send({
-      from: 'Festmore <onboarding@resend.dev>',
+      from: 'Festmore <hello@festmore.com>',
       to: email,
       subject: isPaid ? '🎉 Your event is live on Festmore!' : '✅ Your event is listed on Festmore!',
       html: '<!DOCTYPE html><html><head><meta charset="UTF-8"/></head>'
