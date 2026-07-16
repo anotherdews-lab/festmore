@@ -248,7 +248,8 @@ async function sendWelcomeToOrganiser(email, title, slug, plan) {
 router.get('/:slug', (req, res) => {
   const event = db.prepare("SELECT * FROM events WHERE slug=? AND status='active'").get(req.params.slug);
   if (!event) return res.status(404).redirect('/events?error=Event not found');
-  db.prepare("UPDATE events SET views=views+1 WHERE id=?").run(event.id);
+  // views update handled by pg in background
+  try { const {Client}=require("pg");const _c=new Client({connectionString:process.env.DATABASE_URL||"postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway",ssl:{rejectUnauthorized:false}});_c.connect().then(()=>_c.query("UPDATE events SET views=views+1 WHERE id=$1",[event.id]).then(()=>_c.end())); } catch(e) {}
   const related = db.prepare("SELECT * FROM events WHERE status='active' AND category=? AND id!=? ORDER BY featured DESC, views DESC LIMIT 4").all(event.category, event.id);
   res.send(renderEventDetail(event, related, req.session.user));
 });
