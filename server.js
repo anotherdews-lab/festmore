@@ -45,6 +45,14 @@ app.use(session({
   cookie: { secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
 
+// Block old WordPress ?p= URLs - redirect to home
+app.use((req, res, next) => {
+  if (req.query.p && !isNaN(req.query.p)) {
+    return res.redirect(301, '/');
+  }
+  next();
+});
+
 // Redirect www to non-www
 app.use((req, res, next) => {
   if (req.headers.host && req.headers.host.startsWith('www.')) {

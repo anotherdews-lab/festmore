@@ -290,6 +290,7 @@ function renderEventsPage({ events, total, totalPages, page, q, country, categor
     + '<title>' + (category!=='ALL'?CAT_NAMES[category]+' — ':'') + (country!=='ALL'?COUNTRY_NAMES[country]+' ':'') + 'Events ' + new Date().getFullYear() + ' | Festmore</title>'
     + '<meta name="description" content="Browse ' + total + '+ ' + (category!=='ALL'?CAT_NAMES[category]:'') + ' events' + (country!=='ALL'?' in '+COUNTRY_NAMES[country]:'worldwide') + '."/>'
     + '<link rel="canonical" href="https://festmore.com/events"/>'
+    + (q ? '<meta name="robots" content="noindex,follow"/>' : '')
     + '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>'
     + '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2486135003689222" crossorigin="anonymous"></script>'
     + '<link rel="stylesheet" href="/css/main.css"/></head><body>'
