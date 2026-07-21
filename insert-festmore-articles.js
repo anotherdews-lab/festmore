@@ -14,13 +14,13 @@ async function run() {
     const exists = await client.query('SELECT id FROM articles WHERE slug=$1', [a.slug]);
     if (exists.rows.length > 0) {
       await client.query(
-        'UPDATE articles SET title=$1, excerpt=$2, body=$3, image_url=$4, category=$5 WHERE slug=$6',
+        'UPDATE articles SET title=$1, excerpt=$2, content=$3, image_url=$4, category=$5 WHERE slug=$6',
         [a.title, a.excerpt, a.body, a.image_url, a.category, a.slug]
       );
       console.log('Updated:', a.slug);
     } else {
       await client.query(
-        `INSERT INTO articles (title, slug, excerpt, body, image_url, category, status, created_at)
+        `INSERT INTO articles (title, slug, excerpt, content, image_url, category, status, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, 'published', NOW())`,
         [a.title, a.slug, a.excerpt, a.body, a.image_url, a.category]
       );
