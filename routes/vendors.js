@@ -344,11 +344,27 @@ router.get('/', (req, res) => {
 // ─────────────────────────────────────
 // VENDOR PROFILE PAGE
 // ─────────────────────────────────────
-router.get('/profile/:id', (req, res) => {
-  const vendor = db.prepare("SELECT * FROM vendors WHERE id=? AND status='active'").get(parseInt(req.params.id));
+router.get('/profile/:id', async (req, res) => {
+  let vendor;
+  try {
+    const { Client } = require('pg');
+    const _cp = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await _cp.connect();
+    const _rp = await _cp.query("SELECT * FROM vendors WHERE id=$1 AND status='active'", [req.params.id]);
+    await _cp.end();
+    vendor = _rp.rows[0];
+  } catch(e) { return res.status(500).send('Error loading vendor'); }
   if (!vendor) return res.redirect('/vendors');
   try { db.prepare("UPDATE vendors SET views=views+1 WHERE id=?").run(vendor.id); } catch(e){}
-  const related = db.prepare("SELECT * FROM vendors WHERE status='active' AND category=? AND id!=? ORDER BY verified DESC LIMIT 4").all(vendor.category, vendor.id);
+  let related = [];
+  try {
+    const { Client } = require('pg');
+    const _cr2 = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await _cr2.connect();
+    const _rr = await _cr2.query("SELECT * FROM vendors WHERE status='active' AND category=$1 AND id!=$2 ORDER BY verified DESC LIMIT 4", [vendor.category, vendor.id]);
+    await _cr2.end();
+    related = _rr.rows;
+  } catch(e) {}
   res.send(renderVendorProfile(vendor, related, req.session.user));
 });
 
