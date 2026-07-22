@@ -332,9 +332,10 @@ function activateVendor(vendorId) {
 router.get('/', async (req, res) => {
   const { category = 'ALL', country = 'ALL', q = '' } = req.query;
   let where = ["status='active'"], params = [];
-  if (category !== 'ALL') { where.push("category=?"); params.push(category); }
-  if (country !== 'ALL')  { where.push("country=?");  params.push(country); }
-  if (q) { where.push("(business_name LIKE ? OR description LIKE ? OR city LIKE ?)"); params.push(`%${q}%`, `%${q}%`, `%${q}%`); }
+  let pi = 1;
+  if (category !== 'ALL') { where.push("category=$"+pi++); params.push(category); }
+  if (country !== 'ALL')  { where.push("country=$"+pi++); params.push(country); }
+  if (q) { where.push("(business_name ILIKE $"+pi+" OR description ILIKE $"+(pi+1)+" OR city ILIKE $"+(pi+2)+")"); pi+=3; params.push('%'+q+'%','%'+q+'%','%'+q+'%'); }
   let vendors = [], countryCounts = [], totalVendors = 0;
   try {
     const { Client } = require('pg');
