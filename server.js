@@ -104,6 +104,7 @@ app.get('/', (req, res, next) => {
 // ─────────────────────────────────────
 app.use('/',             require('./routes/home'));
 app.use('/events/in',    require('./routes/cities'));
+app.use('/christmas',    require('./routes/christmas'));
 app.use('/events',       require('./routes/events'));
 app.use('/vendors',      require('./routes/vendors'));
 app.use('/reviews', require('./routes/reviews'));
