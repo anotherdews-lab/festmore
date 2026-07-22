@@ -476,34 +476,42 @@ ${renderNav(user, langHtml)}
 </div>
 
 <!-- ═══ CHRISTMAS MARKETS BANNER ══════════════════════════════════════════ -->
-<section style="background:linear-gradient(135deg,#06200f,#0a3d1f);padding:48px 28px;border-top:1px solid rgba(212,160,23,.1);border-bottom:1px solid rgba(212,160,23,.1);">
-  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;">
+<section style="background:linear-gradient(135deg,#06200f,#0a3d1f);padding:56px 28px;border-top:1px solid rgba(212,160,23,.1);border-bottom:1px solid rgba(212,160,23,.1);position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(212,160,23,.08) 0%,transparent 70%);"></div>
+  <div style="position:absolute;bottom:-40px;left:10%;width:200px;height:200px;background:radial-gradient(circle,rgba(196,30,58,.06) 0%,transparent 70%);"></div>
+  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:48px;align-items:center;position:relative;z-index:1;">
     <div>
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);color:#d4a017;font-size:10px;font-weight:800;padding:5px 14px;border-radius:99px;margin-bottom:16px;letter-spacing:1.5px;text-transform:uppercase;">🎄 Christmas Markets 2026</div>
-      <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(24px,3.5vw,42px);color:#fff;line-height:1.1;margin-bottom:12px;font-weight:700;">Europe's Christmas Markets<br/>— All in One Place</h2>
-      <p style="font-size:15px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:24px;max-width:500px;">100+ markets across 20 countries. Browse, plan your visit and apply for vendor spots — directly to the organiser.</p>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(196,30,58,.2);border:1px solid rgba(196,30,58,.4);color:#ff8c9a;font-size:10px;font-weight:800;padding:5px 14px;border-radius:99px;margin-bottom:20px;letter-spacing:1.5px;text-transform:uppercase;">🎄 Founding Price — This Season Only</div>
+      <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(26px,4vw,48px);color:#fff;line-height:1.05;margin-bottom:14px;font-weight:700;">The World's Christmas Markets<br/><em style="color:#d4a017;font-style:italic;">All in One Place</em></h2>
+      <p style="font-size:15px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:10px;max-width:520px;">Europe, Asia, North America, Australia, the Middle East — we are building the world's first global Christmas market discovery platform. Be part of it from the very beginning.</p>
+      <p style="font-size:14px;color:rgba(255,255,255,.35);line-height:1.6;margin-bottom:28px;max-width:520px;">Featured listing is <strong style="color:#d4a017;">€29 for the entire 2026 Christmas season</strong> — a founding price that will never be offered again. From 2027 the price is €79.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-        <a href="/christmas" style="display:inline-flex;align-items:center;gap:8px;background:#c41e3a;color:#fff;padding:13px 26px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">🎄 Explore Christmas Markets →</a>
-        <a href="/events/submit?plan=standard" style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.15);color:#d4a017;border:1px solid rgba(212,160,23,.3);padding:13px 26px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">List Your Market — €29</a>
+        <a href="/christmas" style="display:inline-flex;align-items:center;gap:8px;background:#c41e3a;color:#fff;padding:14px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 4px 24px rgba(196,30,58,.35);">🎄 Explore All Markets →</a>
+        <a href="/events/submit?plan=standard" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(212,160,23,.2),rgba(212,160,23,.08));color:#d4a017;border:1px solid rgba(212,160,23,.4);padding:14px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">List Your Market — €29 →</a>
       </div>
-      <p style="font-size:11px;color:rgba(255,255,255,.2);margin-top:10px;">Special 2026 price · Returns to €79 in 2027</p>
+      <div style="display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:rgba(255,255,255,.25);">✓ Free listing always available</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.25);">✓ No contract · Cancel anytime</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.25);">✓ Founding price — never again at €29</span>
+      </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:240px;">
-      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:12px;padding:16px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#fff;">100+</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Markets</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:260px;">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:14px;padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:800;color:#fff;font-family:Georgia,serif;">1,800<span style="color:#d4a017;">+</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Events Listed</div>
       </div>
-      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:12px;padding:16px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#fff;">20+</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Countries</div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:14px;padding:20px;text-align:center;">
+        <div style="font-size:32px;font-weight:800;color:#fff;font-family:Georgia,serif;">42<span style="color:#d4a017;">+</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Countries</div>
       </div>
-      <div style="background:rgba(196,30,58,.12);border:1px solid rgba(196,30,58,.25);border-radius:12px;padding:16px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#d4a017;">€29</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Featured 2026</div>
+      <div style="background:linear-gradient(135deg,rgba(196,30,58,.25),rgba(196,30,58,.08));border:1px solid rgba(196,30,58,.35);border-radius:14px;padding:20px;text-align:center;">
+        <div style="font-size:13px;color:rgba(255,255,255,.3);text-decoration:line-through;margin-bottom:2px;">€79</div>
+        <div style="font-size:32px;font-weight:800;color:#d4a017;font-family:Georgia,serif;">€29</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">2026 Only</div>
       </div>
-      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:12px;padding:16px;text-align:center;">
-        <div style="font-size:28px;">🎄</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Free Listing</div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:14px;padding:20px;text-align:center;">
+        <div style="font-size:32px;">🌍</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Worldwide</div>
       </div>
     </div>
   </div>
