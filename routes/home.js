@@ -475,6 +475,40 @@ ${renderNav(user, langHtml)}
   </div>
 </div>
 
+<!-- ═══ CHRISTMAS MARKETS BANNER ══════════════════════════════════════════ -->
+<section style="background:linear-gradient(135deg,#06200f,#0a3d1f);padding:48px 28px;border-top:1px solid rgba(212,160,23,.1);border-bottom:1px solid rgba(212,160,23,.1);">
+  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;">
+    <div>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);color:#d4a017;font-size:10px;font-weight:800;padding:5px 14px;border-radius:99px;margin-bottom:16px;letter-spacing:1.5px;text-transform:uppercase;">🎄 Christmas Markets 2026</div>
+      <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(24px,3.5vw,42px);color:#fff;line-height:1.1;margin-bottom:12px;font-weight:700;">Europe's Christmas Markets<br/>— All in One Place</h2>
+      <p style="font-size:15px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:24px;max-width:500px;">100+ markets across 20 countries. Browse, plan your visit and apply for vendor spots — directly to the organiser.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <a href="/christmas" style="display:inline-flex;align-items:center;gap:8px;background:#c41e3a;color:#fff;padding:13px 26px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">🎄 Explore Christmas Markets →</a>
+        <a href="/events/submit?plan=standard" style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.15);color:#d4a017;border:1px solid rgba(212,160,23,.3);padding:13px 26px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">List Your Market — €29</a>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,.2);margin-top:10px;">Special 2026 price · Returns to €79 in 2027</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:240px;">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:28px;font-weight:800;color:#fff;">100+</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Markets</div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:28px;font-weight:800;color:#fff;">20+</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Countries</div>
+      </div>
+      <div style="background:rgba(196,30,58,.12);border:1px solid rgba(196,30,58,.25);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:28px;font-weight:800;color:#d4a017;">€29</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Featured 2026</div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:12px;padding:16px;text-align:center;">
+        <div style="font-size:28px;">🎄</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;">Free Listing</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ WANTED POSTINGS ════════════════════════════════════════════════════ -->
 <section class="wanted">
   <div class="wanted-inner">
