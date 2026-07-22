@@ -529,41 +529,7 @@ ${renderNav(user, langHtml)}
 </section>
 
 <!-- ═══ FEATURED PAID EVENTS ════════════════════════════════════════════ -->
-<!-- CHRISTMAS BANNER -->
-<section style="background:linear-gradient(135deg,#06200f,#0a3d1f);padding:48px 28px;border-bottom:1px solid rgba(212,160,23,.15);">
-  <div class="section-inner" style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;">
-    <div>
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);color:#d4a017;font-size:10px;font-weight:800;padding:5px 14px;border-radius:99px;margin-bottom:16px;letter-spacing:1.5px;text-transform:uppercase;">🎄 Christmas Markets 2026</div>
-      <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(28px,4vw,48px);color:#fff;line-height:1.1;margin-bottom:16px;font-weight:700;">Europe's Christmas<br/>Markets — All in One Place</h2>
-      <p style="font-size:15px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:28px;max-width:420px;">From Nuremberg to Copenhagen, Brussels to Kraków — browse 100+ Christmas markets across 20 countries. Find vendor spots and apply directly to organisers.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        <a href="/christmas" style="display:inline-flex;align-items:center;gap:8px;background:#c41e3a;color:#fff;padding:14px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 4px 20px rgba(196,30,58,.4);">🎄 Explore Christmas Markets →</a>
-        <a href="/events/submit?plan=standard&promo=xmas2026" style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.15);color:#d4a017;border:1px solid rgba(212,160,23,.3);padding:14px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">List Your Market — €29 🎄</a>
-      </div>
-      <p style="font-size:12px;color:rgba(255,255,255,.25);margin-top:12px;">Special 2026 price · Returns to €79 in 2027</p>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:14px;padding:20px;text-align:center;">
-        <div style="font-size:32px;font-weight:800;color:#fff;font-family:Georgia,serif;">100<span style="color:#d4a017;">+</span></div>
-        <div style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Markets Listed</div>
-      </div>
-      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:14px;padding:20px;text-align:center;">
-        <div style="font-size:32px;font-weight:800;color:#fff;font-family:Georgia,serif;">20<span style="color:#d4a017;">+</span></div>
-        <div style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Countries</div>
-      </div>
-      <div style="background:rgba(196,30,58,.1);border:1px solid rgba(196,30,58,.2);border-radius:14px;padding:20px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#fff;font-family:Georgia,serif;">€29</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Featured Listing 2026</div>
-      </div>
-      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,160,23,.15);border-radius:14px;padding:20px;text-align:center;">
-        <div style="font-size:32px;">🎄</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Free Listing Available</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-\${featuredPaid && featuredPaid.length > 0 ? \`
+${featuredPaid && featuredPaid.length > 0 ? `
 <section style="background:linear-gradient(135deg,#1a0800,#2d1200);padding:40px 28px;border-bottom:1px solid rgba(232,71,10,.15);">
   <div class="section-inner">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
