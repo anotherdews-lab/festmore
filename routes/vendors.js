@@ -532,6 +532,16 @@ router.get('/register', (req, res) => {
 // REGISTER — POST
 // ─────────────────────────────────────
 router.post('/register', async (req, res) => {
+  // ── BOT PROTECTION ──────────────────────────────────────────────
+  const _fields = [req.body.business_name, req.body.email, req.body.city, req.body.description].join(' ');
+  const _bots = [/select\s+.*from/i,/drop\s+table/i,/union\s+select/i,/sleep\s*\(/i,/dbms_pipe/i,/<script/i,/0x[0-9a-f]+/i,/@@\w+/i];
+  if (_bots.some(p => p.test(_fields))) return res.redirect('/vendors/register?error=Invalid input detected');
+  const _emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!_emailRe.test(req.body.email||'')) return res.redirect('/vendors/register?error=Please enter a valid email address');
+  const _blocked = ['example.com','test.com','fake.com','mailinator.com'];
+  if (_blocked.includes((req.body.email||'').split('@')[1]?.toLowerCase())) return res.redirect('/vendors/register?error=Please use a real email address');
+  if ((req.body.business_name||'').length < 2) return res.redirect('/vendors/register?error=Please enter your business name');
+  // ── END BOT PROTECTION ──────────────────────────────────────────
   const {
     business_name, category, city, country, description, website, phone, email, founded_year,
     tagline, price_range, min_event_size, max_event_size, space_required, needs_electricity,
