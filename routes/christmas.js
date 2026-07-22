@@ -389,7 +389,7 @@ footer a{color:rgba(255,255,255,.4);margin:0 8px;}
       <div class="new">€29</div>
       <div class="period">for the full 2026 Christmas season</div>
     </div>
-    <a href="/events/submit?plan=standard&promo=xmas2026" class="offer-btn">Get Featured — €29 →</a>
+    <a href="#"" onclick="document.getElementById('xmasModal').style.display='flex';return false;" class="offer-btn">Get Featured — €29 →</a>
   </div>
 </div>
 
