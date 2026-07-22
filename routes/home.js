@@ -476,7 +476,11 @@ ${renderNav(user, langHtml)}
 </div>
 
 <!-- ═══ CHRISTMAS MARKETS BANNER ══════════════════════════════════════════ -->
-<section style="background:linear-gradient(135deg,#06200f,#0a3d1f);padding:56px 28px;border-top:1px solid rgba(212,160,23,.1);border-bottom:1px solid rgba(212,160,23,.1);position:relative;overflow:hidden;">
+<section style="background:#061a0a;padding:56px 28px;border-top:1px solid rgba(212,160,23,.15);border-bottom:1px solid rgba(212,160,23,.15);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1576919228236-a097c32a5cd4?w=1600&q=80') center/cover;opacity:.4;"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(4,18,8,.95) 0%,rgba(6,26,10,.80) 40%,rgba(4,18,8,.92) 100%);"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#d4a017,#c41e3a,#d4a017,transparent);"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#d4a017,#c41e3a,#d4a017,transparent);"></div>
   <div style="position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(212,160,23,.08) 0%,transparent 70%);"></div>
   <div style="position:absolute;bottom:-40px;left:10%;width:200px;height:200px;background:radial-gradient(circle,rgba(196,30,58,.06) 0%,transparent 70%);"></div>
   <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:48px;align-items:center;position:relative;z-index:1;">
