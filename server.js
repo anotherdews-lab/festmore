@@ -64,7 +64,7 @@ app.use((req, res, next) => {
 // Catch old news-style URLs (no /events/ or /articles/ prefix, contains hyphens, returns 404)
 app.use((req, res, next) => {
   const path = req.path;
-  if (!path.startsWith('/events') && !path.startsWith('/articles') &&
+  if (!path.startsWith('/events') && !path.startsWith('/articles') && !path.startsWith('/list-christmas') && !path.startsWith('/christmas') &&
       !path.startsWith('/vendors') && !path.startsWith('/artists') &&
       !path.startsWith('/admin') && !path.startsWith('/auth') &&
       !path.startsWith('/api') && !path.startsWith('/css') &&
