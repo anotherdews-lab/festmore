@@ -372,7 +372,7 @@ footer a{color:rgba(255,255,255,.4);margin:0 8px;}
     <div class="hero-btns">
       <a href="#markets" class="hbtn hbtn-red">🎄 Browse All Markets</a>
       <a href="#apply-vendor" class="hbtn hbtn-gold">🏪 Find Vendor Spots</a>
-      <a href="#list-market" class="hbtn hbtn-outline">List Your Market →</a>
+      <a href="/list-christmas" class="hbtn hbtn-outline">List Your Market →</a>
     </div>
   </div>
 </section>
@@ -389,7 +389,7 @@ footer a{color:rgba(255,255,255,.4);margin:0 8px;}
       <div class="new">€29</div>
       <div class="period">for the full 2026 Christmas season</div>
     </div>
-    <a href="#" onclick="document.getElementById('xmasModal').style.display='flex';return false;" class="offer-btn">Get Featured — €29 →</a>
+    <a href="/list-christmas" class="offer-btn">Get Featured — €29 →</a>
   </div>
 </div>
 
@@ -544,7 +544,7 @@ ${featuredMarkets.length > 0 ? `
         </div>
       </div>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <a href="#" onclick="document.getElementById('xmasModal').style.display='flex';return false;" class="hbtn hbtn-red">🎄 Get Featured — €29 →</a>
+        <a href="/list-christmas" class="hbtn hbtn-red">🎄 Get Featured — €29 →</a>
         <a href="/events/submit" class="hbtn hbtn-outline">List for Free →</a>
       </div>
     </div>
