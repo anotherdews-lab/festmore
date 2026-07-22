@@ -1018,7 +1018,7 @@ async function deletePhoto(index, id, type) {
       </div>` : `
       <div style="text-align:center;padding:32px 0;color:var(--ink3);">
         <div style="font-size:36px;margin-bottom:12px;">⭐</div>
-        <div style="font-size:15px;">No reviews yet — be the first to review ${v.business_name}</div>
+        <div style="font-size:15px;">No reviews yet — be the first to review ${vendor.business_name}</div>
       </div>`;
     })()}
 
@@ -1027,7 +1027,7 @@ async function deletePhoto(index, id, type) {
       <h3 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;margin-bottom:16px;">Leave a Review</h3>
       ${req.query.success ? `<div style="background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#15803d;font-weight:600;">✅ ${req.query.success}</div>` : ''}
       ${req.query.error ? `<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#dc2626;font-weight:600;">⚠️ ${req.query.error}</div>` : ''}
-      <form method="POST" action="/reviews/vendor/${v.id}/add">
+      <form method="POST" action="/reviews/vendor/${vendor.id}/add">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
           <div>
             <label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Name *</label>
@@ -1469,7 +1469,7 @@ ${renderNav(user)}
 
     <div style="background:var(--ivory);border-radius:16px;padding:24px;">
       <h3 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400;margin-bottom:16px;">Leave a Review</h3>
-      <form method="POST" action="/reviews/vendor/${v.id}/add">
+      <form method="POST" action="/reviews/vendor/${vendor.id}/add">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
           <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Name *</label><input type="text" name="reviewer_name" required placeholder="e.g. Jan de Vries" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/></div>
           <div><label style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;display:block;margin-bottom:6px;">Your Role</label><input type="text" name="reviewer_role" placeholder="e.g. Event Organiser" style="width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;"/></div>
