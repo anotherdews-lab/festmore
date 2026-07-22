@@ -58,6 +58,13 @@ async function sendWelcomeEmail(vendor, loginPassword) {
   try {
     const { Resend } = require('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
+    // Admin notification
+    await resend.emails.send({
+      from: 'Festmore <hello@festmore.com>',
+      to: 'anotherdews@gmail.com',
+      subject: '🏪 New Vendor Registered: ' + vendor.business_name + ' — ' + vendor.city + ', ' + vendor.country,
+      html: '<p><b>' + vendor.business_name + '</b> just registered as a vendor on Festmore.</p><p>Email: ' + vendor.email + '</p><p>Category: ' + vendor.category + '</p><p>City: ' + vendor.city + ', ' + vendor.country + '</p><p>Payment: ' + (vendor.payment_status||'paid') + '</p><p><a href="https://festmore.com/admin/vendors">View in admin</a></p>'
+    });
 
     const year = new Date().getFullYear();
     const firstName = vendor.business_name.split(' ')[0];
@@ -433,9 +440,13 @@ router.post('/dashboard/:id/save', async (req, res) => {
 // ─────────────────────────────────────
 // VENDOR DASHBOARD — add photo (URL)
 // ─────────────────────────────────────
-router.post('/dashboard/:id/add-photo', (req, res) => {
+router.post('/dashboard/:id/add-photo', async (req, res) => {
   if (!req.session.user) return res.redirect('/auth/login');
-  const vendor = db.prepare("SELECT * FROM vendors WHERE id=?").get(parseInt(req.params.id));
+  const _cr = new (require('pg').Client)({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+  await _cr.connect();
+  const _vr = await _cr.query('SELECT * FROM vendors WHERE id=$1', [req.params.id]);
+  await _cr.end();
+  const vendor = _vr.rows[0];
   if (!vendor || (vendor.email !== req.session.user.email && req.session.user.role !== 'admin')) {
     return res.redirect('/vendors');
   }
@@ -449,16 +460,23 @@ router.post('/dashboard/:id/add-photo', (req, res) => {
     return res.redirect('/vendors/dashboard/' + vendor.id + '?error=Maximum 8 photos allowed. Delete one first.');
   }
   photos.push(photo_url.trim());
-  db.prepare("UPDATE vendors SET photos=?, updated_at=datetime('now') WHERE id=?").run(JSON.stringify(photos), vendor.id);
+  const _cu = new (require('pg').Client)({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await _cu.connect();
+    await _cu.query("UPDATE vendors SET photos=$1 WHERE id=$2", [JSON.stringify(photos), vendor.id]);
+    await _cu.end();
   res.redirect('/vendors/dashboard/' + vendor.id + '?success=Photo added successfully!');
 });
 
 // ─────────────────────────────────────
 // VENDOR DASHBOARD — delete photo
 // ─────────────────────────────────────
-router.post('/dashboard/:id/delete-photo', (req, res) => {
+router.post('/dashboard/:id/delete-photo', async (req, res) => {
   if (!req.session.user) return res.redirect('/auth/login');
-  const vendor = db.prepare("SELECT * FROM vendors WHERE id=?").get(parseInt(req.params.id));
+  const _cd = new (require('pg').Client)({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+  await _cd.connect();
+  const _vd = await _cd.query('SELECT * FROM vendors WHERE id=$1', [req.params.id]);
+  await _cd.end();
+  const vendor = _vd.rows[0];
   if (!vendor || (vendor.email !== req.session.user.email && req.session.user.role !== 'admin')) {
     return res.redirect('/vendors');
   }
@@ -468,7 +486,10 @@ router.post('/dashboard/:id/delete-photo', (req, res) => {
   const idx = parseInt(photo_index);
   if (!isNaN(idx) && idx >= 0 && idx < photos.length) {
     photos.splice(idx, 1);
-    db.prepare("UPDATE vendors SET photos=?, updated_at=datetime('now') WHERE id=?").run(JSON.stringify(photos), vendor.id);
+    const _c1 = new (require('pg').Client)({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await _c1.connect();
+    await _c1.query("UPDATE vendors SET photos=$1 WHERE id=$2", [JSON.stringify(photos), vendor.id]);
+    await _c1.end();
   }
   res.redirect('/vendors/dashboard/' + vendor.id + '?success=Photo deleted.');
 });
