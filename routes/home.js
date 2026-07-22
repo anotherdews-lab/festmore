@@ -491,7 +491,7 @@ ${renderNav(user, langHtml)}
       <p style="font-size:14px;color:rgba(255,255,255,.35);line-height:1.6;margin-bottom:28px;max-width:520px;">Featured listing is <strong style="color:#d4a017;">€29 for the entire 2026 Christmas season</strong> — a founding price that will never be offered again. From 2027 the price is €79.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
         <a href="/christmas" style="display:inline-flex;align-items:center;gap:8px;background:#c41e3a;color:#fff;padding:14px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 4px 24px rgba(196,30,58,.35);">🎄 Explore All Markets →</a>
-        <a href="/events/submit?plan=standard" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(212,160,23,.2),rgba(212,160,23,.08));color:#d4a017;border:1px solid rgba(212,160,23,.4);padding:14px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">List Your Market — €29 →</a>
+        <a href="/christmas#list-market" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(212,160,23,.2),rgba(212,160,23,.08));color:#d4a017;border:1px solid rgba(212,160,23,.4);padding:14px 28px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">List Your Market — €29 →</a>
       </div>
       <div style="display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;">
         <span style="font-size:12px;color:rgba(255,255,255,.25);">✓ Free listing always available</span>
