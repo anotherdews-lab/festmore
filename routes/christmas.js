@@ -544,7 +544,7 @@ ${featuredMarkets.length > 0 ? `
         </div>
       </div>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <a href="/events/submit?plan=standard&promo=xmas2026" class="hbtn hbtn-red">🎄 Get Featured — €29</a>
+        <a href="#" onclick="document.getElementById('xmasModal').style.display='flex';return false;" class="hbtn hbtn-red">🎄 Get Featured — €29 →</a>
         <a href="/events/submit" class="hbtn hbtn-outline">List for Free →</a>
       </div>
     </div>
