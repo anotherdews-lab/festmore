@@ -348,27 +348,44 @@ router.get('/profile/:id', (req, res) => {
 // ─────────────────────────────────────
 // VENDOR DASHBOARD — view & edit own profile
 // ─────────────────────────────────────
-router.get('/dashboard/:id', (req, res) => {
+router.get('/dashboard/:id', async (req, res) => {
   if (!req.session.user) return res.redirect('/auth/login?error=Please login to access your dashboard');
-  const vendor = db.prepare("SELECT * FROM vendors WHERE id=?").get(parseInt(req.params.id));
-  if (!vendor) return res.redirect('/vendors');
-  // Only owner or admin can access
-  if (vendor.email !== req.session.user.email && req.session.user.role !== 'admin') {
-    return res.redirect('/vendors/profile/' + vendor.id);
+  try {
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await c.connect();
+    const r = await c.query('SELECT * FROM vendors WHERE id=$1', [req.params.id]);
+    await c.end();
+    const vendor = r.rows[0];
+    if (!vendor) return res.redirect('/vendors');
+    if (vendor.email !== req.session.user.email && req.session.user.role !== 'admin') {
+      return res.redirect('/vendors/profile/' + vendor.id);
+    }
+    let photos = [];
+    try { photos = JSON.parse(vendor.photos || '[]'); } catch(e){}
+    let extra = {};
+    try { extra = JSON.parse(vendor.tags || '{}'); } catch(e){}
+    res.send(renderVendorDashboard(vendor, photos, extra, req.session.user, req.query.success, req.query.error));
+  } catch(err) {
+    console.error('Dashboard error:', err.message);
+    res.redirect('/vendors?error=Could not load dashboard');
   }
-  let photos = [];
-  try { photos = JSON.parse(vendor.photos || '[]'); } catch(e){}
-  let extra = {};
-  try { extra = JSON.parse(vendor.tags || '{}'); } catch(e){}
-  res.send(renderVendorDashboard(vendor, photos, extra, req.session.user, req.query.success, req.query.error));
 });
 
 // ─────────────────────────────────────
 // VENDOR DASHBOARD — save profile edits
 // ─────────────────────────────────────
-router.post('/dashboard/:id/save', (req, res) => {
+router.post('/dashboard/:id/save', async (req, res) => {
   if (!req.session.user) return res.redirect('/auth/login');
-  const vendor = db.prepare("SELECT * FROM vendors WHERE id=?").get(parseInt(req.params.id));
+  let vendor;
+  try {
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await c.connect();
+    const r = await c.query('SELECT * FROM vendors WHERE id=$1', [req.params.id]);
+    await c.end();
+    vendor = r.rows[0];
+  } catch(e) { return res.redirect('/vendors'); }
   if (!vendor) return res.redirect('/vendors');
   if (vendor.email !== req.session.user.email && req.session.user.role !== 'admin') {
     return res.redirect('/vendors/profile/' + vendor.id);
@@ -389,23 +406,26 @@ router.post('/dashboard/:id/save', (req, res) => {
     instagram, facebook, tiktok, video_url, languages, certifications,
   });
   try {
-    db.prepare(`UPDATE vendors SET
-      business_name=?, city=?, country=?, category=?, description=?,
-      website=?, phone=?, founded_year=?, tags=?, updated_at=datetime('now')
-      WHERE id=?
-    `).run(
-      business_name || vendor.business_name,
-      city || vendor.city,
-      country || vendor.country,
-      category || vendor.category,
-      description || vendor.description,
-      website || '', phone || '',
-      parseInt(founded_year) || vendor.founded_year,
-      extra, vendor.id
+    const { Client } = require('pg');
+    const c = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await c.connect();
+    await c.query(`UPDATE vendors SET
+      business_name=$1, city=$2, country=$3, category=$4, description=$5,
+      website=$6, phone=$7, founded_year=$8, tags=$9
+      WHERE id=$10`,
+      [business_name || vendor.business_name,
+       city || vendor.city,
+       country || vendor.country,
+       category || vendor.category,
+       description || vendor.description,
+       website || '', phone || '',
+       parseInt(founded_year) || vendor.founded_year,
+       extra, vendor.id]
     );
+    await c.end();
     res.redirect('/vendors/dashboard/' + vendor.id + '?success=Profile updated successfully!');
   } catch(err) {
-    console.error('❌ Profile save error:', err.message);
+    console.error('Profile save error:', err.message);
     res.redirect('/vendors/dashboard/' + vendor.id + '?error=Failed to save. Please try again.');
   }
 });
