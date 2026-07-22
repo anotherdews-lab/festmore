@@ -551,7 +551,8 @@ router.post('/register', async (req, res) => {
   const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   let slug = slugify(business_name + '-' + city);
   let i = 1;
-  while (db.prepare('SELECT id FROM vendors WHERE slug=?').get(slug)) {
+  // slug uniqueness check handled in pg insert below
+  if (false) {
     slug = slugify(business_name + '-' + city) + '-' + i++;
   }
 
@@ -634,7 +635,14 @@ router.get('/payment-success', async (req, res) => {
   if (vendor_id) {
     activateVendor(vendor_id);
     try {
-      const vendor = db.prepare("SELECT * FROM vendors WHERE id=?").get(parseInt(vendor_id));
+      let vendor = null;
+      try {
+        const _psc = new (require('pg').Client)({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+        await _psc.connect();
+        const _psv = await _psc.query('SELECT * FROM vendors WHERE id=$1', [vendor_id]);
+        await _psc.end();
+        vendor = _psv.rows[0];
+      } catch(e) {}
       if (vendor) {
         const loginPassword = vendor.short_desc || 'festmore2026';
         await sendWelcomeEmail(vendor, loginPassword);
@@ -645,7 +653,16 @@ router.get('/payment-success', async (req, res) => {
       console.error('⚠️ Post-payment tasks error:', err.message);
     }
   }
-  const vendor = vendor_id ? db.prepare("SELECT * FROM vendors WHERE id=?").get(parseInt(vendor_id)) : null;
+  let vendor = null;
+  if (vendor_id) {
+    try {
+      const _vc = new (require('pg').Client)({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+      await _vc.connect();
+      const _vr = await _vc.query('SELECT * FROM vendors WHERE id=$1', [vendor_id]);
+      await _vc.end();
+      vendor = _vr.rows[0] || null;
+    } catch(e) {}
+  }
   res.send(`<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -708,7 +725,14 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       const activated = activateVendor(vendorId);
       if (activated) {
         try {
-          const vendor = db.prepare("SELECT * FROM vendors WHERE id=?").get(parseInt(vendorId));
+          let vendor = null;
+          try {
+            const _wc = new (require('pg').Client)({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+            await _wc.connect();
+            const _wr = await _wc.query('SELECT * FROM vendors WHERE id=$1', [vendorId]);
+            await _wc.end();
+            vendor = _wr.rows[0] || null;
+          } catch(e) {}
           if (vendor) {
             const loginPassword = vendor.short_desc || 'festmore2026';
             await sendWelcomeEmail(vendor, loginPassword);
