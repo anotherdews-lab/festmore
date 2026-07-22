@@ -329,15 +329,25 @@ function activateVendor(vendorId) {
 // ─────────────────────────────────────
 // VENDORS LISTING
 // ─────────────────────────────────────
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const { category = 'ALL', country = 'ALL', q = '' } = req.query;
   let where = ["status='active'"], params = [];
   if (category !== 'ALL') { where.push("category=?"); params.push(category); }
   if (country !== 'ALL')  { where.push("country=?");  params.push(country); }
   if (q) { where.push("(business_name LIKE ? OR description LIKE ? OR city LIKE ?)"); params.push(`%${q}%`, `%${q}%`, `%${q}%`); }
-  const vendors       = db.prepare(`SELECT * FROM vendors WHERE ${where.join(' AND ')} ORDER BY premium DESC, verified DESC, rating DESC LIMIT 96`).all(...params);
-  const countryCounts = db.prepare(`SELECT country, COUNT(*) as count FROM vendors WHERE status='active' GROUP BY country ORDER BY count DESC`).all();
-  const totalVendors  = db.prepare(`SELECT COUNT(*) as n FROM vendors WHERE status='active'`).get().n;
+  let vendors = [], countryCounts = [], totalVendors = 0;
+  try {
+    const { Client } = require('pg');
+    const _cvl = new Client({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:VWgjvXynowzYucOsfqNNAPWojptOHaXJ@gondola.proxy.rlwy.net:47003/railway', ssl:{rejectUnauthorized:false}});
+    await _cvl.connect();
+    const _vlist = await _cvl.query('SELECT * FROM vendors WHERE ' + where.join(' AND ') + ' ORDER BY verified DESC, rating DESC LIMIT 96', params);
+    const _vcount = await _cvl.query("SELECT country, COUNT(*) as count FROM vendors WHERE status='active' GROUP BY country ORDER BY count DESC");
+    const _vtotal = await _cvl.query("SELECT COUNT(*) as n FROM vendors WHERE status='active'");
+    await _cvl.end();
+    vendors = _vlist.rows;
+    countryCounts = _vcount.rows;
+    totalVendors = parseInt(_vtotal.rows[0].n);
+  } catch(e) { console.log('Vendor list error:', e.message); }
   res.send(renderVendorList({ vendors, countryCounts, totalVendors, category, country, q, user: req.session.user }));
 });
 
