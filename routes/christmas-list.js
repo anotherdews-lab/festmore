@@ -6,6 +6,8 @@ router.get('/', (req, res) => {
   res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>List Your Christmas Market — Festmore</title>
+<link rel="canonical" href="https://festmore.com/list-christmas"/>
+<meta name="robots" content="noindex,follow"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Syne,sans-serif;background:#06200f;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
 input,textarea,button{font-family:inherit;}
